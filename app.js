@@ -463,9 +463,9 @@
 
     byId("clearSearch").addEventListener("click", () => {
       stopSearch.value = "";
-      state.map.setFilter("stop-search-highlight", ["==", ["get", "__searchHighlight"], ""]);
-      // Hapus tanda hasil pencarian dengan mengembalikan style lingkaran.
-      if (state.map.getLayer("stop-search-highlight")) state.map.setFilter("stop-search-highlight", ["==", ["get", "__routeKey"], "__none__"]);
+      if (state.map.getLayer("stop-search-highlight")) {
+        state.map.setFilter("stop-search-highlight", ["==", ["get", "__routeKey"], "__none__"]);
+      }
     });
 
     stopSearch.addEventListener("keydown", event => {
@@ -549,14 +549,14 @@
   async function getWalkingRoute(from, to) {
     const response = await fetch(config.walking.serviceUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Client-Id": "transum-surabaya-webgis" },
       body: JSON.stringify({
         locations: [
           { lat: from[1], lon: from[0] },
           { lat: to[1], lon: to[0] }
         ],
         costing: "pedestrian",
-        units: "kilometers",
+        units: "km",
         directions_options: { units: "kilometers" }
       })
     });
