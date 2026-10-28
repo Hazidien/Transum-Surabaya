@@ -71,6 +71,15 @@ window.TRANSUM_CONFIG = {
   ],
 
   /*
+   * Opsional: area jangkauan halte (buffer/area jaringan pejalan kaki).
+   * Simpan hasil GeoJSON di folder halte dan sertakan Route_Id jika area dibedakan per koridor.
+   */
+  coverage: {
+    enabled: false,
+    file: "halte/jangkauan_halte.geojson"
+  },
+
+  /*
    * Untuk uji awal, jangan memuat GeoJSON bangunan 573 MB secara langsung.
    * Bangunan seluruh kota sebaiknya dikonversi menjadi PMTiles/vector tiles.
    *
