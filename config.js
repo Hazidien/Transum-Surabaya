@@ -44,11 +44,6 @@ window.TRANSUM_CONFIG = {
 
   stops: [
     {
-      key: "stops-bus-gunung",
-      file: "halte/halte_bus_Gnanyar-ITS-Kenpark.geojson",
-      fallbackRouteKey: "ww-gunung-anyar"
-    },
-    {
       key: "stops-bus-kejawan",
       file: "halte/halte_bus_Kejawan Putih-Unesa.geojson",
       fallbackRouteKey: "sby-kejawan"
