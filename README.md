@@ -12,10 +12,10 @@ WebGIS interaktif untuk lima koridor bus Surabaya (3 Suroboyo Bus dan 2 Wira Wir
 ## Atribut sumber
 
 - Garis rute: `Route_Id`
-- Halte: `Route_Id` dan `Halte_nama`
+- Halte: `Route_Id` dan `Halte_name` (aplikasi juga menerima `Halte_nama`)
 - Tinggi bangunan: `LIDAR_MEAN`
 
-GeoJSON harus menggunakan geometri yang tepat (LineString/MultiLineString untuk rute, Point untuk halte) dan koordinat WGS 84 / EPSG:4326.
+GeoJSON harus menggunakan geometri yang tepat (LineString/MultiLineString untuk rute, Point untuk halte) dan koordinat WGS 84 / EPSG:4326. File rute dan halte yang diunggah memakai koordinat UTM Zone 49S, jadi koordinatnya telah dikonversi ke longitude/latitude WGS 84 agar cocok dengan web map.
 
 ## Penting: GeoJSON bangunan sekitar 573 MB
 
@@ -43,4 +43,4 @@ Buka repository → **Settings → Pages** → pilih **Deploy from a branch** �
 
 Fitur halte terdekat menggunakan layanan publik Valhalla dengan profil pedestrian dan data OpenStreetMap. Endpoint publik menerapkan kebijakan penggunaan wajar/rate limiting, sehingga tidak cocok untuk trafik besar tanpa izin atau hosting routing sendiri. Jika routing tidak dapat diakses, aplikasi menampilkan fallback jarak garis lurus dan memberi label bahwa itu bukan jarak berjalan kaki jaringan.
 
-Lihat README di masing-masing folder untuk nama file GeoJSON yang diharapkan.
+Catatan pemeriksaan data: file halte `halte_bus_Gnanyar-ITS-Kenpark.geojson` dan `halte_wirawiri_Gnanyar-ITS-Kenpark.geojson` berisi 43 titik dengan atribut dan koordinat yang identik. Agar halte Gunung Anyar tidak terhitung dua kali, aplikasi hanya memuat satu salinan, yaitu file Wira Wiri. Lihat README di masing-masing folder untuk nama file GeoJSON.
