@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>Transum Surabaya · WebGIS 3D</title>
+  <meta name="description" content="WebGIS 3D rute dan halte transportasi umum Surabaya, dilengkapi informasi akses ke halte terdekat.">
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://basemaps.cartocdn.com">
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+  <main class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <header class="brand">
+        <div class="brand-mark" aria-hidden="true">↗</div>
+        <div>
+          <p class="eyebrow">WEBGIS TRANSPORTASI</p>
+          <h1>Transum <span>Surabaya</span></h1>
+          <p class="brand-subtitle">Peta koridor 3D · Preview</p>
+        </div>
+        <button id="closeSidebar" class="icon-button mobile-only" aria-label="Tutup panel">×</button>
+      </header>
+
+      <section class="intro-card">
+        <div class="intro-topline"><span class="live-dot"></span> SURABAYA, JAWA TIMUR</div>
+        <p>Jelajahi koridor bus, halte, dan bentuk kota dalam satu peta interaktif.</p>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div><p class="eyebrow">NAVIGASI</p><h2>Layer peta</h2></div>
+          <span class="count-pill" id="routeCount">0/5</span>
+        </div>
+        <label class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <input id="routeSearch" type="search" placeholder="Cari koridor..." autocomplete="off">
+          <kbd>/</kbd>
+        </label>
+        <div id="routeList" class="route-list">
+          <div class="loading-row"><span class="mini-spinner"></span> Memuat konfigurasi rute…</div>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div><p class="eyebrow">VISUALISASI</p><h2>Data kota</h2></div>
+        </div>
+        <label class="layer-toggle">
+          <span class="layer-symbol buildings-symbol">▰</span>
+          <span class="toggle-copy"><strong>Bangunan 3D</strong><small id="buildingStatus">Menunggu data PMTiles</small></span>
+          <input type="checkbox" id="buildingsToggle" disabled>
+          <span class="switch"></span>
+        </label>
+        <label class="layer-toggle">
+          <span class="layer-symbol stops-symbol">●</span>
+          <span class="toggle-copy"><strong>Titik halte</strong><small id="stopsStatus">Memuat data halte…</small></span>
+          <input type="checkbox" id="stopsToggle" checked>
+          <span class="switch"></span>
+        </label>
+        <label class="layer-toggle">
+          <span class="layer-symbol coverage-symbol">◉</span>
+          <span class="toggle-copy"><strong>Jangkauan halte</strong><small>Buffer atau area jaringan (opsional)</small></span>
+          <input type="checkbox" id="coverageToggle" disabled>
+          <span class="switch"></span>
+        </label>
+      </section>
+
+      <section class="section-block tools-block">
+        <div class="section-heading">
+          <div><p class="eyebrow">AKSESIBILITAS</p><h2>Halte terdekat</h2></div>
+          <span class="mini-tag">BETA</span>
+        </div>
+        <p class="helper-copy">Pilih alat ini, lalu klik lokasi pada peta. Sistem akan mencari halte terdekat dan memperkirakan perjalanan berjalan kaki.</p>
+        <button class="primary-button" id="nearestButton"><span>⌖</span> Pilih lokasi di peta</button>
+        <div id="nearestResult" class="nearest-result" aria-live="polite">
+          <div class="result-placeholder"><span class="pin-outline">◎</span><span>Klik peta untuk memulai pencarian halte.</span></div>
+        </div>
+      </section>
+
+      <footer class="sidebar-footer">
+        <div class="footer-dot"></div>
+        <span>Prototipe · Data rute dan halte milik proyek</span>
+        <button id="resetView" title="Kembali ke tampilan awal">↺</button>
+      </footer>
+    </aside>
+
+    <section class="map-panel">
+      <div id="map" role="application" aria-label="Peta 3D koridor bus Surabaya"></div>
+      <div class="map-topbar">
+        <button id="openSidebar" class="icon-button mobile-only" aria-label="Buka panel">☰</button>
+        <div class="map-search">
+          <span aria-hidden="true">⌕</span>
+          <input id="stopSearch" type="search" placeholder="Cari nama halte..." autocomplete="off">
+          <button id="clearSearch" aria-label="Hapus pencarian">×</button>
+        </div>
+        <div class="topbar-actions">
+          <span class="map-status"><span class="live-dot"></span><span id="loadStatus">Menyiapkan peta</span></span>
+          <button id="tiltButton" class="toolbar-button" title="Ubah tampilan 2D/3D">3D <span>⌄</span></button>
+          <button id="locateButton" class="toolbar-button" title="Gunakan lokasi perangkat">◎ <span>Lokasi saya</span></button>
+        </div>
+      </div>
+      <div class="map-legend" id="mapLegend">
+        <span class="legend-title">KORIDOR</span>
+        <span><i style="background:#F59E0B"></i>Suroboyo Bus</span>
+        <span><i style="background:#FB7185"></i>Wira Wiri</span>
+      </div>
+      <div class="map-attribution-note">Peta dasar © OpenStreetMap contributors · © CARTO</div>
+      <div class="map-error" id="mapError" hidden></div>
+      <div class="map-coordinates" id="coordinates">Surabaya · 3D map</div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
