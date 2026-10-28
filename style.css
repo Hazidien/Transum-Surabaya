@@ -44,6 +44,7 @@ kbd { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color
 .route-list { display: flex; flex-direction: column; gap: 6px; padding-top: 10px; }
 .route-item { display: flex; align-items: center; gap: 10px; min-height: 47px; padding: 8px 9px; background: rgba(255,255,255,.018); border: 1px solid transparent; border-radius: 10px; transition: .15s ease; }
 .route-item:hover { background: rgba(255,255,255,.04); border-color: var(--line); }
+.route-item[hidden] { display: none; }
 .route-item input, .layer-toggle input { position: absolute; opacity: 0; pointer-events: none; }
 .route-line-swatch { flex: 0 0 24px; height: 5px; border-radius: 5px; }
 .route-copy { flex: 1; min-width: 0; }
