@@ -8,7 +8,7 @@ Atribut penting:
 
 Konfigurasi awal website mengharapkan:
 - `halte_bus_benowo_tunjungan.geojson`
-- `halte_bus_kejawaan_putih_its_unesa.geojson`
+- `halte_bus_kejawan_putih_unesa.geojson`
 - `halte_bus_gunung_anyar_its_kenpark.geojson`
 - `halte_wira_wiri_gunung_anyar_its_kenpark.geojson`
 - `halte_wira_wiri_tow_unesa.geojson`
