@@ -400,6 +400,20 @@
       if (sourceLayer) layer["source-layer"] = sourceLayer;
       state.map.addLayer(layer);
       state.buildingLayerAdded = true;
+      state.map.on("click", "buildings-3d", (event) => {
+        if (!event.features?.length) return;
+        const properties = event.features[0].properties || {};
+        const heightValue = properties[config.buildings.heightProperty || "LIDAR_MEAN"];
+        const rows = [["Tinggi (LIDAR_MEAN)", heightValue == null ? "Tidak tersedia" : String(heightValue) + " m"]];
+        ["building_id", "name", "area_m2", "floors"].forEach(key => {
+          if (properties[key] != null) rows.push([key, properties[key]]);
+        });
+        new maplibregl.Popup({ offset: 8 }).setLngLat(event.lngLat)
+          .setHTML(popupHtml("Footprint bangunan", properties.name || properties.building_id || "Bangunan Surabaya", rows))
+          .addTo(state.map);
+      });
+      state.map.on("mouseenter", "buildings-3d", () => state.map.getCanvas().style.cursor = "pointer");
+      state.map.on("mouseleave", "buildings-3d", () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
       toggle.addEventListener("change", (event) => {
         if (state.map.getLayer("buildings-3d")) {
           state.map.setLayoutProperty("buildings-3d", "visibility", event.target.checked ? "visible" : "none");
@@ -419,25 +433,11 @@
   }
 
   function setupMapEvents() {
+    // Handler umum dipasang saat peta siap. Handler layer bangunan dipasang
+    // setelah layer tersebut benar-benar tersedia di style MapLibre.
     state.map.on("click", (event) => {
       if (state.finderMode) findNearestStop([event.lngLat.lng, event.lngLat.lat]);
     });
-
-    state.map.on("click", "buildings-3d", (event) => {
-      if (!state.buildingLayerAdded || !event.features?.length) return;
-      const properties = event.features[0].properties || {};
-      const height = properties[config.buildings.heightProperty || "LIDAR_MEAN"];
-      const rows = [["Tinggi (LIDAR_MEAN)", height == null ? "Tidak tersedia" : String(height) + " m"]];
-      ["building_id", "name", "area_m2", "floors"].forEach(key => {
-        if (properties[key] != null) rows.push([key, properties[key]]);
-      });
-      new maplibregl.Popup({ offset: 8 }).setLngLat(event.lngLat)
-        .setHTML(popupHtml("Footprint bangunan", properties.name || properties.building_id || "Bangunan Surabaya", rows))
-        .addTo(state.map);
-    });
-
-    state.map.on("mouseenter", "buildings-3d", () => state.map.getCanvas().style.cursor = "pointer");
-    state.map.on("mouseleave", "buildings-3d", () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
   }
 
   function setupControls() {
