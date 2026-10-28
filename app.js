@@ -620,7 +620,7 @@
           { lat: to[1], lon: to[0] }
         ],
         costing: "pedestrian",
-        units: "km",
+        units: "kilometers",
         directions_options: { units: "kilometers" }
       })
     });
