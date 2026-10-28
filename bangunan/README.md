@@ -9,10 +9,10 @@ Simpan GeoJSON asli di komputer. GitHub memblokir file reguler yang lebih besar 
 ## Alur yang disarankan
 
 1. Buka **OSGeo4W Shell** yang terpasang bersama QGIS, atau terminal yang memiliki GDAL.
-2. Reproject ke WGS 84 / EPSG:4326 (GeoJSON web harus longitude/latitude). Sesuaikan nama file input dengan file lokalmu:
+2. Jika koordinat input masih berupa UTM Zone 49S dalam meter (misalnya X sekitar 680.000–710.000 dan Y sekitar 9.180.000), tetapkan sumber EPSG:32749 dan reproject ke WGS 84 / EPSG:4326. Sesuaikan nama file input dengan file lokalmu:
 
    ```bash
-   ogr2ogr -f GeoJSON -t_srs EPSG:4326 bangunan_wgs84.geojson bangunan_surabaya.geojson
+   ogr2ogr -f GeoJSON -s_srs EPSG:32749 -t_srs EPSG:4326 bangunan_wgs84.geojson bangunan_surabaya.geojson
    ```
 
 3. Untuk menguji website terlebih dahulu, pilih sebagian bangunan di QGIS (misalnya buffer sekitar satu rute), lalu ekspor subset sebagai `bangunan_uji.geojson`. Unggah hanya jika ukuran filenya kecil.
