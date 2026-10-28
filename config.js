@@ -1,7 +1,7 @@
 /*
  * Konfigurasi data WebGIS Transum Surabaya.
  * Nama berkas di sini harus sama persis dengan nama file yang diunggah ke repository.
- * Route_Id dipakai untuk menghubungkan layer rute dan halte; nama halte berasal dari Halte_nama.
+ * Route_Id dipakai untuk menghubungkan layer rute dan halte; nama halte berasal dari Halte_name atau Halte_nama.
  */
 window.TRANSUM_CONFIG = {
   routes: [
@@ -15,7 +15,7 @@ window.TRANSUM_CONFIG = {
     {
       key: "sby-kejawan",
       label: "Suroboyo Bus · Kejawan Putih–ITS–UNESA",
-      file: "rute/Bus_Suroboyo_Kejawan-Putih-ITS-UNESA.geojson",
+      file: "rute/Bus_Suroboyo_Kejawan Putih- ITS-Unesa.geojson",
       color: "#38BDF8",
       routeValues: ["Kejawan Putih-Unesa", "Kejawan Putih-ITS-Unesa", "Kejawan Putih- ITS-Unesa"]
     },
@@ -29,7 +29,7 @@ window.TRANSUM_CONFIG = {
     {
       key: "ww-gunung-anyar",
       label: "Wira Wiri · Gunung Anyar–ITS–Kenpark",
-      file: "rute/WiraWiri_Gunung-Anyar-ITS-Kenpark.geojson",
+      file: "rute/WiraWiri_Gunung Anyar-ITS-Kenpark.geojson",
       color: "#FB7185",
       routeValues: ["Gunung Anyar-ITS-Kenpark", "Gnanyar-ITS-Kenpark"]
     },
@@ -45,27 +45,27 @@ window.TRANSUM_CONFIG = {
   stops: [
     {
       key: "stops-bus-gunung",
-      file: "halte/halte_bus_gunung_anyar_its_kenpark.geojson",
+      file: "halte/halte_bus_Gnanyar-ITS-Kenpark.geojson",
       fallbackRouteKey: "ww-gunung-anyar"
     },
     {
       key: "stops-bus-kejawan",
-      file: "halte/halte_bus_kejawan_putih_unesa.geojson",
+      file: "halte/halte_bus_Kejawan Putih-Unesa.geojson",
       fallbackRouteKey: "sby-kejawan"
     },
     {
       key: "stops-bus-benowo",
-      file: "halte/halte_bus_benowo_tunjungan.geojson",
+      file: "halte/halte_bus_Terminal Benowo-Tunjungan.geojson",
       fallbackRouteKey: "sby-benowo"
     },
     {
       key: "stops-wira-gunung",
-      file: "halte/halte_wira_wiri_gunung_anyar_its_kenpark.geojson",
+      file: "halte/halte_wirawiri_Gnanyar-ITS-Kenpark.geojson",
       fallbackRouteKey: "ww-gunung-anyar"
     },
     {
       key: "stops-wira-tow",
-      file: "halte/halte_wira_wiri_tow_unesa.geojson",
+      file: "halte/halte_wirawiri_TOW-Unesa.geojson",
       fallbackRouteKey: "ww-tow"
     }
   ],
