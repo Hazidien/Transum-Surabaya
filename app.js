@@ -366,6 +366,7 @@
       config.routes.forEach(route => {
         const fillId = "coverage-fill-" + route.key;
         const outlineId = "coverage-outline-" + route.key;
+        const firstRouteLayer = state.routeLayerIds.get(config.routes[0]?.key)?.[0];
         state.map.addLayer({
           id: fillId,
           type: "fill",
@@ -373,7 +374,7 @@
           filter: ["==", ["get", "__routeKey"], route.key],
           paint: { "fill-color": route.color, "fill-opacity": 0.13 },
           layout: { visibility: "none" }
-        });
+        }, firstRouteLayer);
         state.map.addLayer({
           id: outlineId,
           type: "line",
@@ -381,7 +382,7 @@
           filter: ["==", ["get", "__routeKey"], route.key],
           paint: { "line-color": route.color, "line-width": 1.2, "line-opacity": 0.72 },
           layout: { visibility: "none" }
-        });
+        }, firstRouteLayer);
         const ids = state.routeLayerIds.get(route.key) || [];
         ids.push(fillId, outlineId);
         state.routeLayerIds.set(route.key, ids);
@@ -460,7 +461,8 @@
         layout: { visibility: "none" }
       };
       if (sourceLayer) layer["source-layer"] = sourceLayer;
-      state.map.addLayer(layer);
+      const firstRouteLayer = state.routeLayerIds.get(config.routes[0]?.key)?.[0];
+      state.map.addLayer(layer, firstRouteLayer);
       state.buildingLayerAdded = true;
       state.map.on("click", "buildings-3d", (event) => {
         if (!event.features?.length) return;
