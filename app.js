@@ -291,7 +291,7 @@
           const properties = { ...(feature.properties || {}) };
           const rawRouteId = properties.Route_Id ?? properties.Route_Id_1 ?? properties.route_id ?? properties.routeId ?? "";
           const routeKey = matchRoute(rawRouteId, stopDataset.fallbackRouteKey);
-          const name = properties.Halte_nama ?? properties.halte_nama ?? properties.stop_name ?? properties.name ?? "Halte tanpa nama";
+          const name = properties.Halte_name ?? properties.Halte_nama ?? properties.halte_name ?? properties.halte_nama ?? properties.stop_name ?? properties.name ?? "Halte tanpa nama";
           properties.__routeKey = routeKey || "";
           properties.__stopName = String(name);
           properties.__rawRouteId = String(rawRouteId || "");
