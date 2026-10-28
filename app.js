@@ -114,7 +114,11 @@
     const ids = state.routeLayerIds.get(routeKey) || [];
     if (!state.map) return;
     ids.forEach((id) => {
-      if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+      if (state.map.getLayer(id)) {
+        const isCoverage = id.startsWith("coverage-");
+        const coverageEnabled = byId("coverageToggle")?.checked;
+        state.map.setLayoutProperty(id, "visibility", visible && (!isCoverage || coverageEnabled) ? "visible" : "none");
+      }
     });
     state.stops.forEach((feature) => {
       if (feature.properties.__routeKey === routeKey) feature.properties.__routeVisible = visible;
@@ -248,6 +252,7 @@
 
     await loadAllStops(failures);
     addStopLayers();
+    await setupCoverage(failures);
     setupBuildings(failures);
     updateRouteCounter();
     wireRouteSearch();
@@ -341,6 +346,63 @@
       state.stopsVisible = event.target.checked;
       refreshStopsSource();
     });
+  }
+
+  async function setupCoverage(failures) {
+    const toggle = byId("coverageToggle");
+    if (!config.coverage?.enabled) {
+      toggle.disabled = true;
+      return;
+    }
+    try {
+      const data = await loadGeoJSON(config.coverage.file);
+      data.features = data.features.map(feature => {
+        const properties = { ...(feature.properties || {}) };
+        const routeId = properties.Route_Id ?? properties.route_id ?? properties.Route_Id_1 ?? "";
+        properties.__routeKey = matchRoute(routeId, null) || "";
+        return { ...feature, properties };
+      });
+      state.map.addSource("stop-coverage", { type: "geojson", data });
+      config.routes.forEach(route => {
+        const fillId = "coverage-fill-" + route.key;
+        const outlineId = "coverage-outline-" + route.key;
+        state.map.addLayer({
+          id: fillId,
+          type: "fill",
+          source: "stop-coverage",
+          filter: ["==", ["get", "__routeKey"], route.key],
+          paint: { "fill-color": route.color, "fill-opacity": 0.13 },
+          layout: { visibility: "none" }
+        });
+        state.map.addLayer({
+          id: outlineId,
+          type: "line",
+          source: "stop-coverage",
+          filter: ["==", ["get", "__routeKey"], route.key],
+          paint: { "line-color": route.color, "line-width": 1.2, "line-opacity": 0.72 },
+          layout: { visibility: "none" }
+        });
+        const ids = state.routeLayerIds.get(route.key) || [];
+        ids.push(fillId, outlineId);
+        state.routeLayerIds.set(route.key, ids);
+      });
+      toggle.disabled = false;
+      toggle.checked = false;
+      byId("coverageToggle").addEventListener("change", event => {
+        config.routes.forEach(route => {
+          const isRouteVisible = state.routeVisibility.get(route.key) !== false;
+          ["coverage-fill-" + route.key, "coverage-outline-" + route.key].forEach(id => {
+            if (state.map.getLayer(id)) {
+              state.map.setLayoutProperty(id, "visibility", event.target.checked && isRouteVisible ? "visible" : "none");
+            }
+          });
+        });
+      });
+    } catch (error) {
+      failures.push(error.message);
+      toggle.disabled = true;
+      console.warn("Data jangkauan halte belum tersedia:", error);
+    }
   }
 
   function setupBuildings(failures) {
