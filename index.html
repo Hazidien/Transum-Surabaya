@@ -62,10 +62,16 @@
         </label>
         <label class="layer-toggle">
           <span class="layer-symbol coverage-symbol">◉</span>
-          <span class="toggle-copy"><strong>Jangkauan halte</strong><small>Buffer atau area jaringan (opsional)</small></span>
-          <input type="checkbox" id="coverageToggle" disabled>
+          <span class="toggle-copy"><strong>Buffer lingkaran halte</strong><small>Radius jangkauan indikatif</small></span>
+          <input type="checkbox" id="coverageToggle" checked>
           <span class="switch"></span>
         </label>
+        <div class="buffer-control">
+          <div class="buffer-heading"><label for="bufferSlider">Radius jangkauan</label><strong id="bufferValue">400 m</strong></div>
+          <input id="bufferSlider" type="range" min="100" max="1000" step="100" value="400">
+          <div class="buffer-scale"><span>100 m</span><span>1.000 m</span></div>
+          <p id="bufferTime" class="buffer-caption">≈ 5 menit jalan kaki (garis lurus)</p>
+        </div>
       </section>
 
       <section class="section-block tools-block">
@@ -78,6 +84,29 @@
         <div id="nearestResult" class="nearest-result" aria-live="polite">
           <div class="result-placeholder"><span class="pin-outline">◎</span><span>Klik peta untuk memulai pencarian halte.</span></div>
         </div>
+      </section>
+
+      <section class="section-block simulation-block">
+        <div class="section-heading">
+          <div><p class="eyebrow">SIMULASI</p><h2>Pergerakan bus</h2></div>
+          <span class="mini-tag">DEMO</span>
+        </div>
+        <p class="helper-copy">Bus virtual bergerak mengikuti geometri rute, bukan posisi kendaraan aktual.</p>
+        <button class="primary-button" id="busPlayButton"><span>▶</span> Mulai simulasi bus</button>
+        <div class="buffer-control">
+          <div class="buffer-heading"><label for="busSpeed">Kecepatan animasi</label><strong id="busSpeedValue">1×</strong></div>
+          <input id="busSpeed" type="range" min="1" max="4" step="1" value="1">
+          <div class="buffer-scale"><span>1× lambat</span><span>4× cepat</span></div>
+          <p class="simulation-warning">SIMULASI — bukan data real-time. Kecepatan dan posisi bus bukan data operasional.</p>
+        </div>
+      </section>
+
+      <section class="section-block route-detail-block" id="routeDetailBlock" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">DETAIL KORIDOR</p><h2 id="routeDetailTitle">Pilih rute</h2></div>
+          <button id="closeRouteDetail" class="icon-button" aria-label="Tutup detail rute">×</button>
+        </div>
+        <div id="routeDetailContent"></div>
       </section>
 
       <footer class="sidebar-footer">
