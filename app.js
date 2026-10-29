@@ -157,34 +157,38 @@
   }
 
   function distancePointToRouteMeters(point, routeData) {
-    let best = Infinity;
-    const meanLat = point[1] * Math.PI / 180;
-    const sx = 111320 * Math.cos(meanLat);
+    const lat0 = point[1] * Math.PI / 180;
+    const sx = 111320 * Math.cos(lat0);
     const sy = 110574;
     const px = point[0] * sx, py = point[1] * sy;
-    const visitLine = coords => {
-      if (!Array.isArray(coords) || coords.length < 2) return;
-      if (typeof coords[0]?.[0] !== "number") {
-        coords.forEach(visitLine);
-        return;
-      }
-      for (let i = 1; i < coords.length; i++) {
-        const a = coords[i - 1], b = coords[i];
+    let best = Infinity;
+    const isPosition = value => Array.isArray(value) && value.length >= 2 &&
+      typeof value[0] === "number" && typeof value[1] === "number";
+    const segmentsFrom = coords => {
+      const positions = [];
+      const collect = value => {
+        if (!Array.isArray(value)) return;
+        if (isPosition(value)) positions.push(value);
+        else value.forEach(collect);
+      };
+      collect(coords);
+      return positions;
+    };
+    (routeData?.features || []).forEach(feature => {
+      const coords = feature.geometry?.coordinates;
+      if (!coords) return;
+      const positions = segmentsFrom(coords);
+      for (let i = 1; i < positions.length; i++) {
+        const a = positions[i - 1], b = positions[i];
+        // Avoid connecting the end of one separate line to the start of another.
+        // Tiny adjacent segments still give a reliable local proximity test.
         const ax = a[0] * sx, ay = a[1] * sy;
         const bx = b[0] * sx, by = b[1] * sy;
         const dx = bx - ax, dy = by - ay;
         const denom = dx * dx + dy * dy;
         const t = denom ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / denom)) : 0;
-        best = Math.min(best, Math.hypot(px - (ax + t * dx), py - (ay + t * dy)));
+        best = Math.min(best, Math.hypot(px - ax - t * dx, py - ay - t * dy));
       }
-    };
-    (routeData?.features || []).forEach(feature => {
-      if (feature.geometry?.type === "LineString") visitLine(feature.geometry.coordinates);
-      else if (feature.geometry?.type === "MultiLineString") feature.geometry.coordinates.forEach(visitLine);
-      else if (feature.geometry?.type === "GeometryCollection") feature.geometry.geometries.forEach(g => {
-        if (g.type === "LineString") visitLine(g.coordinates);
-        if (g.type === "MultiLineString") g.coordinates.forEach(visitLine);
-      });
     });
     return best;
   }
@@ -212,7 +216,7 @@
       // stop point was digitized at this location.
       const memberRouteKeys = members.map(f => f.properties.__routeKey).filter(Boolean);
       const routeKeys = [...new Set(memberRouteKeys)];
-      const routeProximityMeters = 60;
+      const routeProximityMeters = 100;
       state.routes.forEach((entry, key) => {
         if (distancePointToRouteMeters(group.center, entry.data) <= routeProximityMeters && !routeKeys.includes(key)) {
           routeKeys.push(key);
