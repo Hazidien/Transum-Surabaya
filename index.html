@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://basemaps.cartocdn.com">
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-  <link href="style.css?v=20261029i" rel="stylesheet">
+  <link href="style.css?v=20261029j" rel="stylesheet">
 </head>
 <body>
   <main class="app-shell">
@@ -101,8 +101,8 @@
         </label>
         <div class="buffer-control">
           <div class="buffer-heading"><label for="busSpeed">Kecepatan simulasi</label><strong id="busSpeedValue">1×</strong></div>
-          <input id="busSpeed" type="range" min="1" max="10" step="1" value="1">
-          <div class="buffer-scale"><span>1× lambat</span><span>10× cepat</span></div>
+          <input id="busSpeed" type="range" min="1" max="60" step="1" value="30">
+          <div class="buffer-scale"><span>1× lambat</span><span>60× cepat</span></div>
           <p class="simulation-warning">SIMULASI — bukan data real-time. Asumsi kecepatan nominal: Suroboyo Bus 20 km/jam dan Wira Wiri 15 km/jam; gerakan animasi dipercepat untuk demonstrasi.</p>
         </div>
       </section>
@@ -160,7 +160,7 @@
         <span class="dock-clock" id="simulationClock">06:00</span>
         <span class="dock-label">Kecepatan</span>
         <select id="busDockSpeed" aria-label="Kecepatan simulasi">
-          <option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="10" selected>10×</option>
+          <option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="10">10×</option><option value="20">20×</option><option value="30" selected>30×</option><option value="60">60×</option>
         </select>
         <label class="dock-check"><input id="busDockVisible" type="checkbox" checked> Tampilkan bus</label>
         <strong id="simBusCount">— bus</strong>
@@ -174,7 +174,7 @@
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
-  <script src="config.js?v=20261029i"></script>
-  <script src="app.js?v=20261029i"></script>
+  <script src="config.js?v=20261029j"></script>
+  <script src="app.js?v=20261029j"></script>
 </body>
 </html>
