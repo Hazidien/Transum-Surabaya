@@ -34,7 +34,10 @@
     busLastTime: 0,
     busMarkers: new Map(),
     busProgress: new Map(),
+    busStopDistances: new Map(),
+    busStopWait: new Map(),
     busSpeedMultiplier: 1,
+    busSpeedSetting: 30,
     activeBusPopup: null,
     activeBusId: null,
     hoverStopPopup: null,
@@ -590,22 +593,22 @@
     const dockButton = byId("busDockPlay");
     const dockSpeed = byId("busDockSpeed");
     const dockToggle = byId("busDockVisible");
-    state.busSpeedMultiplier = 30;
+    // Selector expresses the displayed acceleration. Each setting unit maps to 3x
+    // the previous movement rate: 10x is the previous 30x baseline; 30x is 3x faster.
+    const applyBusSpeed = value => {
+      state.busSpeedSetting = Math.max(1, Number(value) || 1);
+      state.busSpeedMultiplier = state.busSpeedSetting * 3;
+      byId("busSpeedValue").textContent = state.busSpeedSetting + "×";
+      if (dockSpeed) dockSpeed.value = String(state.busSpeedSetting);
+      if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = state.busSpeedSetting + "×";
+    };
+    applyBusSpeed(30);
     speed.value = "30";
-    byId("busSpeedValue").textContent = "30×";
     if (dockSpeed) dockSpeed.value = "30";
-    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "30×";
-    speed.addEventListener("input", () => {
-      state.busSpeedMultiplier = Number(speed.value) || 1;
-      byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
-      if (dockSpeed) dockSpeed.value = String(state.busSpeedMultiplier);
-      if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = state.busSpeedMultiplier + "×";
-    });
+    speed.addEventListener("input", () => applyBusSpeed(speed.value));
     if (dockSpeed) dockSpeed.addEventListener("change", () => {
-      state.busSpeedMultiplier = Number(dockSpeed.value) || 1;
-      speed.value = String(state.busSpeedMultiplier);
-      byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
-      byId("busDockSpeedValue").textContent = state.busSpeedMultiplier + "×";
+      speed.value = String(dockSpeed.value);
+      applyBusSpeed(dockSpeed.value);
     });
     if (dockToggle) dockToggle.addEventListener("change", () => {
       byId("busesToggle").checked = dockToggle.checked;
@@ -696,6 +699,29 @@
     });
   }
 
+  function getRouteStopDistances(routeKey, coords, routeLength) {
+    if (state.busStopDistances.has(routeKey)) return state.busStopDistances.get(routeKey);
+    const cumulative = [0];
+    for (let i = 1; i < coords.length; i++) cumulative[i] = cumulative[i - 1] + haversineKm(coords[i - 1], coords[i]);
+    const points = state.stops.filter(stop => stop.properties.__routeKey === routeKey);
+    const distances = [];
+    points.forEach(stop => {
+      const point = stop.geometry.coordinates;
+      let nearestIndex = -1;
+      let nearestMeters = Infinity;
+      for (let i = 0; i < coords.length; i++) {
+        const d = haversineKm(point, coords[i]) * 1000;
+        if (d < nearestMeters) { nearestMeters = d; nearestIndex = i; }
+      }
+      // Ignore stops that do not appear to belong to this route geometry.
+      if (nearestIndex >= 0 && nearestMeters <= 350) distances.push(cumulative[nearestIndex]);
+    });
+    distances.sort((x, y) => x - y);
+    const unique = distances.filter((value, index) => index === 0 || value - distances[index - 1] > 0.08);
+    state.busStopDistances.set(routeKey, unique);
+    return unique;
+  }
+
   function animateBusMarkers(now) {
     if (!state.busAnimationOn) return;
     if (!state.busLastTime) state.busLastTime = now;
@@ -743,8 +769,31 @@
           state.busProgress.set(busId, length * i / count);
         }
         marker.getElement().style.display = "";
-        let progress = (state.busProgress.get(busId) || 0) + nominalSpeed * deltaHours;
-        if (length > 0) progress %= length;
+        const previousProgress = state.busProgress.get(busId) || 0;
+        const stopsAlongRoute = getRouteStopDistances(route.key, coords, length);
+        const waitState = state.busStopWait.get(busId);
+        let progress = previousProgress;
+        if (waitState && waitState.remainingMs > 0) {
+          waitState.remainingMs -= elapsedMs;
+          progress = waitState.stopProgress;
+          if (waitState.remainingMs <= 0) state.busStopWait.delete(busId);
+        } else {
+          const proposed = previousProgress + nominalSpeed * deltaHours;
+          let nextStop = null;
+          if (length > 0) {
+            for (const stopDistance of stopsAlongRoute) {
+              const ahead = stopDistance > previousProgress + 0.025 && stopDistance <= proposed;
+              const wrapped = proposed >= length && stopDistance <= (proposed % length);
+              if (ahead || wrapped) { nextStop = stopDistance; break; }
+            }
+          }
+          if (nextStop !== null) {
+            progress = nextStop;
+            state.busStopWait.set(busId, { stopProgress: nextStop, remainingMs: 2200 });
+          } else {
+            progress = length > 0 ? proposed % length : proposed;
+          }
+        }
         state.busProgress.set(busId, progress);
         marker.setLngLat(interpolateRoute(coords, progress));
         if (state.activeBusPopup && state.activeBusId === busId) state.activeBusPopup.setLngLat(marker.getLngLat());
