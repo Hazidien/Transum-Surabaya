@@ -322,7 +322,7 @@
       hideLoadingOverlay();
     } else {
       hideError();
-      setStatus("5 rute · data siap");
+      setStatus(state.routes.size + " rute · data siap");
       hideLoadingOverlay();
     }
   }
@@ -621,7 +621,11 @@
       state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
     });
     byId("closeMapDetail").addEventListener("click", () => {
+      if (state.clickMarker) state.clickMarker.remove();
+      state.clickMarker = null;
+      clearWalkingRoute();
       byId("mapDetailPanel").hidden = true;
+      nearestResult.innerHTML = '<div class="result-placeholder"><span class="pin-outline">◎</span><span>Klik peta untuk mencari halte terdekat.</span></div>';
       state.selectedStop = null;
       refreshSelectedBuffer();
     });
