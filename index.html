@@ -93,20 +93,28 @@
         </div>
         <p class="helper-copy">Bus virtual bergerak mengikuti geometri rute, bukan posisi kendaraan aktual.</p>
         <button class="primary-button" id="busPlayButton"><span>▶</span> Mulai simulasi bus</button>
+        <label class="layer-toggle bus-visibility-toggle">
+          <span class="layer-symbol bus-symbol">▰</span>
+          <span class="toggle-copy"><strong>Tampilkan bus</strong><small>Ikon bergerak di sepanjang rute</small></span>
+          <input type="checkbox" id="busesToggle" checked>
+          <span class="switch"></span>
+        </label>
         <div class="buffer-control">
-          <div class="buffer-heading"><label for="busSpeed">Kecepatan animasi</label><strong id="busSpeedValue">1×</strong></div>
+          <div class="buffer-heading"><label for="busSpeed">Kecepatan simulasi</label><strong id="busSpeedValue">1×</strong></div>
           <input id="busSpeed" type="range" min="1" max="4" step="1" value="1">
           <div class="buffer-scale"><span>1× lambat</span><span>4× cepat</span></div>
           <p class="simulation-warning">SIMULASI — bukan data real-time. Asumsi kecepatan nominal: Suroboyo Bus 20 km/jam dan Wira Wiri 15 km/jam; gerakan animasi dipercepat untuk demonstrasi.</p>
         </div>
       </section>
 
-      <section class="section-block route-detail-block" id="routeDetailBlock" hidden>
-        <div class="section-heading">
-          <div><p class="eyebrow">DETAIL KORIDOR</p><h2 id="routeDetailTitle">Pilih rute</h2></div>
-          <button id="closeRouteDetail" class="icon-button" aria-label="Tutup detail rute">×</button>
+      <section class="section-block symbol-block">
+        <div class="section-heading"><div><p class="eyebrow">SIMBOLOGI</p><h2>Simbol peta</h2></div></div>
+        <div class="symbol-list">
+          <span><i class="symbol-stop"></i> Halte</span>
+          <span><i class="symbol-buffer"></i> Buffer halte terpilih</span>
+          <span><i class="symbol-bus">▰</i> Bus (simulasi)</span>
         </div>
-        <div id="routeDetailContent"></div>
+        <button class="primary-button" id="fitAllRoutesButton">Lihat semua rute</button>
       </section>
 
       <footer class="sidebar-footer">
@@ -131,6 +139,13 @@
           <button id="locateButton" class="toolbar-button" title="Gunakan lokasi perangkat">◎ <span>Lokasi saya</span></button>
         </div>
       </div>
+      <aside class="map-detail-panel" id="mapDetailPanel" hidden aria-live="polite">
+        <div class="map-detail-header">
+          <div><p class="eyebrow" id="mapDetailKicker">INFORMASI</p><h2 id="mapDetailTitle">Pilih halte atau rute</h2></div>
+          <button id="closeMapDetail" class="icon-button" aria-label="Tutup informasi">×</button>
+        </div>
+        <div id="mapDetailContent"></div>
+      </aside>
       <div class="map-legend" id="mapLegend">
         <span class="legend-title">KORIDOR</span>
         <span><i style="background:#F59E0B"></i>Suroboyo Bus</span>
