@@ -156,6 +156,39 @@
     refreshSelectedBuffer();
   }
 
+  function distancePointToRouteMeters(point, routeData) {
+    let best = Infinity;
+    const meanLat = point[1] * Math.PI / 180;
+    const sx = 111320 * Math.cos(meanLat);
+    const sy = 110574;
+    const px = point[0] * sx, py = point[1] * sy;
+    const visitLine = coords => {
+      if (!Array.isArray(coords) || coords.length < 2) return;
+      if (typeof coords[0]?.[0] !== "number") {
+        coords.forEach(visitLine);
+        return;
+      }
+      for (let i = 1; i < coords.length; i++) {
+        const a = coords[i - 1], b = coords[i];
+        const ax = a[0] * sx, ay = a[1] * sy;
+        const bx = b[0] * sx, by = b[1] * sy;
+        const dx = bx - ax, dy = by - ay;
+        const denom = dx * dx + dy * dy;
+        const t = denom ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / denom)) : 0;
+        best = Math.min(best, Math.hypot(px - (ax + t * dx), py - (ay + t * dy)));
+      }
+    };
+    (routeData?.features || []).forEach(feature => {
+      if (feature.geometry?.type === "LineString") visitLine(feature.geometry.coordinates);
+      else if (feature.geometry?.type === "MultiLineString") feature.geometry.coordinates.forEach(visitLine);
+      else if (feature.geometry?.type === "GeometryCollection") feature.geometry.geometries.forEach(g => {
+        if (g.type === "LineString") visitLine(g.coordinates);
+        if (g.type === "MultiLineString") g.coordinates.forEach(visitLine);
+      });
+    });
+    return best;
+  }
+
   function refreshStopsSource() {
     if (!state.map || !state.map.getSource("all-stops")) return;
     // Merge points within 28 m so stops shared by multiple routes appear as one marker.
@@ -174,7 +207,17 @@
     });
     const features = groups.map((group, index) => {
       const members = group.members;
-      const routeKeys = [...new Set(members.map(f => f.properties.__routeKey).filter(Boolean))];
+      // Include corridors whose route geometry actually passes this shared stop, even if
+      // the separate stop datasets have slightly different coordinates or only one route's
+      // stop point was digitized at this location.
+      const memberRouteKeys = members.map(f => f.properties.__routeKey).filter(Boolean);
+      const routeKeys = [...new Set(memberRouteKeys)];
+      const routeProximityMeters = 60;
+      state.routes.forEach((entry, key) => {
+        if (distancePointToRouteMeters(group.center, entry.data) <= routeProximityMeters && !routeKeys.includes(key)) {
+          routeKeys.push(key);
+        }
+      });
       const visibleRouteKeys = routeKeys.filter(key => state.routeVisibility.get(key) !== false);
       const names = [...new Set(members.map(f => f.properties.__stopName).filter(Boolean))];
       return {
