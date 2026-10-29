@@ -6,6 +6,27 @@
 window.TRANSUM_CONFIG = {
   routes: [
     {
+      key: "sby-purabaya-unair",
+      label: "Suroboyo Bus · Terminal Purabaya–UNAIR Kampus C",
+      file: "Bus_Suroboyo_Terminal Purabaya - UNAIR Kampus C.geojson",
+      color: "#F97316",
+      routeValues: ["Terminal Purabaya - UNAIR Kampus C", "Purabaya-UNAIR Kampus C", "Purabaya-Unair"]
+    },
+    {
+      key: "ww-pnr-balai-kota",
+      label: "Wira Wiri · PNR–Balai Kota",
+      file: "WiraWiri_PNR-Balai Kota.geojson",
+      color: "#E879F9",
+      routeValues: ["PNR-Balai Kota", "PNR - Balai Kota", "PNR Balai Kota"]
+    },
+    {
+      key: "ww-bratang-pasarturi",
+      label: "Wira Wiri · Terminal Bratang–Stasiun Pasar Turi",
+      file: "WiraWiri_Terminal Bratang- St Pasar Turi.geojson",
+      color: "#FACC15",
+      routeValues: ["Terminal Bratang- St Pasar Turi", "Terminal Bratang - St Pasar Turi", "Bratang-Pasar Turi"]
+    },
+    {
       key: "sby-benowo",
       label: "Suroboyo Bus · Benowo–Tunjungan",
       file: "rute/Bus_Suroboyo_Benowo-Tunjungan.geojson",
@@ -43,6 +64,21 @@ window.TRANSUM_CONFIG = {
   ],
 
   stops: [
+    {
+      key: "stops-bus-purabaya-unair",
+      file: "halte_bus_Terminal Purabaya - UNAIR Kampus C.geojson",
+      fallbackRouteKey: "sby-purabaya-unair"
+    },
+    {
+      key: "stops-wira-pnr-balai-kota",
+      file: "halte_wirawiri_PNR-Balai Kota.geojson",
+      fallbackRouteKey: "ww-pnr-balai-kota"
+    },
+    {
+      key: "stops-wira-bratang-pasarturi",
+      file: "halte_wirawiri_Terminal Bratang- St Pasar Turi.geojson",
+      fallbackRouteKey: "ww-bratang-pasarturi"
+    },
     {
       key: "stops-bus-kejawan",
       file: "halte/halte_bus_Kejawan Putih-Unesa.geojson",
@@ -95,6 +131,9 @@ window.TRANSUM_CONFIG = {
    * Other route counts are placeholders pending route-level official data.
    */
   simulationFleet: {
+    "sby-purabaya-unair": { count: 4, basis: "Simulasi demo: 4 titik bergerak pada koridor baru; bukan jumlah armada resmi.", sourceUrl: "" },
+    "ww-pnr-balai-kota": { count: 4, basis: "Simulasi demo: 4 titik bergerak pada koridor baru; bukan jumlah armada resmi.", sourceUrl: "" },
+    "ww-bratang-pasarturi": { count: 4, basis: "Simulasi demo: 4 titik bergerak pada koridor baru; bukan jumlah armada resmi.", sourceUrl: "" },
     "sby-benowo": { count: 4, basis: "Acuan berita Nov 2025: 16 armada pada rute Benowo–Tunjungan.", sourceUrl: "https://www.detik.com/jatim/berita/d-8216825/suroboyo-bus-mulai-layani-rute-benowo-tunjungan-ada-16-armada" },
     "sby-kejawan": { count: 4, basis: "Statistik Sektoral Surabaya 2024: 6 unit Unesa–ITS; proksi, bukan hitungan langsung rute terbaru.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
     "sby-purabaya": { count: 4, basis: "Statistik Sektoral Surabaya 2024: 9 bus reguler + 1 bus tingkat Purabaya–Rajawali.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
