@@ -95,10 +95,10 @@ window.TRANSUM_CONFIG = {
    * Other route counts are placeholders pending route-level official data.
    */
   simulationFleet: {
-    "sby-benowo": { count: 16, basis: "Acuan berita Nov 2025: 16 armada pada rute Benowo–Tunjungan.", sourceUrl: "https://www.detik.com/jatim/berita/d-8216825/suroboyo-bus-mulai-layani-rute-benowo-tunjungan-ada-16-armada" },
-    "sby-kejawan": { count: 6, basis: "Statistik Sektoral Surabaya 2024: 6 unit Unesa–ITS; proksi, bukan hitungan langsung rute terbaru.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
-    "sby-purabaya": { count: 10, basis: "Statistik Sektoral Surabaya 2024: 9 bus reguler + 1 bus tingkat Purabaya–Rajawali.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
-    "ww-gunung-anyar": { count: 14, basis: "Acuan akademik 2025 untuk TIJ–Gunung Anyar; kesesuaian rute perlu diverifikasi.", sourceUrl: "https://journal.its.ac.id/index.php/jpr/article/download/5128/5467" },
+    "sby-benowo": { count: 4, basis: "Acuan berita Nov 2025: 16 armada pada rute Benowo–Tunjungan.", sourceUrl: "https://www.detik.com/jatim/berita/d-8216825/suroboyo-bus-mulai-layani-rute-benowo-tunjungan-ada-16-armada" },
+    "sby-kejawan": { count: 4, basis: "Statistik Sektoral Surabaya 2024: 6 unit Unesa–ITS; proksi, bukan hitungan langsung rute terbaru.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
+    "sby-purabaya": { count: 4, basis: "Statistik Sektoral Surabaya 2024: 9 bus reguler + 1 bus tingkat Purabaya–Rajawali.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
+    "ww-gunung-anyar": { count: 4, basis: "Acuan akademik 2025 untuk TIJ–Gunung Anyar; kesesuaian rute perlu diverifikasi.", sourceUrl: "https://journal.its.ac.id/index.php/jpr/article/download/5128/5467" },
     "ww-tow": { count: 4, basis: "Acuan akademik 2025 untuk UNESA–Terminal Osowilangun; kesesuaian rute perlu diverifikasi.", sourceUrl: "https://journal.its.ac.id/index.php/jpr/article/download/5128/5467" }
   },
 
