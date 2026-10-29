@@ -145,3 +145,29 @@ kbd { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color
   .map-coordinates { top: 57px; left: 10px; }
   .maplibregl-ctrl-bottom-right { bottom: 65px !important; }
 }
+
+
+/* Buffer radius, simulation controls and route detail panel */
+.buffer-control { margin: 9px 3px 2px; padding: 10px; border-radius: 10px; background: rgba(31,43,59,.58); border: 1px solid rgba(148,163,184,.12); }
+.buffer-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--muted); font-size:10px; font-weight:700; }
+.buffer-heading strong { color:#72e9ce; font-size:11px; }
+.buffer-control input[type="range"] { display:block; width:100%; margin:12px 0 5px; accent-color:#20b8e6; cursor:pointer; }
+.buffer-scale { display:flex; justify-content:space-between; color:#77889f; font-size:9px; }
+.buffer-caption { margin:8px 0 0; color:#aebbd0; font-size:10px; }
+.simulation-warning { margin:8px 0 0; color:#fbbf24; font-size:9px; line-height:1.5; }
+.route-detail-block { border:1px solid rgba(114,233,206,.18); border-radius:12px; background:rgba(17,28,44,.78); padding:12px; }
+.route-detail-block[hidden] { display:none; }
+.route-detail-block .section-heading { align-items:center; }
+.route-detail-block .section-heading h2 { max-width:220px; line-height:1.35; }
+.route-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:10px 0 14px; }
+.route-metric { padding:9px 5px; text-align:center; border-radius:8px; background:rgba(255,255,255,.06); min-width:0; }
+.route-metric strong { display:block; color:#f2f6fc; font-size:14px; }
+.route-metric small { display:block; margin-top:4px; color:#93a3b9; font-size:9px; }
+.route-stop-heading { margin:13px 0 8px; color:#9baac0; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+.route-stop-list { display:flex; flex-direction:column; gap:3px; max-height:310px; overflow:auto; padding-right:3px; }
+.route-stop-item { display:flex; align-items:center; gap:8px; width:100%; border:0; border-radius:7px; padding:6px 5px; background:transparent; color:#e4eaf3; text-align:left; font-size:10px; cursor:pointer; }
+.route-stop-item:hover { background:rgba(255,255,255,.07); }
+.route-stop-number { display:grid; place-items:center; flex:0 0 21px; height:21px; border-radius:50%; background:rgba(148,163,184,.22); color:#d8e2ef; font-weight:800; }
+.route-stop-name { flex:1; min-width:0; overflow-wrap:anywhere; }
+.route-stop-item small { color:#8294aa; font-size:9px; }
+.bus-marker { width:25px; height:25px; display:grid; place-items:center; border:2px solid white; border-radius:50%; color:#07101e; font-size:14px; font-weight:900; box-shadow:0 2px 12px rgba(0,0,0,.5); }
