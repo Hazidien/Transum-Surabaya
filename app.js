@@ -590,11 +590,11 @@
     const dockButton = byId("busDockPlay");
     const dockSpeed = byId("busDockSpeed");
     const dockToggle = byId("busDockVisible");
-    state.busSpeedMultiplier = 3;
-    speed.value = "3";
-    byId("busSpeedValue").textContent = "3×";
-    if (dockSpeed) dockSpeed.value = "3";
-    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "3×";
+    state.busSpeedMultiplier = 10;
+    speed.value = "10";
+    byId("busSpeedValue").textContent = "10×";
+    if (dockSpeed) dockSpeed.value = "10";
+    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "10×";
     speed.addEventListener("input", () => {
       state.busSpeedMultiplier = Number(speed.value) || 1;
       byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
@@ -1107,13 +1107,30 @@
     }
     refreshSelectedBuffer();
     drawWalkingRoute(best.route.coordinates);
-    if (best.straightMeters <= 5000) {
-      state.map.fitBounds(new maplibregl.LngLatBounds(origin, best.feature.geometry.coordinates), {
-        padding: { top: 110, bottom: 110, left: 370, right: 90 }, maxZoom: 15, duration: 700
-      });
+    const stopCoord = best.feature.geometry.coordinates;
+    const coordsAreValid = Array.isArray(origin) && Array.isArray(stopCoord) &&
+      Number.isFinite(origin[0]) && Number.isFinite(origin[1]) &&
+      Number.isFinite(stopCoord[0]) && Number.isFinite(stopCoord[1]) &&
+      origin[0] >= 112.0 && origin[0] <= 113.5 && origin[1] >= -8.0 && origin[1] <= -6.5 &&
+      stopCoord[0] >= 112.0 && stopCoord[0] <= 113.5 && stopCoord[1] >= -8.0 && stopCoord[1] <= -6.5;
+    // Fit only when the clicked point and selected stop are genuinely close in Surabaya.
+    // Otherwise, never fit a wide or malformed extent: focus on the stop at a stable city zoom.
+    if (coordsAreValid && best.straightMeters <= 1500) {
+      const safeBounds = new maplibregl.LngLatBounds(origin, stopCoord);
+      const sw = safeBounds.getSouthWest();
+      const ne = safeBounds.getNorthEast();
+      if ((ne.lng - sw.lng) < 0.04 && (ne.lat - sw.lat) < 0.04) {
+        state.map.fitBounds(safeBounds, {
+          padding: { top: 110, bottom: 110, left: 370, right: 90 }, maxZoom: 15, duration: 700
+        });
+      } else {
+        state.map.flyTo({ center: stopCoord, zoom: 14, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
+      }
+    } else if (coordsAreValid) {
+      state.map.flyTo({ center: stopCoord, zoom: 14, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
     } else {
-      // If the clicked point is far from the transit network, focus on the nearest stop at a stable city zoom.
-      state.map.flyTo({ center: best.feature.geometry.coordinates, zoom: 14, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
+      // Invalid coordinates must never be passed to fitBounds or flyTo.
+      state.map.flyTo({ center: config.map.center, zoom: config.map.zoom, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
     }
 
     const props = best.feature.properties || {};
