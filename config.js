@@ -95,11 +95,11 @@ window.TRANSUM_CONFIG = {
    * Other route counts are placeholders pending route-level official data.
    */
   simulationFleet: {
-    "sby-benowo": { count: 16, basis: "Acuan berita Dishub, Nov 2025: 16 armada pada rute Benowo–Tunjungan." },
-    "sby-kejawan": { count: 6, basis: "Acuan Statistik Sektoral Surabaya 2024: 6 unit pada rute Unesa–ITS; dipakai sebagai proksi untuk geometri koridor ini, bukan hitungan langsung rute terbaru." },
-    "sby-purabaya": { count: 10, basis: "Acuan Statistik Sektoral Surabaya 2024: 9 bus reguler dan 1 bus tingkat pada rute Purabaya–Rajawali." },
-    "ww-gunung-anyar": { count: 14, basis: "Acuan akademik 2025 untuk rute TIJ–Gunung Anyar; kesesuaian rute perlu diverifikasi." },
-    "ww-tow": { count: 4, basis: "Acuan akademik 2025 untuk rute UNESA–Terminal Osowilangun; kesesuaian rute perlu diverifikasi." }
+    "sby-benowo": { count: 16, basis: "Acuan berita Nov 2025: 16 armada pada rute Benowo–Tunjungan.", sourceUrl: "https://www.detik.com/jatim/berita/d-8216825/suroboyo-bus-mulai-layani-rute-benowo-tunjungan-ada-16-armada" },
+    "sby-kejawan": { count: 6, basis: "Statistik Sektoral Surabaya 2024: 6 unit Unesa–ITS; proksi, bukan hitungan langsung rute terbaru.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
+    "sby-purabaya": { count: 10, basis: "Statistik Sektoral Surabaya 2024: 9 bus reguler + 1 bus tingkat Purabaya–Rajawali.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
+    "ww-gunung-anyar": { count: 14, basis: "Acuan akademik 2025 untuk TIJ–Gunung Anyar; kesesuaian rute perlu diverifikasi.", sourceUrl: "https://journal.its.ac.id/index.php/jpr/article/download/5128/5467" },
+    "ww-tow": { count: 4, basis: "Acuan akademik 2025 untuk UNESA–Terminal Osowilangun; kesesuaian rute perlu diverifikasi.", sourceUrl: "https://journal.its.ac.id/index.php/jpr/article/download/5128/5467" }
   },
 
   buildings: {
