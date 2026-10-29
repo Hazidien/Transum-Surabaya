@@ -590,11 +590,11 @@
     const dockButton = byId("busDockPlay");
     const dockSpeed = byId("busDockSpeed");
     const dockToggle = byId("busDockVisible");
-    state.busSpeedMultiplier = 10;
-    speed.value = "10";
-    byId("busSpeedValue").textContent = "10×";
-    if (dockSpeed) dockSpeed.value = "10";
-    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "10×";
+    state.busSpeedMultiplier = 30;
+    speed.value = "30";
+    byId("busSpeedValue").textContent = "30×";
+    if (dockSpeed) dockSpeed.value = "30";
+    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "30×";
     speed.addEventListener("input", () => {
       state.busSpeedMultiplier = Number(speed.value) || 1;
       byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
