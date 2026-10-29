@@ -8,21 +8,21 @@ window.TRANSUM_CONFIG = {
     {
       key: "sby-purabaya-unair",
       label: "Suroboyo Bus · Terminal Purabaya–UNAIR Kampus C",
-      file: "Bus_Suroboyo_Terminal Purabaya - UNAIR Kampus C.geojson",
+      file: "rute/Bus_Suroboyo_Terminal Purabaya - UNAIR Kampus C.geojson",
       color: "#F97316",
       routeValues: ["Terminal Purabaya - UNAIR Kampus C", "Purabaya-UNAIR Kampus C", "Purabaya-Unair"]
     },
     {
       key: "ww-pnr-balai-kota",
       label: "Wira Wiri · PNR–Balai Kota",
-      file: "WiraWiri_PNR-Balai Kota.geojson",
+      file: "rute/WiraWiri_PNR-Balai Kota.geojson",
       color: "#E879F9",
       routeValues: ["PNR-Balai Kota", "PNR - Balai Kota", "PNR Balai Kota"]
     },
     {
       key: "ww-bratang-pasarturi",
       label: "Wira Wiri · Terminal Bratang–Stasiun Pasar Turi",
-      file: "WiraWiri_Terminal Bratang- St Pasar Turi.geojson",
+      file: "rute/WiraWiri_Terminal Bratang- St Pasar Turi.geojson",
       color: "#FACC15",
       routeValues: ["Terminal Bratang- St Pasar Turi", "Terminal Bratang - St Pasar Turi", "Bratang-Pasar Turi"]
     },
@@ -66,17 +66,17 @@ window.TRANSUM_CONFIG = {
   stops: [
     {
       key: "stops-bus-purabaya-unair",
-      file: "halte_bus_Terminal Purabaya - UNAIR Kampus C.geojson",
+      file: "halte/halte_bus_Terminal Purabaya - UNAIR Kampus C.geojson",
       fallbackRouteKey: "sby-purabaya-unair"
     },
     {
       key: "stops-wira-pnr-balai-kota",
-      file: "halte_wirawiri_PNR-Balai Kota.geojson",
+      file: "halte/halte_wirawiri_PNR-Balai Kota.geojson",
       fallbackRouteKey: "ww-pnr-balai-kota"
     },
     {
       key: "stops-wira-bratang-pasarturi",
-      file: "halte_wirawiri_Terminal Bratang- St Pasar Turi.geojson",
+      file: "halte/halte_wirawiri_Terminal Bratang- St Pasar Turi.geojson",
       fallbackRouteKey: "ww-bratang-pasarturi"
     },
     {
