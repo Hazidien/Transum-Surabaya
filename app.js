@@ -37,6 +37,7 @@
     busSpeedMultiplier: 1,
     activeBusPopup: null,
     activeBusId: null,
+    hoverStopPopup: null,
     simulationMinutes: 6 * 60
   };
 
@@ -168,11 +169,15 @@
     const allBounds = new maplibregl.LngLatBounds();
     let hasBounds = false;
     state.routes.forEach(route => {
-      if (route.bounds && !route.bounds.isEmpty()) {
-        allBounds.extend(route.bounds.getSouthWest());
-        allBounds.extend(route.bounds.getNorthEast());
-        hasBounds = true;
-      }
+      if (!route.bounds || route.bounds.isEmpty()) return;
+      const sw = route.bounds.getSouthWest();
+      const ne = route.bounds.getNorthEast();
+      const center = route.bounds.getCenter();
+      // All configured corridors are in Surabaya; ignore malformed coordinates outside this area.
+      if (center.lng < 111 || center.lng > 114 || center.lat < -8.5 || center.lat > -6.5) return;
+      allBounds.extend(sw);
+      allBounds.extend(ne);
+      hasBounds = true;
     });
     if (hasBounds) state.map.fitBounds(allBounds, {
       padding: { top: 100, bottom: 90, left: 370, right: 70 },
@@ -374,8 +379,24 @@
           f.geometry.coordinates[1] === feature.geometry.coordinates[1]);
         showStopDetails(original || feature);
       });
-      state.map.on("mouseenter", layerId, () => state.map.getCanvas().style.cursor = "pointer");
-      state.map.on("mouseleave", layerId, () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
+      state.map.on("mouseenter", layerId, (event) => {
+        state.map.getCanvas().style.cursor = "pointer";
+        const feature = event.features?.[0];
+        if (!feature) return;
+        if (state.hoverStopPopup) state.hoverStopPopup.remove();
+        state.hoverStopPopup = new maplibregl.Popup({
+          closeButton: false, closeOnClick: false, offset: 10, className: "stop-hover-popup"
+        }).setLngLat(feature.geometry.coordinates)
+          .setHTML('<div class="stop-hover-label">' + escapeHtml(feature.properties.__stopName || "Halte") + '</div>')
+          .addTo(state.map);
+      });
+      state.map.on("mouseleave", layerId, () => {
+        state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "";
+        if (state.hoverStopPopup) {
+          state.hoverStopPopup.remove();
+          state.hoverStopPopup = null;
+        }
+      });
     });
 
     if (!state.map.getLayer("stop-labels")) {
@@ -385,6 +406,7 @@
         minzoom: 10.5,
         layout: {
           "text-field": ["get", "__stopName"],
+          "visibility": "none",
           "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
           "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
           "text-offset": [0, 1.15],
@@ -568,11 +590,11 @@
     const dockButton = byId("busDockPlay");
     const dockSpeed = byId("busDockSpeed");
     const dockToggle = byId("busDockVisible");
-    state.busSpeedMultiplier = 5;
-    speed.value = "5";
-    byId("busSpeedValue").textContent = "5×";
-    if (dockSpeed) dockSpeed.value = "5";
-    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "5×";
+    state.busSpeedMultiplier = 3;
+    speed.value = "3";
+    byId("busSpeedValue").textContent = "3×";
+    if (dockSpeed) dockSpeed.value = "3";
+    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "3×";
     speed.addEventListener("input", () => {
       state.busSpeedMultiplier = Number(speed.value) || 1;
       byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
@@ -721,7 +743,7 @@
           state.busProgress.set(busId, length * i / count);
         }
         marker.getElement().style.display = "";
-        let progress = (state.busProgress.get(busId) || 0) + nominalSpeed * deltaHours * 0.12;
+        let progress = (state.busProgress.get(busId) || 0) + nominalSpeed * deltaHours;
         if (length > 0) progress %= length;
         state.busProgress.set(busId, progress);
         marker.setLngLat(interpolateRoute(coords, progress));
@@ -1085,9 +1107,14 @@
     }
     refreshSelectedBuffer();
     drawWalkingRoute(best.route.coordinates);
-    state.map.fitBounds(new maplibregl.LngLatBounds(origin, best.feature.geometry.coordinates), {
-      padding: { top: 110, bottom: 110, left: 370, right: 90 }, maxZoom: 16, duration: 700
-    });
+    if (best.straightMeters <= 5000) {
+      state.map.fitBounds(new maplibregl.LngLatBounds(origin, best.feature.geometry.coordinates), {
+        padding: { top: 110, bottom: 110, left: 370, right: 90 }, maxZoom: 15, duration: 700
+      });
+    } else {
+      // If the clicked point is far from the transit network, focus on the nearest stop at a stable city zoom.
+      state.map.flyTo({ center: best.feature.geometry.coordinates, zoom: 14, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
+    }
 
     const props = best.feature.properties || {};
     const distance = best.route.distanceKm * 1000;
