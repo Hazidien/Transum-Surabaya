@@ -707,14 +707,28 @@
     const distances = [];
     points.forEach(stop => {
       const point = stop.geometry.coordinates;
-      let nearestIndex = -1;
-      let nearestMeters = Infinity;
-      for (let i = 0; i < coords.length; i++) {
-        const d = haversineKm(point, coords[i]) * 1000;
-        if (d < nearestMeters) { nearestMeters = d; nearestIndex = i; }
+      let bestDistanceMeters = Infinity;
+      let bestAlongKm = null;
+      for (let i = 1; i < coords.length; i++) {
+        const a = coords[i - 1], b = coords[i];
+        const meanLat = (a[1] + b[1] + point[1]) / 3 * Math.PI / 180;
+        const sx = 111.32 * Math.cos(meanLat);
+        const sy = 110.57;
+        const ax = a[0] * sx, ay = a[1] * sy;
+        const bx = b[0] * sx, by = b[1] * sy;
+        const px = point[0] * sx, py = point[1] * sy;
+        const dx = bx - ax, dy = by - ay;
+        const denom = dx * dx + dy * dy;
+        const t = denom ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / denom)) : 0;
+        const q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+        const distanceMeters = haversineKm(point, q) * 1000;
+        if (distanceMeters < bestDistanceMeters) {
+          bestDistanceMeters = distanceMeters;
+          bestAlongKm = cumulative[i - 1] + haversineKm(a, b) * t;
+        }
       }
-      // Ignore stops that do not appear to belong to this route geometry.
-      if (nearestIndex >= 0 && nearestMeters <= 350) distances.push(cumulative[nearestIndex]);
+      // Stop points can sit slightly away from the digitized route centerline.
+      if (bestAlongKm !== null && bestDistanceMeters <= 250) distances.push(bestAlongKm);
     });
     distances.sort((x, y) => x - y);
     const unique = distances.filter((value, index) => index === 0 || value - distances[index - 1] > 0.08);
@@ -1162,24 +1176,34 @@
       Number.isFinite(stopCoord[0]) && Number.isFinite(stopCoord[1]) &&
       origin[0] >= 112.0 && origin[0] <= 113.5 && origin[1] >= -8.0 && origin[1] <= -6.5 &&
       stopCoord[0] >= 112.0 && stopCoord[0] <= 113.5 && stopCoord[1] >= -8.0 && stopCoord[1] <= -6.5;
-    // Fit only when the clicked point and selected stop are genuinely close in Surabaya.
-    // Otherwise, never fit a wide or malformed extent: focus on the stop at a stable city zoom.
-    if (coordsAreValid && best.straightMeters <= 1500) {
+    const currentZoom = state.map.getZoom();
+    // Clicking "nearby" from a stop can produce identical origin/destination coordinates.
+    // Never fit a degenerate/small bounds; fly to the stop at a stable, readable city zoom.
+    if (!coordsAreValid) {
+      state.map.flyTo({ center: config.map.center, zoom: config.map.zoom, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
+    } else if (best.straightMeters < 120) {
+      state.map.flyTo({
+        center: stopCoord,
+        zoom: Math.max(14, Math.min(16, currentZoom)),
+        pitch: config.map.pitch,
+        bearing: config.map.bearing,
+        duration: 700
+      });
+    } else if (best.straightMeters <= 1500) {
       const safeBounds = new maplibregl.LngLatBounds(origin, stopCoord);
       const sw = safeBounds.getSouthWest();
       const ne = safeBounds.getNorthEast();
-      if ((ne.lng - sw.lng) < 0.04 && (ne.lat - sw.lat) < 0.04) {
+      const lngSpan = ne.lng - sw.lng;
+      const latSpan = ne.lat - sw.lat;
+      if (lngSpan > 0.0002 && latSpan > 0.0002 && lngSpan < 0.04 && latSpan < 0.04) {
         state.map.fitBounds(safeBounds, {
           padding: { top: 110, bottom: 110, left: 370, right: 90 }, maxZoom: 15, duration: 700
         });
       } else {
         state.map.flyTo({ center: stopCoord, zoom: 14, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
       }
-    } else if (coordsAreValid) {
-      state.map.flyTo({ center: stopCoord, zoom: 14, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
     } else {
-      // Invalid coordinates must never be passed to fitBounds or flyTo.
-      state.map.flyTo({ center: config.map.center, zoom: config.map.zoom, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
+      state.map.flyTo({ center: stopCoord, zoom: 14, pitch: config.map.pitch, bearing: config.map.bearing, duration: 700 });
     }
 
     const props = best.feature.properties || {};
