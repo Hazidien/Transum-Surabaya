@@ -104,6 +104,11 @@
     routeList.appendChild(item);
 
     const checkbox = item.querySelector("input");
+    item.addEventListener("click", (event) => {
+      if (event.target === checkbox) return;
+      selectRouteDetails(route.key);
+      zoomToRoute(route.key);
+    });
     checkbox.addEventListener("change", () => {
       state.routeVisibility.set(route.key, checkbox.checked);
       updateRouteVisibility(route.key);
@@ -150,6 +155,23 @@
       return copy;
     });
     state.map.getSource("all-stops").setData({ type: "FeatureCollection", features });
+  }
+
+  function fitAllRoutes() {
+    const allBounds = new maplibregl.LngLatBounds();
+    let hasBounds = false;
+    state.routes.forEach(route => {
+      if (route.bounds && !route.bounds.isEmpty()) {
+        allBounds.extend(route.bounds.getSouthWest());
+        allBounds.extend(route.bounds.getNorthEast());
+        hasBounds = true;
+      }
+    });
+    if (hasBounds) state.map.fitBounds(allBounds, {
+      padding: { top: 100, bottom: 90, left: 370, right: 70 },
+      maxZoom: 12.8, duration: 850
+    });
+    else state.map.flyTo({ center: config.map.center, zoom: config.map.zoom, pitch: config.map.pitch, bearing: config.map.bearing, duration: 850 });
   }
 
   function zoomToRoute(routeKey) {
@@ -543,7 +565,8 @@
       marker.getElement().style.display = "";
       const length = routeLengthKm(coords);
       const nominalSpeed = route.key.startsWith("ww-") ? 15 : 20;
-      let progress = (state.busProgress.get(route.key) || 0) + nominalSpeed * deltaHours;
+      // The nominal 15/20 km/h speed is accelerated 60x for visible demonstration movement.
+      let progress = (state.busProgress.get(route.key) || 0) + nominalSpeed * deltaHours * 60;
       if (length > 0) progress %= length;
       state.busProgress.set(route.key, progress);
       marker.setLngLat(interpolateRoute(coords, progress));
@@ -727,9 +750,7 @@
       byId("tiltButton").innerHTML = is3D ? "2D <span>⌄</span>" : "3D <span>⌄</span>";
     });
 
-    byId("resetView").addEventListener("click", () => {
-      state.map.flyTo({ center: config.map.center, zoom: config.map.zoom, pitch: config.map.pitch, bearing: config.map.bearing, duration: 900 });
-    });
+    byId("resetView").addEventListener("click", () => fitAllRoutes());
 
     byId("clearSearch").addEventListener("click", () => {
       stopSearch.value = "";
