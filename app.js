@@ -23,7 +23,15 @@
     finderMode: false,
     clickMarker: null,
     walkingLayerAdded: false,
-    activePopup: null
+    activePopup: null,
+    selectedRouteKey: null,
+    bufferRadius: 400,
+    busAnimationOn: false,
+    busFrame: null,
+    busLastTime: 0,
+    busMarkers: new Map(),
+    busProgress: new Map(),
+    busSpeedMultiplier: 1
   };
 
   if (!window.maplibregl || !config) {
@@ -124,6 +132,11 @@
       if (feature.properties.__routeKey === routeKey) feature.properties.__routeVisible = visible;
     });
     refreshStopsSource();
+    const bufferSource = state.map.getSource("stop-circle-buffers");
+    if (bufferSource && state.bufferRadius) {
+      const visibleStops = state.stops.filter(f => !f.properties.__routeKey || state.routeVisibility.get(f.properties.__routeKey) !== false);
+      bufferSource.setData({ type: "FeatureCollection", features: visibleStops.map(f => stopBufferPolygon(f, state.bufferRadius)) });
+    }
   }
 
   function refreshStopsSource() {
@@ -229,13 +242,8 @@
           paint: { "line-color": route.color, "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 15, 5], "line-opacity": 0.98 }
         });
         state.map.on("click", lineId, (event) => {
-          const feature = event.features?.[0];
-          const routeId = feature?.properties?.Route_Id ?? feature?.properties?.route_id ?? route.label;
-          const popup = new maplibregl.Popup({ offset: 10, closeButton: true })
-            .setLngLat(event.lngLat)
-            .setHTML(popupHtml("Rute bus", route.label, [["Route_Id", routeId]]))
-            .addTo(state.map);
-          state.activePopup = popup;
+          selectRouteDetails(route.key);
+          state.map.flyTo({ center: event.lngLat, zoom: Math.max(13, state.map.getZoom()), duration: 450 });
         });
         state.map.on("mouseenter", lineId, () => state.map.getCanvas().style.cursor = "pointer");
         state.map.on("mouseleave", lineId, () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
@@ -252,6 +260,8 @@
 
     await loadAllStops(failures);
     addStopLayers();
+    setupCircleBuffers();
+    setupBusSimulation();
     await setupCoverage(failures);
     setupBuildings(failures);
     updateRouteCounter();
@@ -348,7 +358,203 @@
     });
   }
 
+
+  function stopBufferPolygon(feature, radiusMeters, steps = 48) {
+    const [lon, lat] = feature.geometry.coordinates;
+    const coords = [];
+    const earth = 6371008.8;
+    const angular = radiusMeters / earth;
+    const lat1 = lat * Math.PI / 180;
+    const lon1 = lon * Math.PI / 180;
+    for (let i = 0; i <= steps; i++) {
+      const bearing = (i / steps) * Math.PI * 2;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(angular) + Math.cos(lat1) * Math.sin(angular) * Math.cos(bearing));
+      const lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(angular) * Math.cos(lat1), Math.cos(angular) - Math.sin(lat1) * Math.sin(lat2));
+      coords.push([lon2 * 180 / Math.PI, lat2 * 180 / Math.PI]);
+    }
+    return { type: "Feature", properties: { __routeKey: feature.properties.__routeKey, __stopName: feature.properties.__stopName }, geometry: { type: "Polygon", coordinates: [coords] } };
+  }
+
+  function setupCircleBuffers() {
+    const toggle = byId("coverageToggle");
+    const slider = byId("bufferSlider");
+    if (!state.map.getSource("stop-circle-buffers")) {
+      state.map.addSource("stop-circle-buffers", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      state.map.addLayer({
+        id: "stop-circle-buffer-fill", type: "fill", source: "stop-circle-buffers",
+        paint: { "fill-color": ["match", ["get", "__routeKey"],
+          "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
+          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "fill-opacity": 0.14 },
+        layout: { visibility: toggle.checked ? "visible" : "none" }
+      });
+      state.map.addLayer({
+        id: "stop-circle-buffer-outline", type: "line", source: "stop-circle-buffers",
+        paint: { "line-color": ["match", ["get", "__routeKey"],
+          "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
+          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 1, "line-opacity": 0.48 },
+        layout: { visibility: toggle.checked ? "visible" : "none" }
+      });
+    }
+    const refresh = () => {
+      state.bufferRadius = Number(slider.value) || 400;
+      byId("bufferValue").textContent = state.bufferRadius >= 1000 ? "1.000 m" : state.bufferRadius + " m";
+      byId("bufferTime").textContent = "≈ " + Math.max(1, Math.round((state.bufferRadius / 1000 / 4.5) * 60)) + " menit jalan kaki (garis lurus)";
+      const features = state.stops.filter(f => !f.properties.__routeKey || state.routeVisibility.get(f.properties.__routeKey) !== false)
+        .map(f => stopBufferPolygon(f, state.bufferRadius));
+      state.map.getSource("stop-circle-buffers").setData({ type: "FeatureCollection", features });
+    };
+    slider.addEventListener("input", refresh);
+    toggle.addEventListener("change", () => {
+      ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
+        if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", toggle.checked ? "visible" : "none");
+      });
+    });
+    refresh();
+  }
+
+  function haversineKm(a, b) { return haversineMeters(a, b) / 1000; }
+
+  function routeCoordinates(routeData) {
+    const coords = [];
+    const walk = c => {
+      if (!Array.isArray(c)) return;
+      if (typeof c[0] === "number" && typeof c[1] === "number") coords.push(c);
+      else c.forEach(walk);
+    };
+    (routeData.features || []).forEach(f => { if (f.geometry) walk(f.geometry.coordinates); });
+    return coords;
+  }
+
+  function routeLengthKm(coords) {
+    let total = 0;
+    for (let i = 1; i < coords.length; i++) total += haversineKm(coords[i - 1], coords[i]);
+    return total;
+  }
+
+  function selectRouteDetails(routeKey) {
+    const route = config.routes.find(r => r.key === routeKey);
+    const entry = state.routes.get(routeKey);
+    if (!route || !entry) return;
+    state.selectedRouteKey = routeKey;
+    const coords = routeCoordinates(entry.data);
+    const lengthKm = routeLengthKm(coords);
+    const stops = state.stops.filter(f => f.properties.__routeKey === routeKey);
+    const indexedStops = stops.map(feature => {
+      let nearestIndex = 0, nearestDistance = Infinity;
+      const point = feature.geometry.coordinates;
+      coords.forEach((coord, i) => {
+        const d = haversineMeters(point, coord);
+        if (d < nearestDistance) { nearestDistance = d; nearestIndex = i; }
+      });
+      return { feature, nearestIndex, nearestDistance };
+    }).sort((a, b) => a.nearestIndex - b.nearestIndex);
+    byId("routeDetailTitle").textContent = route.label;
+    byId("routeDetailContent").innerHTML = `
+      <div class="route-metrics">
+        <div class="route-metric"><strong>${stops.length}</strong><small>halte</small></div>
+        <div class="route-metric"><strong>${lengthKm.toFixed(1)} km</strong><small>panjang rute*</small></div>
+        <div class="route-metric"><strong>${indexedStops.filter(s => s.nearestDistance <= 100).length}</strong><small>titik dekat garis</small></div>
+      </div>
+      <p class="result-note">*Panjang dihitung dari geometri garis pada GeoJSON, bukan jadwal atau jarak operasional resmi.</p>
+      <div class="route-stop-heading">Halte sepanjang rute</div>
+      <div class="route-stop-list">${indexedStops.length ? indexedStops.map((item, i) => `
+        <button class="route-stop-item" data-stop-index="${i}">
+          <span class="route-stop-number">${i + 1}</span>
+          <span class="route-stop-name">${escapeHtml(item.feature.properties.__stopName || "Halte tanpa nama")}</span>
+          <small>${Math.round(item.nearestDistance)} m dari garis</small>
+        </button>`).join("") : '<p class="result-note">Belum ada data halte untuk koridor ini. Tambahkan GeoJSON halte yang sesuai.</p>'}
+      </div>`;
+    byId("routeDetailBlock").hidden = false;
+    byId("routeDetailContent").querySelectorAll("[data-stop-index]").forEach(button => {
+      button.addEventListener("click", () => {
+        const item = indexedStops[Number(button.dataset.stopIndex)];
+        if (!item) return;
+        const c = item.feature.geometry.coordinates;
+        state.map.flyTo({ center: c, zoom: 16, duration: 650 });
+        new maplibregl.Popup({ offset: 10 }).setLngLat(c)
+          .setHTML(popupHtml("Halte koridor", item.feature.properties.__stopName, [["Koridor", route.label], ["Jarak ke garis rute", Math.round(item.nearestDistance) + " m"]]))
+          .addTo(state.map);
+      });
+    });
+    byId("routeDetailBlock").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function setupBusSimulation() {
+    const button = byId("busPlayButton");
+    const speed = byId("busSpeed");
+    speed.addEventListener("input", () => {
+      state.busSpeedMultiplier = Number(speed.value) || 1;
+      byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
+    });
+    byId("closeRouteDetail").addEventListener("click", () => { byId("routeDetailBlock").hidden = true; });
+    button.addEventListener("click", () => {
+      state.busAnimationOn = !state.busAnimationOn;
+      button.innerHTML = state.busAnimationOn ? "<span>Ⅱ</span> Jeda simulasi bus" : "<span>▶</span> Mulai simulasi bus";
+      if (state.busAnimationOn) {
+        state.busLastTime = 0;
+        state.busFrame = requestAnimationFrame(animateBusMarkers);
+      } else if (state.busFrame) {
+        cancelAnimationFrame(state.busFrame);
+        state.busFrame = null;
+      }
+    });
+  }
+
+  function interpolateRoute(coords, progressKm) {
+    if (coords.length < 2) return coords[0] || [112.75, -7.27];
+    let left = Math.max(0, progressKm);
+    for (let i = 1; i < coords.length; i++) {
+      const segment = haversineKm(coords[i - 1], coords[i]);
+      if (left <= segment || i === coords.length - 1) {
+        const t = segment ? Math.min(1, left / segment) : 0;
+        return [coords[i - 1][0] + (coords[i][0] - coords[i - 1][0]) * t,
+                coords[i - 1][1] + (coords[i][1] - coords[i - 1][1]) * t];
+      }
+      left -= segment;
+    }
+    return coords[coords.length - 1];
+  }
+
+  function animateBusMarkers(now) {
+    if (!state.busAnimationOn) return;
+    if (!state.busLastTime) state.busLastTime = now;
+    const deltaHours = Math.min(0.2, (now - state.busLastTime) / 3600000) * state.busSpeedMultiplier;
+    state.busLastTime = now;
+    config.routes.forEach(route => {
+      const entry = state.routes.get(route.key);
+      if (!entry || state.routeVisibility.get(route.key) === false) {
+        const marker = state.busMarkers.get(route.key);
+        if (marker) marker.getElement().style.display = "none";
+        return;
+      }
+      const coords = routeCoordinates(entry.data);
+      if (coords.length < 2) return;
+      let marker = state.busMarkers.get(route.key);
+      if (!marker) {
+        const el = document.createElement("div");
+        el.className = "bus-marker";
+        el.textContent = "▰";
+        el.style.background = route.color;
+        el.title = "SIMULASI — " + route.label;
+        marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(coords[0]).addTo(state.map);
+        state.busMarkers.set(route.key, marker);
+        state.busProgress.set(route.key, 0);
+      }
+      marker.getElement().style.display = "";
+      const length = routeLengthKm(coords);
+      const nominalSpeed = route.key.startsWith("ww-") ? 15 : 20;
+      let progress = (state.busProgress.get(route.key) || 0) + nominalSpeed * deltaHours;
+      if (length > 0) progress %= length;
+      state.busProgress.set(route.key, progress);
+      marker.setLngLat(interpolateRoute(coords, progress));
+    });
+    state.busFrame = requestAnimationFrame(animateBusMarkers);
+  }
+
   async function setupCoverage(failures) {
+    // Radius buffers are generated dynamically from the loaded stop points.
+    // Do not require an external coverage GeoJSON for this layer.
+    return;
     const toggle = byId("coverageToggle");
     if (!config.coverage?.enabled) {
       toggle.disabled = true;
