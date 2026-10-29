@@ -54,6 +54,11 @@ window.TRANSUM_CONFIG = {
       fallbackRouteKey: "sby-benowo"
     },
     {
+      key: "stops-bus-purabaya",
+      file: "halte/halte_bus_Purabaya-Rajawali.geojson",
+      fallbackRouteKey: "sby-purabaya"
+    },
+    {
       key: "stops-wira-gunung",
       file: "halte/halte_wirawiri_Gnanyar-ITS-Kenpark.geojson",
       fallbackRouteKey: "ww-gunung-anyar"
