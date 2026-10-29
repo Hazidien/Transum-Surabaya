@@ -630,11 +630,23 @@
     if (!feature || !feature.geometry || feature.geometry.type !== "Point") return;
     state.selectedStop = feature;
     const p = feature.properties || {};
-    const members = Array.isArray(p.__memberStops) ? p.__memberStops : [{
+    // MapLibre may expose GeoJSON array-valued properties as JSON strings on queried features.
+    // Parse them explicitly; otherwise the popup falls back to a single route and hides the shared corridors.
+    const parseArrayProperty = value => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") {
+        try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed : []; }
+        catch (_) { return []; }
+      }
+      return [];
+    };
+    const parsedMembers = parseArrayProperty(p.__memberStops);
+    const members = parsedMembers.length ? parsedMembers : [{
       name: p.__stopName || "Halte tanpa nama", routeKey: p.__routeKey || "",
       id: p.stop_id ?? p.Stop_Id ?? p.Id ?? p.id ?? "—", coordinates: feature.geometry.coordinates
     }];
-    const routeKeys = [...new Set((Array.isArray(p.__routeKeys) ? p.__routeKeys : members.map(m => m.routeKey)).filter(Boolean))];
+    const storedRouteKeys = parseArrayProperty(p.__routeKeys);
+    const routeKeys = [...new Set((storedRouteKeys.length ? storedRouteKeys : members.map(m => m.routeKey)).filter(Boolean))];
     const routeLabels = routeKeys.map(key => ({ key, label: routeNameByKey(key), color: config.routes.find(route => route.key === key)?.color || "#38BDF8" }));
     const routeKey = routeKeys[0] || p.__routeKey || "";
     const routeLabel = routeNameByKey(routeKey);
