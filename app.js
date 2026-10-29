@@ -62,6 +62,11 @@
     mapError.hidden = true;
   }
 
+  function hideLoadingOverlay() {
+    const overlay = byId("mapLoadingOverlay");
+    if (overlay) overlay.hidden = true;
+  }
+
   function setStatus(message) {
     loadStatus.textContent = message;
   }
@@ -300,15 +305,17 @@
         hasBounds = true;
       }
     });
-    if (hasBounds) state.map.fitBounds(allBounds, { padding: { top: 95, bottom: 85, left: 370, right: 60 }, maxZoom: 12.8, duration: 900 });
+    // Keep the configured opening view. Do not auto-fit all corridors, which can zoom out unexpectedly.
 
     if (failures.length) {
       setStatus("Peta siap · data belum lengkap");
       showError("Peta dasar sudah tampil, tetapi beberapa GeoJSON belum ditemukan atau tidak terbaca. Unggah berkas menggunakan nama yang tercantum di folder README, lalu muat ulang website. Detail teknis ada di console browser.");
       console.warn("Berkas data belum tersedia:", failures);
+      hideLoadingOverlay();
     } else {
       hideError();
       setStatus("5 rute · data siap");
+      hideLoadingOverlay();
     }
   }
 
@@ -561,11 +568,11 @@
     const dockButton = byId("busDockPlay");
     const dockSpeed = byId("busDockSpeed");
     const dockToggle = byId("busDockVisible");
-    state.busSpeedMultiplier = 1;
-    speed.value = "1";
-    byId("busSpeedValue").textContent = "1×";
-    if (dockSpeed) dockSpeed.value = "1";
-    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "1×";
+    state.busSpeedMultiplier = 5;
+    speed.value = "5";
+    byId("busSpeedValue").textContent = "5×";
+    if (dockSpeed) dockSpeed.value = "5";
+    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "5×";
     speed.addEventListener("input", () => {
       state.busSpeedMultiplier = Number(speed.value) || 1;
       byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
