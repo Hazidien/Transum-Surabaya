@@ -25,7 +25,10 @@
     walkingLayerAdded: false,
     activePopup: null,
     selectedRouteKey: null,
+    selectedStop: null,
     bufferRadius: 400,
+    labelsVisible: true,
+    busesVisible: true,
     busAnimationOn: false,
     busFrame: null,
     busLastTime: 0,
@@ -137,11 +140,7 @@
       if (feature.properties.__routeKey === routeKey) feature.properties.__routeVisible = visible;
     });
     refreshStopsSource();
-    const bufferSource = state.map.getSource("stop-circle-buffers");
-    if (bufferSource && state.bufferRadius) {
-      const visibleStops = state.stops.filter(f => !f.properties.__routeKey || state.routeVisibility.get(f.properties.__routeKey) !== false);
-      bufferSource.setData({ type: "FeatureCollection", features: visibleStops.map(f => stopBufferPolygon(f, state.bufferRadius)) });
-    }
+    refreshSelectedBuffer();
   }
 
   function refreshStopsSource() {
@@ -359,20 +358,33 @@
       state.map.on("click", layerId, (event) => {
         const feature = event.features?.[0];
         if (!feature) return;
-        const p = feature.properties || {};
-        const routeLabel = routeNameByKey(p.__routeKey);
-        const rows = [];
-        if (p.__rawRouteId) rows.push(["Route_Id", p.__rawRouteId]);
-        rows.push(["Stop ID", p.stop_id ?? p.Stop_Id ?? p.Id ?? p.id ?? "Tidak tersedia"]);
-        const popup = new maplibregl.Popup({ offset: 9, closeButton: true })
-          .setLngLat(event.lngLat)
-          .setHTML(popupHtml("Informasi halte", p.__stopName || "Halte tanpa nama", rows.concat([["Koridor", routeLabel]])))
-          .addTo(state.map);
-        state.activePopup = popup;
+        const original = state.stops.find(f => f.properties.__stopName === feature.properties.__stopName &&
+          f.properties.__routeKey === feature.properties.__routeKey &&
+          f.geometry.coordinates[0] === feature.geometry.coordinates[0] &&
+          f.geometry.coordinates[1] === feature.geometry.coordinates[1]);
+        showStopDetails(original || feature);
       });
       state.map.on("mouseenter", layerId, () => state.map.getCanvas().style.cursor = "pointer");
       state.map.on("mouseleave", layerId, () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
     });
+
+    if (!state.map.getLayer("stop-labels")) {
+      state.map.addLayer({
+        id: "stop-labels", type: "symbol", source: "all-stops",
+        filter: ["==", ["get", "__showStop"], 1],
+        minzoom: 10.5,
+        layout: {
+          "text-field": ["get", "__stopName"],
+          "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
+          "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
+          "text-offset": [0, 1.15],
+          "text-anchor": "top",
+          "text-allow-overlap": false,
+          "text-ignore-placement": false
+        },
+        paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
+      });
+    }
 
     byId("stopsToggle").addEventListener("change", (event) => {
       state.stopsVisible = event.target.checked;
@@ -421,17 +433,17 @@
       state.bufferRadius = Number(slider.value) || 400;
       byId("bufferValue").textContent = state.bufferRadius >= 1000 ? "1.000 m" : state.bufferRadius + " m";
       byId("bufferTime").textContent = "≈ " + Math.max(1, Math.round((state.bufferRadius / 1000 / 4.5) * 60)) + " menit jalan kaki (garis lurus)";
-      const features = state.stops.filter(f => !f.properties.__routeKey || state.routeVisibility.get(f.properties.__routeKey) !== false)
-        .map(f => stopBufferPolygon(f, state.bufferRadius));
-      state.map.getSource("stop-circle-buffers").setData({ type: "FeatureCollection", features });
+      refreshSelectedBuffer();
     };
     slider.addEventListener("input", refresh);
     toggle.addEventListener("change", () => {
       ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
         if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", toggle.checked ? "visible" : "none");
       });
+      refreshSelectedBuffer();
     });
     refresh();
+    refreshSelectedBuffer();
   }
 
   function haversineKm(a, b) { return haversineMeters(a, b) / 1000; }
@@ -470,8 +482,9 @@
       });
       return { feature, nearestIndex, nearestDistance };
     }).sort((a, b) => a.nearestIndex - b.nearestIndex);
-    byId("routeDetailTitle").textContent = route.label;
-    byId("routeDetailContent").innerHTML = `
+    byId("mapDetailKicker").textContent = "DETAIL KORIDOR";
+    byId("mapDetailTitle").textContent = route.label;
+    byId("mapDetailContent").innerHTML = `
       <div class="route-metrics">
         <div class="route-metric"><strong>${stops.length}</strong><small>halte</small></div>
         <div class="route-metric"><strong>${lengthKm.toFixed(1)} km</strong><small>panjang rute*</small></div>
@@ -486,19 +499,50 @@
           <small>${Math.round(item.nearestDistance)} m dari garis</small>
         </button>`).join("") : '<p class="result-note">Belum ada data halte untuk koridor ini. Tambahkan GeoJSON halte yang sesuai.</p>'}
       </div>`;
-    byId("routeDetailBlock").hidden = false;
-    byId("routeDetailContent").querySelectorAll("[data-stop-index]").forEach(button => {
+    byId("mapDetailPanel").hidden = false;
+    byId("mapDetailContent").querySelectorAll("[data-stop-index]").forEach(button => {
       button.addEventListener("click", () => {
         const item = indexedStops[Number(button.dataset.stopIndex)];
         if (!item) return;
-        const c = item.feature.geometry.coordinates;
-        state.map.flyTo({ center: c, zoom: 16, duration: 650 });
-        new maplibregl.Popup({ offset: 10 }).setLngLat(c)
-          .setHTML(popupHtml("Halte koridor", item.feature.properties.__stopName, [["Koridor", route.label], ["Jarak ke garis rute", Math.round(item.nearestDistance) + " m"]]))
-          .addTo(state.map);
+        showStopDetails(item.feature);
+        state.map.flyTo({ center: item.feature.geometry.coordinates, zoom: 16, duration: 650 });
       });
     });
-    byId("routeDetailBlock").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+
+  function refreshSelectedBuffer() {
+    const source = state.map?.getSource("stop-circle-buffers");
+    if (!source) return;
+    const stop = state.selectedStop;
+    const enabled = byId("coverageToggle").checked && stop && state.stopsVisible &&
+      state.routeVisibility.get(stop.properties.__routeKey) !== false;
+    source.setData({ type: "FeatureCollection", features: enabled ? [stopBufferPolygon(stop, state.bufferRadius)] : [] });
+  }
+
+  function showStopDetails(feature) {
+    if (!feature || !feature.geometry || feature.geometry.type !== "Point") return;
+    state.selectedStop = feature;
+    const p = feature.properties || {};
+    const routeKey = p.__routeKey || "";
+    const routeLabel = routeNameByKey(routeKey);
+    byId("mapDetailKicker").textContent = "INFORMASI HALTE";
+    byId("mapDetailTitle").textContent = p.__stopName || "Halte tanpa nama";
+    byId("mapDetailContent").innerHTML = `
+      <div class="route-metrics stop-metrics">
+        <div class="route-metric"><strong>${escapeHtml(routeLabel.startsWith("Koridor belum") ? "—" : routeLabel.split(" · ")[0])}</strong><small>operator/layanan</small></div>
+        <div class="route-metric"><strong>${escapeHtml(p.stop_id ?? p.Stop_Id ?? p.Id ?? p.id ?? "—")}</strong><small>ID halte</small></div>
+        <div class="route-metric"><strong>${state.bufferRadius} m</strong><small>radius indikatif</small></div>
+      </div>
+      <div class="route-stop-heading">Dilayani koridor</div>
+      <div class="served-route-chip" style="--route-color:${(config.routes.find(r => r.key === routeKey)?.color || "#38BDF8")}">${escapeHtml(routeLabel)}</div>
+      <p class="result-note">Buffer lingkaran hanya ditampilkan untuk halte yang dipilih. Radius dapat diubah dari panel kiri. Jarak merupakan radius geometris, bukan jaminan akses trotoar.</p>
+      <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>`;
+    byId("mapDetailPanel").hidden = false;
+    refreshSelectedBuffer();
+    const coord = feature.geometry.coordinates;
+    state.map.flyTo({ center: coord, zoom: Math.max(14, state.map.getZoom()), duration: 550 });
+    byId("detailFindNearby").addEventListener("click", () => findNearestStop(coord));
   }
 
   function setupBusSimulation() {
@@ -507,6 +551,10 @@
     speed.addEventListener("input", () => {
       state.busSpeedMultiplier = Number(speed.value) || 1;
       byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
+    });
+    byId("busesToggle").addEventListener("change", event => {
+      state.busesVisible = event.target.checked;
+      state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
     });
     byId("closeRouteDetail").addEventListener("click", () => { byId("routeDetailBlock").hidden = true; });
     button.addEventListener("click", () => {
@@ -544,7 +592,7 @@
     state.busLastTime = now;
     config.routes.forEach(route => {
       const entry = state.routes.get(route.key);
-      if (!entry || state.routeVisibility.get(route.key) === false) {
+      if (!entry || state.routeVisibility.get(route.key) === false || !state.busesVisible) {
         const marker = state.busMarkers.get(route.key);
         if (marker) marker.getElement().style.display = "none";
         return;
@@ -734,6 +782,12 @@
   }
 
   function setupControls() {
+    byId("closeMapDetail").addEventListener("click", () => {
+      byId("mapDetailPanel").hidden = true;
+      state.selectedStop = null;
+      refreshSelectedBuffer();
+    });
+    byId("fitAllRoutesButton").addEventListener("click", fitAllRoutes);
     nearestButton.addEventListener("click", () => {
       state.finderMode = !state.finderMode;
       nearestButton.classList.toggle("active", state.finderMode);
@@ -802,10 +856,7 @@
     const feature = candidates[0];
     const coord = feature.geometry.coordinates;
     state.map.flyTo({ center: coord, zoom: 16, pitch: config.map.pitch, duration: 900 });
-    new maplibregl.Popup({ offset: 10 })
-      .setLngLat(coord)
-      .setHTML(popupHtml("Hasil pencarian", feature.properties.__stopName, [["Koridor", routeNameByKey(feature.properties.__routeKey)], ["Route_Id", feature.properties.__rawRouteId || "—"]]))
-      .addTo(state.map);
+    showStopDetails(feature);
     state.finderMode = false;
     nearestButton.classList.remove("active");
     nearestButton.innerHTML = "<span>⌖</span> Pilih lokasi di peta";
@@ -908,6 +959,7 @@
     }
 
     drawWalkingRoute(best.route.coordinates);
+    showStopDetails(best.feature);
     state.map.fitBounds(new maplibregl.LngLatBounds(origin, best.feature.geometry.coordinates), {
       padding: { top: 110, bottom: 110, left: 370, right: 90 }, maxZoom: 16, duration: 700
     });
