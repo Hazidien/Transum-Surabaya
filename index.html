@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://basemaps.cartocdn.com">
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-  <link href="style.css?v=20261029f" rel="stylesheet">
+  <link href="style.css?v=20261029g" rel="stylesheet">
 </head>
 <body>
   <main class="app-shell">
@@ -126,6 +126,10 @@
 
     <section class="map-panel">
       <div id="map" role="application" aria-label="Peta 3D koridor bus Surabaya"></div>
+      <div id="mapLoadingOverlay" class="map-loading-overlay" role="status" aria-live="polite">
+        <div class="map-loading-spinner" aria-hidden="true"></div>
+        <p>Memuat data rute, halte, dan POI...</p>
+      </div>
       <div class="map-topbar">
         <button id="openSidebar" class="icon-button mobile-only" aria-label="Buka panel">☰</button>
         <div class="map-search">
@@ -170,7 +174,7 @@
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
-  <script src="config.js?v=20261029f"></script>
-  <script src="app.js?v=20261029f"></script>
+  <script src="config.js?v=20261029g"></script>
+  <script src="app.js?v=20261029g"></script>
 </body>
 </html>
