@@ -561,11 +561,11 @@
     const dockButton = byId("busDockPlay");
     const dockSpeed = byId("busDockSpeed");
     const dockToggle = byId("busDockVisible");
-    state.busSpeedMultiplier = 10;
-    speed.value = "10";
-    byId("busSpeedValue").textContent = "10×";
-    if (dockSpeed) dockSpeed.value = "10";
-    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "10×";
+    state.busSpeedMultiplier = 1;
+    speed.value = "1";
+    byId("busSpeedValue").textContent = "1×";
+    if (dockSpeed) dockSpeed.value = "1";
+    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "1×";
     speed.addEventListener("input", () => {
       state.busSpeedMultiplier = Number(speed.value) || 1;
       byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
@@ -700,7 +700,7 @@
           const el = document.createElement("button");
           el.type = "button";
           el.className = "bus-marker";
-          el.textContent = route.key.startsWith("ww-") ? "🚐" : "🚌";
+          el.textContent = "";
           el.style.background = route.color;
           el.setAttribute("aria-label", "Buka informasi bus simulasi " + (i + 1));
           el.title = "SIMULASI — klik untuk informasi bus";
@@ -714,7 +714,7 @@
           state.busProgress.set(busId, length * i / count);
         }
         marker.getElement().style.display = "";
-        let progress = (state.busProgress.get(busId) || 0) + nominalSpeed * deltaHours * 60;
+        let progress = (state.busProgress.get(busId) || 0) + nominalSpeed * deltaHours * 0.12;
         if (length > 0) progress %= length;
         state.busProgress.set(busId, progress);
         marker.setLngLat(interpolateRoute(coords, progress));
