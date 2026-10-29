@@ -531,6 +531,13 @@
     const routeLabel = routeNameByKey(routeKey);
     byId("mapDetailKicker").textContent = "INFORMASI HALTE";
     byId("mapDetailTitle").textContent = p.__stopName || "Halte tanpa nama";
+    const bufferToggle = byId("coverageToggle");
+    if (bufferToggle && !bufferToggle.checked) {
+      bufferToggle.checked = true;
+      ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
+        if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", "visible");
+      });
+    }
     byId("mapDetailContent").innerHTML = `
       <div class="route-metrics stop-metrics">
         <div class="route-metric"><strong>${escapeHtml(routeLabel.startsWith("Koridor belum") ? "—" : routeLabel.split(" · ")[0])}</strong><small>operator/layanan</small></div>
@@ -1053,6 +1060,15 @@
       };
     }
 
+    state.selectedStop = best.feature;
+    const bufferToggle = byId("coverageToggle");
+    if (bufferToggle && !bufferToggle.checked) {
+      bufferToggle.checked = true;
+      ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
+        if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", "visible");
+      });
+    }
+    refreshSelectedBuffer();
     drawWalkingRoute(best.route.coordinates);
     state.map.fitBounds(new maplibregl.LngLatBounds(origin, best.feature.geometry.coordinates), {
       padding: { top: 110, bottom: 110, left: 370, right: 90 }, maxZoom: 16, duration: 700
