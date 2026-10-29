@@ -96,8 +96,8 @@ window.TRANSUM_CONFIG = {
    */
   simulationFleet: {
     "sby-benowo": { count: 16, basis: "Acuan berita Dishub, Nov 2025: 16 armada pada rute Benowo–Tunjungan." },
-    "sby-kejawan": { count: 10, basis: "Asumsi simulasi sementara; jumlah armada khusus koridor ini belum terverifikasi." },
-    "sby-purabaya": { count: 10, basis: "Asumsi simulasi sementara; jumlah armada khusus koridor ini belum terverifikasi." },
+    "sby-kejawan": { count: 6, basis: "Acuan Statistik Sektoral Surabaya 2024: 6 unit pada rute Unesa–ITS; dipakai sebagai proksi untuk geometri koridor ini, bukan hitungan langsung rute terbaru." },
+    "sby-purabaya": { count: 10, basis: "Acuan Statistik Sektoral Surabaya 2024: 9 bus reguler dan 1 bus tingkat pada rute Purabaya–Rajawali." },
     "ww-gunung-anyar": { count: 14, basis: "Acuan akademik 2025 untuk rute TIJ–Gunung Anyar; kesesuaian rute perlu diverifikasi." },
     "ww-tow": { count: 4, basis: "Acuan akademik 2025 untuk rute UNESA–Terminal Osowilangun; kesesuaian rute perlu diverifikasi." }
   },
