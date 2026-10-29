@@ -158,13 +158,40 @@
 
   function refreshStopsSource() {
     if (!state.map || !state.map.getSource("all-stops")) return;
-    const features = state.stops.map(feature => {
-      const copy = structuredClone(feature);
-      const routeVisible = copy.properties.__routeKey
-        ? state.routeVisibility.get(copy.properties.__routeKey) !== false
-        : true;
-      copy.properties.__showStop = state.stopsVisible && routeVisible ? 1 : 0;
-      return copy;
+    // Merge points within 28 m so stops shared by multiple routes appear as one marker.
+    const groups = [];
+    const mergeDistanceMeters = 28;
+    state.stops.forEach(feature => {
+      const coord = feature.geometry.coordinates;
+      let group = groups.find(candidate => haversineKm(candidate.center, coord) * 1000 <= mergeDistanceMeters);
+      if (!group) { group = { members: [], coords: [], center: coord }; groups.push(group); }
+      group.members.push(feature);
+      group.coords.push(coord);
+      group.center = [
+        group.coords.reduce((sum, c) => sum + c[0], 0) / group.coords.length,
+        group.coords.reduce((sum, c) => sum + c[1], 0) / group.coords.length
+      ];
+    });
+    const features = groups.map((group, index) => {
+      const members = group.members;
+      const routeKeys = [...new Set(members.map(f => f.properties.__routeKey).filter(Boolean))];
+      const visibleRouteKeys = routeKeys.filter(key => state.routeVisibility.get(key) !== false);
+      const names = [...new Set(members.map(f => f.properties.__stopName).filter(Boolean))];
+      return {
+        type: "Feature", id: "stop-cluster-" + index,
+        geometry: { type: "Point", coordinates: group.center },
+        properties: {
+          __stopName: names[0] || "Halte", __stopNames: names,
+          __routeKey: routeKeys[0] || "", __routeKeys: routeKeys, __visibleRouteKeys: visibleRouteKeys,
+          __memberCount: members.length,
+          __memberStops: members.map(f => ({
+            name: f.properties.__stopName || "Halte tanpa nama", routeKey: f.properties.__routeKey || "",
+            id: f.properties.stop_id ?? f.properties.Stop_Id ?? f.properties.Id ?? f.properties.id ?? "—",
+            coordinates: f.geometry.coordinates
+          })),
+          __showStop: state.stopsVisible && visibleRouteKeys.length ? 1 : 0
+        }
+      };
     });
     state.map.getSource("all-stops").setData({ type: "FeatureCollection", features });
   }
@@ -365,7 +392,7 @@
       const layerId = "stops-" + route.key;
       state.map.addLayer({
         id: layerId, type: "circle", source: "all-stops",
-        filter: ["all", ["==", ["get", "__routeKey"], route.key], ["==", ["get", "__showStop"], 1]],
+        filter: ["all", ["in", route.key, ["get", "__visibleRouteKeys"]], ["==", ["get", "__showStop"], 1]],
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
           "circle-color": route.color,
@@ -377,11 +404,7 @@
       state.map.on("click", layerId, (event) => {
         const feature = event.features?.[0];
         if (!feature) return;
-        const original = state.stops.find(f => f.properties.__stopName === feature.properties.__stopName &&
-          f.properties.__routeKey === feature.properties.__routeKey &&
-          f.geometry.coordinates[0] === feature.geometry.coordinates[0] &&
-          f.geometry.coordinates[1] === feature.geometry.coordinates[1]);
-        showStopDetails(original || feature);
+        showStopDetails(feature);
       });
       state.map.on("mouseenter", layerId, (event) => {
         state.map.getCanvas().style.cursor = "pointer";
@@ -560,10 +583,16 @@
     if (!feature || !feature.geometry || feature.geometry.type !== "Point") return;
     state.selectedStop = feature;
     const p = feature.properties || {};
-    const routeKey = p.__routeKey || "";
+    const members = Array.isArray(p.__memberStops) ? p.__memberStops : [{
+      name: p.__stopName || "Halte tanpa nama", routeKey: p.__routeKey || "",
+      id: p.stop_id ?? p.Stop_Id ?? p.Id ?? p.id ?? "—", coordinates: feature.geometry.coordinates
+    }];
+    const routeKeys = [...new Set((Array.isArray(p.__routeKeys) ? p.__routeKeys : members.map(m => m.routeKey)).filter(Boolean))];
+    const routeLabels = routeKeys.map(key => ({ key, label: routeNameByKey(key), color: config.routes.find(route => route.key === key)?.color || "#38BDF8" }));
+    const routeKey = routeKeys[0] || p.__routeKey || "";
     const routeLabel = routeNameByKey(routeKey);
     byId("mapDetailKicker").textContent = "INFORMASI HALTE";
-    byId("mapDetailTitle").textContent = p.__stopName || "Halte tanpa nama";
+    byId("mapDetailTitle").textContent = (p.__memberCount > 1 ? "Halte bersama · " : "") + (p.__stopName || "Halte tanpa nama");
     const bufferToggle = byId("coverageToggle");
     if (bufferToggle && !bufferToggle.checked) {
       bufferToggle.checked = true;
@@ -573,12 +602,13 @@
     }
     byId("mapDetailContent").innerHTML = `
       <div class="route-metrics stop-metrics">
-        <div class="route-metric"><strong>${escapeHtml(routeLabel.startsWith("Koridor belum") ? "—" : routeLabel.split(" · ")[0])}</strong><small>operator/layanan</small></div>
-        <div class="route-metric"><strong>${escapeHtml(p.stop_id ?? p.Stop_Id ?? p.Id ?? p.id ?? "—")}</strong><small>ID halte</small></div>
+        <div class="route-metric"><strong>${escapeHtml(routeLabels.length ? [...new Set(routeLabels.map(r => r.label.split(" · ")[0]))].join(" / ") : "—")}</strong><small>operator/layanan</small></div>
+        <div class="route-metric"><strong>${p.__memberCount || 1}</strong><small>titik halte digabung</small></div>
         <div class="route-metric"><strong>${state.bufferRadius} m</strong><small>radius indikatif</small></div>
       </div>
-      <div class="route-stop-heading">Dilayani koridor</div>
-      <div class="served-route-chip" style="--route-color:${(config.routes.find(r => r.key === routeKey)?.color || "#38BDF8")}">${escapeHtml(routeLabel)}</div>
+      <div class="route-stop-heading">Dilayani koridor (${routeLabels.length})</div>
+      <div class="served-route-list">${routeLabels.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
+      ${p.__memberCount > 1 ? '<p class="result-note">Titik halte berdekatan digabung pada peta. Informasi ini mencakup ' + p.__memberCount + ' titik halte dari dataset dan ' + routeLabels.length + ' koridor unik.</p>' : ""}
       <p class="result-note">Buffer lingkaran hanya ditampilkan untuk halte yang dipilih. Radius dapat diubah dari panel kiri. Jarak merupakan radius geometris, bukan jaminan akses trotoar.</p>
       <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>`;
     byId("mapDetailPanel").hidden = false;
