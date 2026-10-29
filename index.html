@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://basemaps.cartocdn.com">
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-  <link href="style.css?v=20261029b" rel="stylesheet">
+  <link href="style.css?v=20261029c" rel="stylesheet">
 </head>
 <body>
   <main class="app-shell">
@@ -151,6 +151,17 @@
         <span><i style="background:#F59E0B"></i>Suroboyo Bus</span>
         <span><i style="background:#FB7185"></i>Wira Wiri</span>
       </div>
+      <div class="simulation-dock" id="simulationDock">
+        <button id="busDockPlay" aria-label="Mulai atau jeda simulasi">▶</button>
+        <span class="dock-clock" id="simulationClock">06:00</span>
+        <span class="dock-label">Kecepatan</span>
+        <select id="busDockSpeed" aria-label="Kecepatan simulasi">
+          <option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="10" selected>10×</option>
+        </select>
+        <label class="dock-check"><input id="busDockVisible" type="checkbox" checked> Tampilkan bus</label>
+        <strong id="simBusCount">— bus</strong>
+        <span class="dock-disclaimer">Data simulasi, bukan posisi bus sebenarnya</span>
+      </div>
       <div class="map-attribution-note">Peta dasar © OpenStreetMap contributors · © CARTO</div>
       <div class="map-error" id="mapError" hidden></div>
       <div class="map-coordinates" id="coordinates">Surabaya · 3D map</div>
@@ -159,7 +170,7 @@
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
-  <script src="config.js?v=20261029b"></script>
-  <script src="app.js?v=20261029b"></script>
+  <script src="config.js?v=20261029c"></script>
+  <script src="app.js?v=20261029c"></script>
 </body>
 </html>
