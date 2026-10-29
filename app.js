@@ -607,6 +607,9 @@
     };
     button.addEventListener("click", toggleSimulation);
     if (dockButton) dockButton.addEventListener("click", toggleSimulation);
+    if (byId("simBusCount")) byId("simBusCount").textContent = getTotalSimulatedFleet() + " bus";
+    // Start a clearly labelled simulation on load, matching the reference's running timeline.
+    toggleSimulation();
   }
 
   function interpolateRoute(coords, progressKm) {
