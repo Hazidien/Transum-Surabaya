@@ -76,7 +76,8 @@
   }
 
   async function loadGeoJSON(path) {
-    const response = await fetch(path, { cache: "no-cache" });
+    const encodedPath = path.split("/").map(segment => encodeURIComponent(segment)).join("/");
+    const response = await fetch(encodedPath, { cache: "no-cache" });
     if (!response.ok) throw new Error("HTTP " + response.status + " — " + path);
     const data = await response.json();
     if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) {
@@ -316,7 +317,7 @@
     // Keep the configured opening view. Do not auto-fit all corridors, which can zoom out unexpectedly.
 
     if (failures.length) {
-      setStatus("Peta siap · data belum lengkap");
+      setStatus(state.routes.size + "/" + config.routes.length + " rute · data belum lengkap");
       showError("Peta dasar sudah tampil, tetapi beberapa GeoJSON belum ditemukan atau tidak terbaca. Unggah berkas menggunakan nama yang tercantum di folder README, lalu muat ulang website. Detail teknis ada di console browser.");
       console.warn("Berkas data belum tersedia:", failures);
       hideLoadingOverlay();
@@ -800,7 +801,7 @@
           let nextStop = null;
           if (length > 0) {
             for (const stopDistance of stopsAlongRoute) {
-              const ahead = stopDistance > previousProgress + 0.025 && stopDistance <= proposed;
+              const ahead = stopDistance > previousProgress + 0.001 && stopDistance <= proposed + 0.001;
               const wrapped = proposed >= length && stopDistance <= (proposed % length);
               if (ahead || wrapped) { nextStop = stopDistance; break; }
             }
