@@ -419,7 +419,7 @@
         paint: { "fill-color": ["match", ["get", "__routeKey"],
           "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
           "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "fill-opacity": 0.14 },
-        layout: { visibility: toggle.checked ? "visible" : "none" }
+        layout: { visibility: "none" }
       });
       state.map.addLayer({
         id: "stop-circle-buffer-outline", type: "line", source: "stop-circle-buffers",
