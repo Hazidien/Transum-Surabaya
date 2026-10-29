@@ -87,6 +87,21 @@ window.TRANSUM_CONFIG = {
    * ubah enabled menjadi true. Gunakan property LIDAR_MEAN sebagai tinggi (meter)
    * hanya setelah memastikan nilainya memang tinggi bangunan di atas tanah.
    */
+  /*
+   * Armada simulasi per rute. Angka bertanda "acuan/proxy" bukan feed GPS.
+   * Benowo-Tunjungan: 16 armada diberitakan mulai operasi Nov 2025.
+   * Gunung Anyar and UNESA-Osowilangun counts are based on academic route table (2025)
+   * for analogous routes; verify equivalence with current corridor names before formal use.
+   * Other route counts are placeholders pending route-level official data.
+   */
+  simulationFleet: {
+    "sby-benowo": { count: 16, basis: "Acuan berita Dishub, Nov 2025: 16 armada pada rute Benowo–Tunjungan." },
+    "sby-kejawan": { count: 10, basis: "Asumsi simulasi sementara; jumlah armada khusus koridor ini belum terverifikasi." },
+    "sby-purabaya": { count: 10, basis: "Asumsi simulasi sementara; jumlah armada khusus koridor ini belum terverifikasi." },
+    "ww-gunung-anyar": { count: 14, basis: "Acuan akademik 2025 untuk rute TIJ–Gunung Anyar; kesesuaian rute perlu diverifikasi." },
+    "ww-tow": { count: 4, basis: "Acuan akademik 2025 untuk rute UNESA–Terminal Osowilangun; kesesuaian rute perlu diverifikasi." }
+  },
+
   buildings: {
     enabled: false,
     mode: "pmtiles",
