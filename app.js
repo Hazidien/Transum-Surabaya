@@ -34,7 +34,10 @@
     busLastTime: 0,
     busMarkers: new Map(),
     busProgress: new Map(),
-    busSpeedMultiplier: 1
+    busSpeedMultiplier: 1,
+    activeBusPopup: null,
+    activeBusId: null,
+    simulationMinutes: 6 * 60
   };
 
   if (!window.maplibregl || !config) {
@@ -211,7 +214,7 @@
 
     state.map = new maplibregl.Map({
       container: "map",
-      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+      style: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
       center: config.map.center,
       zoom: config.map.zoom,
       pitch: config.map.pitch,
@@ -417,15 +420,15 @@
       state.map.addLayer({
         id: "stop-circle-buffer-fill", type: "fill", source: "stop-circle-buffers",
         paint: { "fill-color": ["match", ["get", "__routeKey"],
-          "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
-          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "fill-opacity": 0.14 },
+          "sby-benowo", "#00D9FF", "sby-kejawan", "#00D9FF", "sby-purabaya", "#00D9FF",
+          "ww-gunung-anyar", "#00D9FF", "ww-tow", "#00D9FF", "#00D9FF"], "fill-opacity": 0.34 },
         layout: { visibility: "none" }
       });
       state.map.addLayer({
         id: "stop-circle-buffer-outline", type: "line", source: "stop-circle-buffers",
         paint: { "line-color": ["match", ["get", "__routeKey"],
           "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
-          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 1, "line-opacity": 0.48 },
+          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 2.4, "line-opacity": 0.98 },
         layout: { visibility: toggle.checked ? "visible" : "none" }
       });
     }
@@ -548,18 +551,45 @@
   function setupBusSimulation() {
     const button = byId("busPlayButton");
     const speed = byId("busSpeed");
+    const dockButton = byId("busDockPlay");
+    const dockSpeed = byId("busDockSpeed");
+    const dockToggle = byId("busDockVisible");
+    state.busSpeedMultiplier = 10;
+    speed.value = "10";
+    byId("busSpeedValue").textContent = "10×";
+    if (dockSpeed) dockSpeed.value = "10";
+    if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = "10×";
     speed.addEventListener("input", () => {
       state.busSpeedMultiplier = Number(speed.value) || 1;
       byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
+      if (dockSpeed) dockSpeed.value = String(state.busSpeedMultiplier);
+      if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = state.busSpeedMultiplier + "×";
+    });
+    if (dockSpeed) dockSpeed.addEventListener("change", () => {
+      state.busSpeedMultiplier = Number(dockSpeed.value) || 1;
+      speed.value = String(state.busSpeedMultiplier);
+      byId("busSpeedValue").textContent = state.busSpeedMultiplier + "×";
+      byId("busDockSpeedValue").textContent = state.busSpeedMultiplier + "×";
+    });
+    if (dockToggle) dockToggle.addEventListener("change", () => {
+      byId("busesToggle").checked = dockToggle.checked;
+      state.busesVisible = dockToggle.checked;
+      state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
     });
     byId("busesToggle").addEventListener("change", event => {
       state.busesVisible = event.target.checked;
+      if (dockToggle) dockToggle.checked = event.target.checked;
       state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
     });
-    byId("closeRouteDetail").addEventListener("click", () => { byId("routeDetailBlock").hidden = true; });
-    button.addEventListener("click", () => {
+    byId("closeMapDetail").addEventListener("click", () => {
+      byId("mapDetailPanel").hidden = true;
+      state.selectedStop = null;
+      refreshSelectedBuffer();
+    });
+    const toggleSimulation = () => {
       state.busAnimationOn = !state.busAnimationOn;
       button.innerHTML = state.busAnimationOn ? "<span>Ⅱ</span> Jeda simulasi bus" : "<span>▶</span> Mulai simulasi bus";
+      if (dockButton) dockButton.textContent = state.busAnimationOn ? "Ⅱ" : "▶";
       if (state.busAnimationOn) {
         state.busLastTime = 0;
         state.busFrame = requestAnimationFrame(animateBusMarkers);
@@ -567,7 +597,9 @@
         cancelAnimationFrame(state.busFrame);
         state.busFrame = null;
       }
-    });
+    };
+    button.addEventListener("click", toggleSimulation);
+    if (dockButton) dockButton.addEventListener("click", toggleSimulation);
   }
 
   function interpolateRoute(coords, progressKm) {
@@ -585,40 +617,96 @@
     return coords[coords.length - 1];
   }
 
+  function getFleetConfig(routeKey) {
+    const fleet = config.simulationFleet?.[routeKey];
+    return fleet || { count: 4, basis: "Asumsi simulasi; jumlah resmi per rute belum terverifikasi" };
+  }
+
+  function getTotalSimulatedFleet() {
+    return config.routes.reduce((sum, route) => sum + Math.max(1, Number(getFleetConfig(route.key).count) || 1), 0);
+  }
+
+  function createBusPopup(route, busId, fleet, speedKmh, marker) {
+    if (state.activeBusPopup) state.activeBusPopup.remove();
+    state.activeBusId = busId;
+    const popup = new maplibregl.Popup({ closeButton: true, closeOnClick: false, offset: 18, maxWidth: "290px" })
+      .setLngLat(marker.getLngLat())
+      .setHTML(`
+        <div class="bus-popup-content">
+          <div class="popup-kicker">SIMULASI ARMADA</div>
+          <h3>${escapeHtml(busId)}</h3>
+          <p><strong>${escapeHtml(route.label)}</strong></p>
+          <p>Kecepatan nominal: <strong>${speedKmh} km/jam</strong></p>
+          <p>Armada simulasi koridor: <strong>${fleet.count} unit</strong></p>
+          <p class="bus-popup-destination">Mengikuti geometri rute pada peta</p>
+          <p class="simulation-warning">SIMULASI — bukan posisi bus sebenarnya atau data GPS real-time.</p>
+          <p class="bus-popup-basis">${escapeHtml(fleet.basis || "Asumsi simulasi")}</p>
+        </div>`)
+      .addTo(state.map);
+    state.activeBusPopup = popup;
+    popup.on("close", () => {
+      if (state.activeBusPopup === popup) {
+        state.activeBusPopup = null;
+        state.activeBusId = null;
+      }
+    });
+  }
+
   function animateBusMarkers(now) {
     if (!state.busAnimationOn) return;
     if (!state.busLastTime) state.busLastTime = now;
-    const deltaHours = Math.min(0.2, (now - state.busLastTime) / 3600000) * state.busSpeedMultiplier;
+    const elapsedMs = Math.min(250, now - state.busLastTime);
+    const deltaHours = elapsedMs / 3600000 * state.busSpeedMultiplier;
     state.busLastTime = now;
+    state.simulationMinutes = (state.simulationMinutes + elapsedMs / 1000 * state.busSpeedMultiplier * 0.5) % (24 * 60);
+    const hh = String(Math.floor(state.simulationMinutes / 60)).padStart(2, "0");
+    const mm = String(Math.floor(state.simulationMinutes % 60)).padStart(2, "0");
+    if (byId("simulationClock")) byId("simulationClock").textContent = hh + ":" + mm;
+
     config.routes.forEach(route => {
       const entry = state.routes.get(route.key);
-      if (!entry || state.routeVisibility.get(route.key) === false || !state.busesVisible) {
-        const marker = state.busMarkers.get(route.key);
-        if (marker) marker.getElement().style.display = "none";
+      const routeVisible = state.routeVisibility.get(route.key) !== false;
+      if (!entry || !routeVisible || !state.busesVisible) {
+        state.busMarkers.forEach((marker, busId) => {
+          if (busId.startsWith(route.key + "::")) marker.getElement().style.display = "none";
+        });
         return;
       }
       const coords = routeCoordinates(entry.data);
       if (coords.length < 2) return;
-      let marker = state.busMarkers.get(route.key);
-      if (!marker) {
-        const el = document.createElement("div");
-        el.className = "bus-marker";
-        el.textContent = "▰";
-        el.style.background = route.color;
-        el.title = "SIMULASI — " + route.label;
-        marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(coords[0]).addTo(state.map);
-        state.busMarkers.set(route.key, marker);
-        state.busProgress.set(route.key, 0);
-      }
-      marker.getElement().style.display = "";
+      const fleet = getFleetConfig(route.key);
+      const count = Math.max(1, Math.min(40, Number(fleet.count) || 1));
       const length = routeLengthKm(coords);
       const nominalSpeed = route.key.startsWith("ww-") ? 15 : 20;
-      // The nominal 15/20 km/h speed is accelerated 60x for visible demonstration movement.
-      let progress = (state.busProgress.get(route.key) || 0) + nominalSpeed * deltaHours * 60;
-      if (length > 0) progress %= length;
-      state.busProgress.set(route.key, progress);
-      marker.setLngLat(interpolateRoute(coords, progress));
+      for (let i = 0; i < count; i++) {
+        const busId = route.key + "::" + String(i + 1).padStart(2, "0");
+        let marker = state.busMarkers.get(busId);
+        if (!marker) {
+          const el = document.createElement("button");
+          el.type = "button";
+          el.className = "bus-marker";
+          el.textContent = route.key.startsWith("ww-") ? "🚐" : "🚌";
+          el.style.background = route.color;
+          el.setAttribute("aria-label", "Buka informasi bus simulasi " + (i + 1));
+          el.title = "SIMULASI — klik untuk informasi bus";
+          marker = new maplibregl.Marker({ element: el, anchor: "center" })
+            .setLngLat(interpolateRoute(coords, length * i / count)).addTo(state.map);
+          el.addEventListener("click", event => {
+            event.stopPropagation();
+            createBusPopup(route, busId, fleet, nominalSpeed, marker);
+          });
+          state.busMarkers.set(busId, marker);
+          state.busProgress.set(busId, length * i / count);
+        }
+        marker.getElement().style.display = "";
+        let progress = (state.busProgress.get(busId) || 0) + nominalSpeed * deltaHours * 60;
+        if (length > 0) progress %= length;
+        state.busProgress.set(busId, progress);
+        marker.setLngLat(interpolateRoute(coords, progress));
+        if (state.activeBusPopup && state.activeBusId === busId) state.activeBusPopup.setLngLat(marker.getLngLat());
+      }
     });
+    if (byId("simBusCount")) byId("simBusCount").textContent = getTotalSimulatedFleet() + " bus";
     state.busFrame = requestAnimationFrame(animateBusMarkers);
   }
 
@@ -777,7 +865,14 @@
     // Handler umum dipasang saat peta siap. Handler layer bangunan dipasang
     // setelah layer tersebut benar-benar tersedia di style MapLibre.
     state.map.on("click", (event) => {
-      if (state.finderMode) findNearestStop([event.lngLat.lng, event.lngLat.lat]);
+      const rendered = state.map.queryRenderedFeatures(event.point);
+      const routeLayerIds = new Set([...state.routeLayerIds.values()].flat());
+      const clickedTransitFeature = rendered.some(feature => {
+        const id = feature.layer?.id || "";
+        return id.startsWith("stops-") || id === "stop-labels" || routeLayerIds.has(id);
+      });
+      if (clickedTransitFeature) return;
+      findNearestStop([event.lngLat.lng, event.lngLat.lat]);
     });
   }
 
@@ -959,7 +1054,6 @@
     }
 
     drawWalkingRoute(best.route.coordinates);
-    showStopDetails(best.feature);
     state.map.fitBounds(new maplibregl.LngLatBounds(origin, best.feature.geometry.coordinates), {
       padding: { top: 110, bottom: 110, left: 370, right: 90 }, maxZoom: 16, duration: 700
     });
@@ -982,12 +1076,27 @@
         <p class="result-note">${escapeHtml(note)}</p>
         <button id="clearNearest" class="toolbar-button" style="margin-top:9px;width:100%;justify-content:center">Hapus hasil</button>
       </div>`;
-    byId("clearNearest").addEventListener("click", () => {
+    byId("mapDetailKicker").textContent = "HALTE TERDEKAT";
+    byId("mapDetailTitle").textContent = props.__stopName || "Halte terdekat";
+    byId("mapDetailContent").innerHTML = `
+      <div class="route-metrics">
+        <div class="route-metric"><strong>${escapeHtml(distanceText)}</strong><small>jarak ${routingFailed ? "garis lurus" : "berjalan kaki"}</small></div>
+        <div class="route-metric"><strong>${escapeHtml(timeText)}</strong><small>estimasi jalan kaki</small></div>
+      </div>
+      <div class="route-stop-heading">Dilayani koridor</div>
+      <div class="served-route-chip" style="--route-color:${config.routes.find(r => r.key === props.__routeKey)?.color || "#38BDF8"}">${escapeHtml(routeNameByKey(props.__routeKey))}</div>
+      <p class="result-note">${escapeHtml(note)}</p>
+      <button id="clearNearestFromPanel" class="toolbar-button" style="width:100%;justify-content:center">× Hapus hasil pencarian</button>`;
+    byId("mapDetailPanel").hidden = false;
+    const clearNearestResult = () => {
       if (state.clickMarker) state.clickMarker.remove();
       state.clickMarker = null;
       clearWalkingRoute();
-      nearestResult.innerHTML = '<div class="result-placeholder"><span class="pin-outline">◎</span><span>Klik peta untuk memulai pencarian halte.</span></div>';
-    });
+      byId("mapDetailPanel").hidden = true;
+      nearestResult.innerHTML = '<div class="result-placeholder"><span class="pin-outline">◎</span><span>Klik peta untuk mencari halte terdekat.</span></div>';
+    };
+    byId("clearNearest").addEventListener("click", clearNearestResult);
+    byId("clearNearestFromPanel").addEventListener("click", clearNearestResult);
   }
 
   function drawWalkingRoute(coordinates) {
@@ -1001,12 +1110,12 @@
     state.map.addLayer({
       id: "walking-route-casing", type: "line", source: "walking-route",
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": "#07101e", "line-width": 8, "line-opacity": .9 }
+      paint: { "line-color": "#FFFFFF", "line-width": 6, "line-opacity": .88 }
     });
     state.map.addLayer({
       id: "walking-route-line", type: "line", source: "walking-route",
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": "#50e3c2", "line-width": 4, "line-dasharray": [1.3, 1.1] }
+      paint: { "line-color": "#F43F5E", "line-width": 3.5, "line-dasharray": [1.2, 1.2] }
     });
     state.walkingLayerAdded = true;
   }
