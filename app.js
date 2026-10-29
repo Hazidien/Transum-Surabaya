@@ -655,6 +655,7 @@
           <p class="bus-popup-destination">Posisi bergerak mengikuti geometri rute; bukan jadwal kedatangan.</p>
           <p class="simulation-warning">SIMULASI — bukan posisi bus sebenarnya atau data GPS real-time.</p>
           <p class="bus-popup-basis">${escapeHtml(fleet.basis || "Asumsi simulasi")}</p>
+          ${fleet.sourceUrl ? '<p><a class="bus-source-link" href="' + escapeHtml(fleet.sourceUrl) + '" target="_blank" rel="noopener noreferrer">Lihat sumber armada ↗</a></p>' : ""}
         </div>`)
       .addTo(state.map);
     state.activeBusPopup = popup;
