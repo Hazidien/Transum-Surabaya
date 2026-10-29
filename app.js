@@ -639,16 +639,20 @@
   function createBusPopup(route, busId, fleet, speedKmh, marker) {
     if (state.activeBusPopup) state.activeBusPopup.remove();
     state.activeBusId = busId;
+    const routeEntry = state.routes.get(route.key);
+    const routeKm = routeEntry ? routeLengthKm(routeCoordinates(routeEntry.data)) : 0;
+    const spacingKm = fleet.count > 0 ? routeKm / fleet.count : 0;
     const popup = new maplibregl.Popup({ closeButton: true, closeOnClick: false, offset: 18, maxWidth: "290px" })
       .setLngLat(marker.getLngLat())
       .setHTML(`
         <div class="bus-popup-content">
           <div class="popup-kicker">SIMULASI ARMADA</div>
-          <h3>${escapeHtml(busId)}</h3>
+          <h3>${escapeHtml(busId.split("::").pop())}</h3>
           <p><strong>${escapeHtml(route.label)}</strong></p>
           <p>Kecepatan nominal: <strong>${speedKmh} km/jam</strong></p>
           <p>Armada simulasi koridor: <strong>${fleet.count} unit</strong></p>
-          <p class="bus-popup-destination">Mengikuti geometri rute pada peta</p>
+          <p>Jarak rata-rata antar bus di sepanjang rute: <strong>${spacingKm.toFixed(1)} km</strong></p>
+          <p class="bus-popup-destination">Posisi bergerak mengikuti geometri rute; bukan jadwal kedatangan.</p>
           <p class="simulation-warning">SIMULASI — bukan posisi bus sebenarnya atau data GPS real-time.</p>
           <p class="bus-popup-basis">${escapeHtml(fleet.basis || "Asumsi simulasi")}</p>
         </div>`)
