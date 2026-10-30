@@ -62,12 +62,12 @@ window.TRANSUM_CONFIG = {
       routeValues: ["TOW-UNESA"]
     }
     ,
-    { key: "ww-bratang-bulak", label: "Wira Wiri · Terminal Bratang–Shelter Bulak", file: "rute/WiraWiri_Bratang-Shelter_Bulak.geojson", color: "#FBBF24", routeValues: ["Terminal_Bratang-Shelter_Bulak","Bratang-Shelter_Bulak"] },
-    { key: "ww-mayjend-sungkono", label: "Wira Wiri · Mayjend Sungkono–RSUD BDH", file: "rute/WiraWiri_Mayjend_Sungkono-RSUD_BDH.geojson", color: "#FB7185", routeValues: ["Mayjend_Sungkono-RSUD_BDH","Mayjend_Sungkono-RSUD_BDH_1"] },
-    { key: "ww-sier-kotalama", label: "Wira Wiri · SIER–Kota Lama", file: "rute/WiraWiri_SIER-Kota_Lama.geojson", color: "#A78BFA", routeValues: ["SIER-Kota_Lama"] },
-    { key: "ww-tij-gununganyar", label: "Wira Wiri · TIJ–Gunung Anyar", file: "rute/WiraWiri_TIJ-Gunung_Anyar.geojson", color: "#22D3EE", routeValues: ["TIJ-Gunung-Anyar","TIJ-Gunung_Anyar"] },
-    { key: "ww-tij-lakarsantri", label: "Wira Wiri · TIJ–Lakarsantri", file: "rute/WiraWiri_TIJ-Lakarsantri.geojson", color: "#84CC16", routeValues: ["TIJ-Lakarsantri"] },
-    { key: "ww-keputih-bunguran", label: "Wira Wiri · Terminal Keputih–Bunguran", file: "rute/WiraWiri_Terminal_Keputih-Bunguran.geojson", color: "#F472B6", routeValues: ["Terminal_Keputih-Bunguran"] }
+    { key: "ww-bratang-bulak", label: "Wira Wiri · Terminal Bratang–Shelter Bulak", file: "rute/WiraWiri_Bratang-Shelter_Bulak.geojson", color: "#64748B", routeValues: ["Terminal_Bratang-Shelter_Bulak","Bratang-Shelter_Bulak"] },
+    { key: "ww-mayjend-sungkono", label: "Wira Wiri · Mayjend Sungkono–RSUD BDH", file: "rute/WiraWiri_Mayjend_Sungkono-RSUD_BDH.geojson", color: "#D946EF", routeValues: ["Mayjend_Sungkono-RSUD_BDH","Mayjend_Sungkono-RSUD_BDH_1"] },
+    { key: "ww-sier-kotalama", label: "Wira Wiri · SIER–Kota Lama", file: "rute/WiraWiri_SIER-Kota_Lama.geojson", color: "#0F766E", routeValues: ["SIER-Kota_Lama"] },
+    { key: "ww-tij-gununganyar", label: "Wira Wiri · TIJ–Gunung Anyar", file: "rute/WiraWiri_TIJ-Gunung_Anyar.geojson", color: "#1D4ED8", routeValues: ["TIJ-Gunung-Anyar","TIJ-Gunung_Anyar"] },
+    { key: "ww-tij-lakarsantri", label: "Wira Wiri · TIJ–Lakarsantri", file: "rute/WiraWiri_TIJ-Lakarsantri.geojson", color: "#65A30D", routeValues: ["TIJ-Lakarsantri"] },
+    { key: "ww-keputih-bunguran", label: "Wira Wiri · Terminal Keputih–Bunguran", file: "rute/WiraWiri_Terminal_Keputih-Bunguran.geojson", color: "#BE123C", routeValues: ["Terminal_Keputih-Bunguran"] }
   ],
 
   stops: [
