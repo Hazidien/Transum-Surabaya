@@ -61,6 +61,13 @@ window.TRANSUM_CONFIG = {
       color: "#34D399",
       routeValues: ["TOW-UNESA"]
     }
+    ,
+    { key: "ww-bratang-bulak", label: "Wira Wiri · Terminal Bratang–Shelter Bulak", file: "rute/WiraWiri_Bratang-Shelter_Bulak.geojson", color: "#FBBF24", routeValues: ["Terminal_Bratang-Shelter_Bulak","Bratang-Shelter_Bulak"] },
+    { key: "ww-mayjend-sungkono", label: "Wira Wiri · Mayjend Sungkono–RSUD BDH", file: "rute/WiraWiri_Mayjend_Sungkono-RSUD_BDH.geojson", color: "#FB7185", routeValues: ["Mayjend_Sungkono-RSUD_BDH","Mayjend_Sungkono-RSUD_BDH_1"] },
+    { key: "ww-sier-kotalama", label: "Wira Wiri · SIER–Kota Lama", file: "rute/WiraWiri_SIER-Kota_Lama.geojson", color: "#A78BFA", routeValues: ["SIER-Kota_Lama"] },
+    { key: "ww-tij-gununganyar", label: "Wira Wiri · TIJ–Gunung Anyar", file: "rute/WiraWiri_TIJ-Gunung_Anyar.geojson", color: "#22D3EE", routeValues: ["TIJ-Gunung-Anyar","TIJ-Gunung_Anyar"] },
+    { key: "ww-tij-lakarsantri", label: "Wira Wiri · TIJ–Lakarsantri", file: "rute/WiraWiri_TIJ-Lakarsantri.geojson", color: "#84CC16", routeValues: ["TIJ-Lakarsantri"] },
+    { key: "ww-keputih-bunguran", label: "Wira Wiri · Terminal Keputih–Bunguran", file: "rute/WiraWiri_Terminal_Keputih-Bunguran.geojson", color: "#F472B6", routeValues: ["Terminal_Keputih-Bunguran"] }
   ],
 
   stops: [
@@ -103,7 +110,13 @@ window.TRANSUM_CONFIG = {
       key: "stops-wira-tow",
       file: "halte/halte_wirawiri_TOW-Unesa.geojson",
       fallbackRouteKey: "ww-tow"
-    }
+    },
+    { key: "stops-wira-mayjend-sungkono", file: "halte/halte_wirawiri_Mayjend_Sungkono-RSUD_BDH.geojson", fallbackRouteKey: "ww-mayjend-sungkono" },
+    { key: "stops-wira-sier-kotalama", file: "halte/halte_wirawiri_SIER-Kota_Lama.geojson", fallbackRouteKey: "ww-sier-kotalama" },
+    { key: "stops-wira-tij-gununganyar", file: "halte/halte_wirawiri_TIJ-Gunung_Anyar.geojson", fallbackRouteKey: "ww-tij-gununganyar" },
+    { key: "stops-wira-tij-lakarsantri", file: "halte/halte_wirawiri_TIJ-Lakarsantri.geojson", fallbackRouteKey: "ww-tij-lakarsantri" },
+    { key: "stops-wira-bratang-bulak", file: "halte/halte_wirawiri_Terminal_Bratang-Shelter_Bulak.geojson", fallbackRouteKey: "ww-bratang-bulak" },
+    { key: "stops-wira-keputih-bunguran", file: "halte/halte_wirawiri_Terminal_Keputih-Bunguran.geojson", fallbackRouteKey: "ww-keputih-bunguran" }
   ],
 
   /*
@@ -138,7 +151,13 @@ window.TRANSUM_CONFIG = {
     "sby-kejawan": { count: 4, basis: "Statistik Sektoral Surabaya 2024: 6 unit Unesa–ITS; proksi, bukan hitungan langsung rute terbaru.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
     "sby-purabaya": { count: 4, basis: "Statistik Sektoral Surabaya 2024: 9 bus reguler + 1 bus tingkat Purabaya–Rajawali.", sourceUrl: "https://satudata.surabaya.go.id/files/sektoral/2024/8_Bab_VIII_Transportasi_dan_Pariwisata.pdf" },
     "ww-gunung-anyar": { count: 4, basis: "Acuan akademik 2025 untuk TIJ–Gunung Anyar; kesesuaian rute perlu diverifikasi.", sourceUrl: "https://journal.its.ac.id/index.php/jpr/article/download/5128/5467" },
-    "ww-tow": { count: 4, basis: "Acuan akademik 2025 untuk UNESA–Terminal Osowilangun; kesesuaian rute perlu diverifikasi.", sourceUrl: "https://journal.its.ac.id/index.php/jpr/article/download/5128/5467" }
+    "ww-tow": { count: 4, basis: "Acuan akademik 2025 untuk UNESA–Terminal Osowilangun; kesesuaian rute perlu diverifikasi.", sourceUrl: "https://journal.its.ac.id/index.php/jpr/article/download/5128/5467" },
+    "ww-bratang-bulak": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
+    "ww-mayjend-sungkono": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
+    "ww-sier-kotalama": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
+    "ww-tij-gununganyar": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
+    "ww-tij-lakarsantri": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
+    "ww-keputih-bunguran": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" }
   },
 
   buildings: {
