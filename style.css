@@ -239,7 +239,7 @@ kbd { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color
 .map-help-panel h2 { margin:0 0 8px; font-size:15px; }
 .map-help-panel p:last-child { margin:0; color:#b8c5d6; font-size:11px; line-height:1.65; }
 .map-help-panel strong { color:#fff; }
-.credit-launcher { position:absolute; z-index:12; right:18px; bottom:66px; padding:9px 14px; border:1px solid rgba(255,255,255,.18); border-radius:9px; background:rgba(12,21,35,.96); color:#eaf0f8; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 5px 18px rgba(0,0,0,.28); }
+.credit-launcher { position:absolute; z-index:12; right:18px; bottom:118px; padding:9px 14px; border:1px solid rgba(255,255,255,.18); border-radius:9px; background:rgba(12,21,35,.96); color:#eaf0f8; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 5px 18px rgba(0,0,0,.28); }
 .credit-launcher:hover { border-color:#50e3c2; color:#8ff0db; }
 .credit-modal[hidden] { display:none !important; }
 .credit-modal { position:fixed; inset:0; z-index:100000; display:flex; align-items:center; justify-content:center; padding:22px; background:rgba(4,9,17,.78); backdrop-filter:blur(7px); }
@@ -254,7 +254,7 @@ kbd { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color
 @media(max-width:760px) {
   .map-help-panel { top:60px; right:8px; width:min(270px,calc(100% - 16px)); padding:11px 12px; }
   .map-help-panel p:last-child { font-size:10px; }
-  .credit-launcher { right:10px; bottom:60px; }
+  .credit-launcher { right:10px; bottom:112px; }
   .credit-card { padding:22px 18px; }
 }
 
