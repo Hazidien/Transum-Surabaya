@@ -162,17 +162,21 @@
 
   function updateRouteVisibility(routeKey) {
     const visible = state.routeVisibility.get(routeKey) !== false;
+    if (!state.map || !state.map.isStyleLoaded()) return;
     const ids = state.routeLayerIds.get(routeKey) || [];
-    if (!state.map) return;
-    ids.forEach((id) => {
-      if (state.map.getLayer(id)) {
-        const isCoverage = id.startsWith("coverage-");
-        const coverageEnabled = byId("coverageToggle")?.checked;
-        state.map.setLayoutProperty(id, "visibility", visible && (!isCoverage || coverageEnabled) ? "visible" : "none");
-      }
+    ids.forEach(id => {
+      if (!state.map.getLayer(id)) return;
+      const isCoverage = id.startsWith("coverage-");
+      const coverageEnabled = byId("coverageToggle")?.checked === true;
+      state.map.setLayoutProperty(id, "visibility", visible && (!isCoverage || coverageEnabled) ? "visible" : "none");
     });
+    // Perbarui satu sumber halte bersama agar titik yang dilayani koridor lain tetap tampil.
     refreshStopsSource();
     refreshSelectedBuffer();
+    if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) {
+      state.activeBusPopup.remove();
+    }
+    requestAnimationFrame(() => state.map?.resize());
   }
 
   function distancePointToRouteMeters(point, routeData) {
@@ -214,35 +218,37 @@
 
   function buildStopGroups() {
     if (state.stopGroups) return state.stopGroups;
-    // Gabungkan hanya halte bernama sama yang benar-benar berdekatan.
-    // Route_Id (atau fallback dataset) menjadi sumber daftar koridor; tidak menebak layanan dari jarak ke semua garis rute.
+    // Kelompok halte bersama: nama sama dalam radius 80 m, atau koordinat hampir identik (<= 8 m).
+    // Ini mengakomodasi perbedaan digitasi kecil antar-koridor tanpa menyatukan halte berlawanan arah yang hanya berdekatan.
     const groups = [];
     const buckets = new Map();
-    const mergeDistanceMeters = 35;
-    const cellLat = mergeDistanceMeters / 110574;
-    const cellLonAt = lat => mergeDistanceMeters / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
+    const cellLat = 80 / 110574;
+    const cellLonAt = lat => 80 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
     const nameKey = value => normalize(value || "halte-tanpa-nama");
     state.stops.forEach(feature => {
       const coord = feature.geometry.coordinates;
       const lat = coord[1], lon = coord[0];
-      const lonCell = cellLonAt(lat);
-      const gx = Math.floor(lon / lonCell), gy = Math.floor(lat / cellLat);
+      const gx = Math.floor(lon / cellLonAt(lat)), gy = Math.floor(lat / cellLat);
       const keyName = nameKey(feature.properties.__stopName);
       let match = null;
       for (let dx = -1; dx <= 1 && !match; dx++) {
         for (let dy = -1; dy <= 1 && !match; dy++) {
-          const candidates = buckets.get(keyName + "|" + (gx + dx) + "|" + (gy + dy)) || [];
-          match = candidates.find(group => haversineKm(group.center, coord) * 1000 <= mergeDistanceMeters) || null;
+          for (const group of buckets.get((gx + dx) + "|" + (gy + dy)) || []) {
+            const distance = haversineKm(group.center, coord) * 1000;
+            const sameName = group.nameKeys.has(keyName);
+            if ((sameName && distance <= 80) || distance <= 8) { match = group; break; }
+          }
         }
       }
       if (!match) {
-        match = { members: [], coords: [], center: coord, names: [feature.properties.__stopName || "Halte"] };
+        match = { members: [], coords: [], center: coord, nameKeys: new Set([keyName]) };
         groups.push(match);
-        const bucketKey = keyName + "|" + gx + "|" + gy;
+        const bucketKey = gx + "|" + gy;
         if (!buckets.has(bucketKey)) buckets.set(bucketKey, []);
         buckets.get(bucketKey).push(match);
       }
       match.members.push(feature);
+      match.nameKeys.add(keyName);
       match.coords.push(coord);
       match.center = [
         match.coords.reduce((sum, c) => sum + c[0], 0) / match.coords.length,
@@ -307,7 +313,17 @@
 
   function zoomToRoute(routeKey) {
     const entry = state.routes.get(routeKey);
-    if (!entry || !entry.bounds || !state.map) return;
+    if (!entry || !entry.bounds || !state.map || !state.map.isStyleLoaded()) return;
+    const sw = entry.bounds.getSouthWest(), ne = entry.bounds.getNorthEast();
+    const center = entry.bounds.getCenter();
+    const valid = [sw.lng, sw.lat, ne.lng, ne.lat, center.lng, center.lat].every(Number.isFinite)
+      && center.lng >= 112 && center.lng <= 113.5 && center.lat >= -8 && center.lat <= -6.5
+      && (ne.lng - sw.lng) < 0.5 && (ne.lat - sw.lat) < 0.5;
+    // Jangan pernah fitBounds ke koordinat salah/di luar Surabaya; pertahankan view peta bila data rute tidak valid.
+    if (!valid) {
+      console.warn("Zoom rute dibatalkan karena bounds tidak valid:", routeKey, center);
+      return;
+    }
     state.map.fitBounds(entry.bounds, { padding: { top: 90, bottom: 90, left: 380, right: 70 }, maxZoom: 15, duration: 900 });
   }
 
@@ -926,7 +942,8 @@
       const fleet = getFleetConfig(route.key);
       const count = Math.max(1, Math.min(40, Number(fleet.count) || 1));
       const length = routeLengthKm(coords);
-      const nominalSpeed = route.key.startsWith("ww-") ? 15 : 20;
+      const simulationMovementSpeed = route.key.startsWith("ww-") ? 15 : 20;
+      const popupNominalSpeed = route.key.startsWith("ww-") ? 25 : 20;
       for (let i = 0; i < count; i++) {
         const busId = route.key + "::" + String(i + 1).padStart(2, "0");
         let marker = state.busMarkers.get(busId);
@@ -942,7 +959,7 @@
             .setLngLat(interpolateRoute(coords, length * i / count)).addTo(state.map);
           el.addEventListener("click", event => {
             event.stopPropagation();
-            createBusPopup(route, busId, fleet, nominalSpeed, marker);
+            createBusPopup(route, busId, fleet, popupNominalSpeed, marker);
           });
           state.busMarkers.set(busId, marker);
           state.busProgress.set(busId, length * i / count);
@@ -957,7 +974,7 @@
           progress = waitState.stopProgress;
           if (waitState.remainingMs <= 0) state.busStopWait.delete(busId);
         } else {
-          const proposed = previousProgress + nominalSpeed * deltaHours;
+          const proposed = previousProgress + simulationMovementSpeed * deltaHours;
           let nextStop = null;
           if (length > 0) {
             for (const stopDistance of stopsAlongRoute) {
