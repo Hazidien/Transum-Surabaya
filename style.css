@@ -231,3 +231,29 @@ kbd { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color
 .stop-hover-popup .maplibregl-popup-content { padding:6px 10px !important; border:1px solid rgba(255,255,255,.15); border-radius:6px !important; background:rgba(22,31,45,.96) !important; color:#f8fafc !important; }
 .stop-hover-popup .maplibregl-popup-tip { display:none; }
 .stop-hover-label { font-size:11px; line-height:1.25; font-weight:750; white-space:nowrap; }
+
+
+/* Halte seragam: marker putih dengan outline biru gelap. */
+.map-help-panel { position:absolute; z-index:4; top:72px; right:18px; width:min(310px,calc(100% - 36px)); padding:15px 17px; border:1px solid rgba(148,163,184,.2); border-radius:14px; background:rgba(28,36,49,.94); color:#eaf0f8; box-shadow:0 10px 30px rgba(0,0,0,.28); backdrop-filter:blur(12px); pointer-events:none; }
+.map-help-panel .eyebrow { margin:0 0 8px; }
+.map-help-panel h2 { margin:0 0 8px; font-size:15px; }
+.map-help-panel p:last-child { margin:0; color:#b8c5d6; font-size:11px; line-height:1.65; }
+.map-help-panel strong { color:#fff; }
+.credit-launcher { position:absolute; z-index:12; right:18px; bottom:66px; padding:9px 14px; border:1px solid rgba(255,255,255,.18); border-radius:9px; background:rgba(12,21,35,.96); color:#eaf0f8; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 5px 18px rgba(0,0,0,.28); }
+.credit-launcher:hover { border-color:#50e3c2; color:#8ff0db; }
+.credit-modal[hidden] { display:none !important; }
+.credit-modal { position:fixed; inset:0; z-index:100000; display:flex; align-items:center; justify-content:center; padding:22px; background:rgba(4,9,17,.78); backdrop-filter:blur(7px); }
+.credit-card { position:relative; width:min(560px,100%); max-height:min(82vh,760px); overflow:auto; padding:28px; border:1px solid rgba(148,163,184,.24); border-radius:18px; background:#172333; color:#eaf0f8; box-shadow:0 22px 70px rgba(0,0,0,.48); }
+.credit-card h2 { margin:5px 0 14px; font-size:22px; }
+.credit-card h3 { margin:18px 0 8px; font-size:13px; }
+.credit-card p { color:#c0cada; font-size:13px; line-height:1.75; }
+.credit-card strong { color:#fff; }
+.credit-card a { color:#72e9ce; text-decoration:underline; text-underline-offset:3px; }
+.credit-close { position:absolute; top:13px; right:14px; width:34px; height:34px; border:0; border-radius:8px; background:rgba(255,255,255,.1); color:#fff; font-size:22px; cursor:pointer; }
+.credit-divider { height:1px; margin:18px 0; background:rgba(255,255,255,.12); }
+@media(max-width:760px) {
+  .map-help-panel { top:60px; right:8px; width:min(270px,calc(100% - 16px)); padding:11px 12px; }
+  .map-help-panel p:last-child { font-size:10px; }
+  .credit-launcher { right:10px; bottom:60px; }
+  .credit-card { padding:22px 18px; }
+}
