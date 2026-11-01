@@ -42,10 +42,10 @@ window.TRANSUM_CONFIG = {
     },
     {
       key: "sby-purabaya",
-      label: "Suroboyo Bus · Purabaya–Rajawali",
-      file: "rute/Bus_Suroboyo_Purabaya-Rajawali.geojson",
+      label: "Suroboyo Bus · Purabaya–Perak",
+      file: "rute/Bus_Suroboyo_Purabaya-Perak.geojson",
       color: "#A78BFA",
-      routeValues: ["Purabaya-Rajawali"]
+      routeValues: ["Purabaya_Perak", "Purabaya-Perak"]
     },
     {
       key: "ww-gunung-anyar",
@@ -67,7 +67,8 @@ window.TRANSUM_CONFIG = {
     { key: "ww-sier-kotalama", label: "Wira Wiri · SIER–Kota Lama", file: "rute/WiraWiri_SIER-Kota_Lama.geojson", color: "#0F766E", routeValues: ["SIER-Kota_Lama"] },
     { key: "ww-tij-gununganyar", label: "Wira Wiri · TIJ–Gunung Anyar", file: "rute/WiraWiri_TIJ-Gunung_Anyar.geojson", color: "#1D4ED8", routeValues: ["TIJ-Gunung-Anyar","TIJ-Gunung_Anyar"] },
     { key: "ww-tij-lakarsantri", label: "Wira Wiri · TIJ–Lakarsantri", file: "rute/WiraWiri_TIJ-Lakarsantri.geojson", color: "#65A30D", routeValues: ["TIJ-Lakarsantri"] },
-    { key: "ww-keputih-bunguran", label: "Wira Wiri · Terminal Keputih–Bunguran", file: "rute/WiraWiri_Terminal_Keputih-Bunguran.geojson", color: "#BE123C", routeValues: ["Terminal_Keputih-Bunguran"] }
+    { key: "ww-keputih-bunguran", label: "Wira Wiri · Terminal Keputih–Bunguran", file: "rute/WiraWiri_Terminal_Keputih-Bunguran.geojson", color: "#BE123C", routeValues: ["Terminal_Keputih-Bunguran"] },
+    { key: "ww-menanggal-manukan", label: "Wira Wiri · Terminal Menanggal–Terminal Manukan", file: "rute/WiraWiri_Terminal Menanggal-Terminal Manukan.geojson", color: "#DC2626", routeValues: ["Terminal Menanggal-Terminal Manukan"] }
   ],
 
   stops: [
@@ -98,7 +99,7 @@ window.TRANSUM_CONFIG = {
     },
     {
       key: "stops-bus-purabaya",
-      file: "halte/halte_bus_Purabaya-Rajawali.geojson",
+      file: "halte/halte_bus_Purabaya-Perak.geojson",
       fallbackRouteKey: "sby-purabaya"
     },
     {
@@ -116,7 +117,9 @@ window.TRANSUM_CONFIG = {
     { key: "stops-wira-tij-gununganyar", file: "halte/halte_wirawiri_TIJ-Gunung_Anyar.geojson", fallbackRouteKey: "ww-tij-gununganyar" },
     { key: "stops-wira-tij-lakarsantri", file: "halte/halte_wirawiri_TIJ-Lakarsantri.geojson", fallbackRouteKey: "ww-tij-lakarsantri" },
     { key: "stops-wira-bratang-bulak", file: "halte/halte_wirawiri_Terminal_Bratang-Shelter_Bulak.geojson", fallbackRouteKey: "ww-bratang-bulak" },
-    { key: "stops-wira-keputih-bunguran", file: "halte/halte_wirawiri_Terminal_Keputih-Bunguran.geojson", fallbackRouteKey: "ww-keputih-bunguran" }
+    { key: "stops-wira-keputih-bunguran", file: "halte/halte_wirawiri_Terminal_Keputih-Bunguran.geojson", fallbackRouteKey: "ww-keputih-bunguran" },
+    { key: "stops-bus-purabaya-perak", file: "halte/halte_bus_Purabaya-Perak.geojson", fallbackRouteKey: "sby-purabaya" },
+    { key: "stops-wira-menanggal-manukan", file: "halte/halte_wirawiri_Terminal Menanggal-Terminal Manukan.geojson", fallbackRouteKey: "ww-menanggal-manukan" }
   ],
 
   /*
@@ -157,7 +160,8 @@ window.TRANSUM_CONFIG = {
     "ww-sier-kotalama": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
     "ww-tij-gununganyar": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
     "ww-tij-lakarsantri": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
-    "ww-keputih-bunguran": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" }
+    "ww-keputih-bunguran": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" },
+    "ww-menanggal-manukan": { count: 4, basis: "Simulasi demo: 4 bus per koridor; bukan jumlah armada resmi.", sourceUrl: "" }
   },
 
   buildings: {
