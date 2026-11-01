@@ -685,8 +685,11 @@
     const source = state.map?.getSource("stop-circle-buffers");
     if (!source) return;
     const stop = state.selectedStop;
-    const enabled = byId("coverageToggle").checked && stop && state.stopsVisible &&
-      state.routeVisibility.get(stop.properties.__routeKey) !== false;
+    const selectedRouteKeys = Array.isArray(stop?.properties?.__routeKeys)
+      ? stop.properties.__routeKeys
+      : [stop?.properties?.__routeKey].filter(Boolean);
+    const hasVisibleService = selectedRouteKeys.some(key => state.routeVisibility.get(key) !== false);
+    const enabled = byId("coverageToggle").checked && stop && state.stopsVisible && hasVisibleService;
     source.setData({ type: "FeatureCollection", features: enabled ? [stopBufferPolygon(stop, state.bufferRadius)] : [] });
   }
 
@@ -714,6 +717,7 @@
     const routeLabels = routeKeys.map(key => ({ key, label: routeNameByKey(key), color: config.routes.find(route => route.key === key)?.color || "#38BDF8" }));
     const routeKey = routeKeys[0] || p.__routeKey || "";
     const routeLabel = routeNameByKey(routeKey);
+    const rawRouteIds = [...new Set(members.map(member => member.routeId).filter(Boolean))];
     byId("mapDetailKicker").textContent = "INFORMASI HALTE";
     byId("mapDetailTitle").textContent = (p.__memberCount > 1 ? "Halte bersama · " : "") + (p.__stopName || "Halte tanpa nama");
     const bufferToggle = byId("coverageToggle");
@@ -731,6 +735,7 @@
       </div>
       <div class="route-stop-heading">Dilayani koridor (${routeLabels.length})</div>
       <div class="served-route-list">${routeLabels.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
+      ${rawRouteIds.length ? '<p class="result-note">Route_Id: ' + rawRouteIds.map(escapeHtml).join(" · ") + '</p>' : ""}
       ${p.__memberCount > 1 ? '<p class="result-note">Titik halte berdekatan digabung pada peta. Informasi ini mencakup ' + p.__memberCount + ' titik halte dari dataset dan ' + routeLabels.length + ' koridor unik.</p>' : ""}
       <p class="result-note">Buffer lingkaran hanya ditampilkan untuk halte yang dipilih. Radius dapat diubah dari panel kiri. Jarak merupakan radius geometris, bukan jaminan akses trotoar.</p>
       <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>`;
