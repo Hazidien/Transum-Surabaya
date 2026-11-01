@@ -635,6 +635,7 @@
         </button>`).join("") : '<p class="result-note">Belum ada data halte untuk koridor ini. Tambahkan GeoJSON halte yang sesuai.</p>'}
       </div>`;
     byId("mapDetailPanel").hidden = false;
+    if (byId("mapHelpPanel")) byId("mapHelpPanel").hidden = true;
     byId("mapDetailContent").querySelectorAll("[data-stop-index]").forEach(button => {
       button.addEventListener("click", () => {
         const item = indexedStops[Number(button.dataset.stopIndex)];
@@ -700,6 +701,7 @@
       <p class="result-note">Buffer lingkaran hanya ditampilkan untuk halte yang dipilih. Radius dapat diubah dari panel kiri. Jarak merupakan radius geometris, bukan jaminan akses trotoar.</p>
       <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>`;
     byId("mapDetailPanel").hidden = false;
+    if (byId("mapHelpPanel")) byId("mapHelpPanel").hidden = true;
     refreshSelectedBuffer();
     const coord = feature.geometry.coordinates;
     state.map.flyTo({ center: coord, zoom: Math.max(14, state.map.getZoom()), duration: 550 });
@@ -744,6 +746,7 @@
       state.clickMarker = null;
       clearWalkingRoute();
       byId("mapDetailPanel").hidden = true;
+      if (byId("mapHelpPanel")) byId("mapHelpPanel").hidden = false;
       nearestResult.innerHTML = '<div class="result-placeholder"><span class="pin-outline">◎</span><span>Klik peta untuk mencari halte terdekat.</span></div>';
       state.selectedStop = null;
       refreshSelectedBuffer();
@@ -1364,6 +1367,7 @@
       state.clickMarker = null;
       clearWalkingRoute();
       byId("mapDetailPanel").hidden = true;
+      if (byId("mapHelpPanel")) byId("mapHelpPanel").hidden = false;
       nearestResult.innerHTML = '<div class="result-placeholder"><span class="pin-outline">◎</span><span>Klik peta untuk mencari halte terdekat.</span></div>';
     };
     byId("clearNearest").addEventListener("click", clearNearestResult);
