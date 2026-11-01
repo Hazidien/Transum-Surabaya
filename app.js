@@ -278,11 +278,9 @@
         for(const group of buckets.get((gx+dx)+"|"+(gy+dy)) || []) {
           const distance = haversineMeters(group.center, coord);
           const exactName = keyName && group.nameKeys.has(keyName);
-          const similarName = keyName && [...group.nameKeys].some(existing => {
-            const maxLen=Math.max(existing.length,keyName.length);
-            return maxLen>=7 && editDistance(existing,keyName)<=1;
-          });
-          if ((exactName && distance<=100) || (similarName && distance<=45) || distance<=6) {
+          // Jangan gabungkan varian halte A/B atau 1/2 hanya karena mirip secara ejaan.
+          // Variasi seperti III B dan 3B sudah disamakan oleh normalizeStopName.
+          if ((exactName && distance<=80) || distance<=6) {
             match=group; break;
           }
         }
