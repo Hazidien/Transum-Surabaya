@@ -182,6 +182,12 @@
       updateRouteCounter();
       updateRouteGroupHeadings();
     });
+    item.querySelector(".route-check").addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      checkbox.checked = !checkbox.checked;
+      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     item.addEventListener("dblclick", () => zoomToRoute(route.key));
   }
 
