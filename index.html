@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://basemaps.cartocdn.com">
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-  <link href="style.css?v=20261029q" rel="stylesheet">
+  <link href="style.css?v=20261101b" rel="stylesheet">
 </head>
 <body>
   <main class="app-shell">
@@ -143,6 +143,11 @@
           <button id="locateButton" class="toolbar-button" title="Gunakan lokasi perangkat">◎ <span>Lokasi saya</span></button>
         </div>
       </div>
+      <aside class="map-help-panel" id="mapHelpPanel">
+        <p class="eyebrow">HASIL ANALISIS</p>
+        <h2>monggo dicoba!</h2>
+        <p>klik <strong>halte</strong> untuk melihat informasi dan koridor yang melayaninya, klik <strong>garis rute</strong> untuk melihat statistik serta daftar halte, atau klik <strong>area kosong</strong> untuk mencari halte terdekat.</p>
+      </aside>
       <aside class="map-detail-panel" id="mapDetailPanel" hidden aria-live="polite">
         <div class="map-detail-header">
           <div><p class="eyebrow" id="mapDetailKicker">INFORMASI</p><h2 id="mapDetailTitle">Pilih halte atau rute</h2></div>
@@ -166,6 +171,21 @@
         <strong id="simBusCount">— bus</strong>
         <span class="dock-disclaimer">Data simulasi, bukan posisi bus sebenarnya</span>
       </div>
+      <button id="openCreditButton" class="credit-launcher" type="button" aria-label="Buka kredit">Credit</button>
+      <section class="credit-modal" id="creditModal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="creditTitle">
+        <div class="credit-card">
+          <button id="closeCreditButton" class="credit-close" type="button" aria-label="Tutup kredit">×</button>
+          <p class="eyebrow">WEBGIS TRANSPORTASI · SURABAYA</p>
+          <h2 id="creditTitle">tentang peta ini</h2>
+          <p>berikut merupakan peta webgis interaktif transportasi umum di kota surabaya yang berdasarkan wirawiri dan bus suroboyo tahun 2026, berdasarkan referensi aplikasi gobis. perlu dipahami bahwa transum dalam simulasi bukanlah kondisi eksisting, melainkan hanya sebagai acuan dan media webgis transum interaktif.</p>
+          <div class="credit-divider"></div>
+          <p><strong>credit:</strong> hazidien ramadhan utomo dan rafif firjatullah yang telah membantu digitasi halte dan rute.</p>
+          <h3>to know more about us:</h3>
+          <p><a href="https://hazidien.github.io/hazidien-portfolio/" target="_blank" rel="noopener noreferrer">hazidien (personal website and porto)</a></p>
+          <p><a href="https://www.linkedin.com/in/hazidienramadhanutomo/" target="_blank" rel="noopener noreferrer">hazidien (linkedin)</a></p>
+          <p><a href="https://www.linkedin.com/in/rafiffirjatullah/" target="_blank" rel="noopener noreferrer">rafif firjatullah (linkedin)</a></p>
+        </div>
+      </section>
       <div class="map-attribution-note">Peta dasar © OpenStreetMap contributors · © CARTO</div>
       <div class="map-error" id="mapError" hidden></div>
       <div class="map-coordinates" id="coordinates">Surabaya · 3D map</div>
@@ -174,7 +194,7 @@
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
-  <script src="config.js?v=20261101a"></script>
-  <script src="app.js?v=20261030b"></script>
+  <script src="config.js?v=20261101b"></script>
+  <script src="app.js?v=20261101b"></script>
 </body>
 </html>
