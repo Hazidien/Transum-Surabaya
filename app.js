@@ -213,13 +213,25 @@
       const coverageEnabled = byId("coverageToggle")?.checked === true;
       state.map.setLayoutProperty(id, "visibility", visible && (!isCoverage || coverageEnabled) ? "visible" : "none");
     });
-    // Perbarui satu sumber halte bersama agar titik yang dilayani koridor lain tetap tampil.
-    refreshStopsSource();
-    refreshSelectedBuffer();
-    if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) {
-      state.activeBusPopup.remove();
+    // Visibilitas halte diatur per-koridor melalui layer filter, bukan setData GeoJSON
+    // setiap checkbox berubah. Ini mencegah rebuild source besar dan mempertahankan titik
+    // halte bersama selama minimal satu koridor yang melayaninya masih aktif.
+    const stopLayerId = "stops-" + routeKey;
+    if (state.map.getLayer(stopLayerId)) {
+      state.map.setLayoutProperty(stopLayerId, "visibility", visible && state.stopsVisible ? "visible" : "none");
     }
-    requestAnimationFrame(() => state.map?.resize());
+    const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
+    if (state.map.getLayer("stop-labels")) {
+      state.map.setFilter("stop-labels", visibleKeys.length
+        ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
+        : ["==", ["get", "__showStop"], -1]);
+      state.map.setLayoutProperty("stop-labels", "visibility", state.stopsVisible ? "visible" : "none");
+    }
+    refreshSelectedBuffer();
+    state.busMarkers.forEach((marker, busId) => {
+      if (busId.startsWith(routeKey + "::")) marker.getElement().style.display = visible && state.busesVisible ? "" : "none";
+    });
+    if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) state.activeBusPopup.remove();
   }
 
   function distancePointToRouteMeters(point, routeData) {
@@ -577,7 +589,8 @@
       const layerId = "stops-" + route.key;
       state.map.addLayer({
         id: layerId, type: "circle", source: "all-stops",
-        filter: ["all", ["in", route.key, ["get", "__visibleRouteKeys"]], ["==", ["get", "__showStop"], 1]],
+        filter: ["in", route.key, ["get", "__routeKeys"]],
+        layout: { visibility: state.routeVisibility.get(route.key) !== false && state.stopsVisible ? "visible" : "none" },
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
           "circle-color": "#FFFFFF",
@@ -630,9 +643,23 @@
       });
     }
 
-    byId("stopsToggle").addEventListener("change", (event) => {
+    byId("stopsToggle").addEventListener("change", event => {
       state.stopsVisible = event.target.checked;
-      refreshStopsSource();
+      config.routes.forEach(route => {
+        const id = "stops-" + route.key;
+        if (state.map.getLayer(id)) {
+          state.map.setLayoutProperty(id, "visibility",
+            state.stopsVisible && state.routeVisibility.get(route.key) !== false ? "visible" : "none");
+        }
+      });
+      if (state.map.getLayer("stop-labels")) {
+        const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
+        state.map.setFilter("stop-labels", visibleKeys.length
+          ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
+          : ["==", ["get", "__showStop"], -1]);
+        state.map.setLayoutProperty("stop-labels", "visibility", state.stopsVisible ? "visible" : "none");
+      }
+      refreshSelectedBuffer();
     });
   }
 
