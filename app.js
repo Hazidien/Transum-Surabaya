@@ -16,6 +16,7 @@
     routes: new Map(),
     stops: [],
     stopFeatures: [],
+    stopGroups: null,
     routeVisibility: new Map(),
     routeLayerIds: new Map(),
     stopsVisible: true,
@@ -193,9 +194,10 @@
     return best;
   }
 
-  function refreshStopsSource() {
-    if (!state.map || !state.map.getSource("all-stops")) return;
-    // Merge points within 28 m so stops shared by multiple routes appear as one marker.
+  function buildStopGroups() {
+    if (state.stopGroups) return state.stopGroups;
+    // Pengelompokan halte dan pencocokan kedekatan koridor hanya dihitung sekali.
+    // Saat checkbox rute diubah, kita cukup memfilter cache ini agar UI tidak freeze.
     const groups = [];
     const mergeDistanceMeters = 28;
     state.stops.forEach(feature => {
@@ -209,26 +211,31 @@
         group.coords.reduce((sum, c) => sum + c[1], 0) / group.coords.length
       ];
     });
-    const features = groups.map((group, index) => {
-      const members = group.members;
-      // Include corridors whose route geometry actually passes this shared stop, even if
-      // the separate stop datasets have slightly different coordinates or only one route's
-      // stop point was digitized at this location.
-      const memberRouteKeys = members.map(f => f.properties.__routeKey).filter(Boolean);
-      const routeKeys = [...new Set(memberRouteKeys)];
+    groups.forEach(group => {
+      const routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
       const routeProximityMeters = 100;
       state.routes.forEach((entry, key) => {
-        if (distancePointToRouteMeters(group.center, entry.data) <= routeProximityMeters && !routeKeys.includes(key)) {
-          routeKeys.push(key);
-        }
+        if (!routeKeys.includes(key) && distancePointToRouteMeters(group.center, entry.data) <= routeProximityMeters) routeKeys.push(key);
       });
+      group.routeKeys = routeKeys;
+      group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
+    });
+    state.stopGroups = groups;
+    return groups;
+  }
+
+  function refreshStopsSource() {
+    if (!state.map || !state.map.getSource("all-stops")) return;
+    const groups = buildStopGroups();
+    const features = groups.map((group, index) => {
+      const members = group.members;
+      const routeKeys = group.routeKeys;
       const visibleRouteKeys = routeKeys.filter(key => state.routeVisibility.get(key) !== false);
-      const names = [...new Set(members.map(f => f.properties.__stopName).filter(Boolean))];
       return {
         type: "Feature", id: "stop-cluster-" + index,
         geometry: { type: "Point", coordinates: group.center },
         properties: {
-          __stopName: names[0] || "Halte", __stopNames: names,
+          __stopName: group.names[0] || "Halte", __stopNames: group.names,
           __routeKey: routeKeys[0] || "", __routeKeys: routeKeys, __visibleRouteKeys: visibleRouteKeys,
           __memberCount: members.length,
           __memberStops: members.map(f => ({
@@ -294,6 +301,21 @@
     return config.routes.find(route => route.key === key)?.label || "Koridor belum teridentifikasi";
   }
 
+  function openCreditModal(autoOpen = false) {
+    const modal = byId("creditModal");
+    if (!modal) return;
+    modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
+    if (autoOpen) modal.dataset.openedAtStartup = "true";
+  }
+
+  function closeCreditModal() {
+    const modal = byId("creditModal");
+    if (!modal) return;
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+  }
+
   function createMap() {
     if (window.pmtiles && window.maplibregl.addProtocol) {
       const protocol = new pmtiles.Protocol();
@@ -314,6 +336,11 @@
 
     state.map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
     state.map.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: "metric" }), "bottom-left");
+
+    byId("openCreditButton")?.addEventListener("click", () => openCreditModal());
+    byId("closeCreditButton")?.addEventListener("click", closeCreditModal);
+    byId("creditModal")?.addEventListener("click", event => { if (event.target.id === "creditModal") closeCreditModal(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeCreditModal(); });
 
     state.map.on("load", () => {
       setStatus("Peta dasar siap");
@@ -395,10 +422,12 @@
       showError("Peta dasar sudah tampil, tetapi beberapa GeoJSON belum ditemukan atau tidak terbaca. Unggah berkas menggunakan nama yang tercantum di folder README, lalu muat ulang website. Detail teknis ada di console browser.");
       console.warn("Berkas data belum tersedia:", failures);
       hideLoadingOverlay();
+      openCreditModal(true);
     } else {
       hideError();
       setStatus(state.routes.size + " rute · data siap");
       hideLoadingOverlay();
+      openCreditModal(true);
     }
   }
 
@@ -442,9 +471,9 @@
         filter: ["all", ["in", route.key, ["get", "__visibleRouteKeys"]], ["==", ["get", "__showStop"], 1]],
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
-          "circle-color": route.color,
-          "circle-stroke-color": "#08101d",
-          "circle-stroke-width": 1.4,
+          "circle-color": "#FFFFFF",
+          "circle-stroke-color": "#173B63",
+          "circle-stroke-width": 2.2,
           "circle-opacity": 0.98
         }
       });
