@@ -257,3 +257,12 @@ kbd { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color
   .credit-launcher { right:10px; bottom:60px; }
   .credit-card { padding:22px 18px; }
 }
+
+
+/* Separate corridor families in the sidebar, following the reference layout. */
+.route-group { display:flex; flex-direction:column; gap:6px; margin:4px 0 10px; }
+.route-group[hidden] { display:none; }
+.route-group-heading { margin:8px 4px 3px; padding:0 2px 7px; color:#91a2b8; font-size:10px; font-weight:850; letter-spacing:.12em; border-bottom:1px solid rgba(167,185,211,.13); }
+.route-group[data-group="suroboyo"] .route-group-heading::before { content:""; display:inline-block; width:8px; height:8px; margin-right:8px; border-radius:2px; background:#F59E0B; }
+.route-group[data-group="wirawiri"] .route-group-heading::before { content:""; display:inline-block; width:8px; height:8px; margin-right:8px; border-radius:2px; background:#34D399; }
+.route-list { gap:2px; }
