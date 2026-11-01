@@ -36,6 +36,8 @@
     busMarkers: new Map(),
     busProgress: new Map(),
     busStopDistances: new Map(),
+    routeAnimationCache: new Map(),
+    busLastRender: 0,
     busStopWait: new Map(),
     busSpeedMultiplier: 1,
     busSpeedSetting: 30,
@@ -53,6 +55,38 @@
   const normalize = (value) => String(value ?? "")
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+  // Samakan variasi angka Romawi/Arab dan awalan generik nama halte.
+  function normalizeStopName(value) {
+    let text = String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    text = text.replace(/\biii\b/g, "3").replace(/\bii\b/g, "2").replace(/\biv\b/g, "4")
+      .replace(/\bii\b/g, "2").replace(/\bi\b/g, "1");
+    text = text.replace(/\b(halte|shelter|bus stop|stop)\b/g, " ");
+    return text.replace(/[^a-z0-9]+/g, "");
+  }
+
+  function editDistance(a, b) {
+    const row = Array.from({length:b.length+1}, (_,i)=>i);
+    for(let i=1;i<=a.length;i++){
+      let diagonal=row[0]; row[0]=i;
+      for(let j=1;j<=b.length;j++){
+        const above=row[j];
+        row[j]=Math.min(row[j]+1,row[j-1]+1,diagonal+(a[i-1]===b[j-1]?0:1));
+        diagonal=above;
+      }
+    }
+    return row[b.length];
+  }
+
+  function preferredStopName(names) {
+    return [...names].filter(Boolean).sort((a,b)=>{
+      const score = value => {
+        const n=String(value).trim();
+        return (normalizeStopName(n).length*2) + (/^(halte|shelter)\b/i.test(n)?2:0) - (/tanpa nama/i.test(n)?100:0);
+      };
+      return score(b)-score(a);
+    })[0] || "Halte";
+  }
 
   const escapeHtml = (value) => String(value ?? "")
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -120,8 +154,9 @@
       group.appendChild(heading);
       routeList.appendChild(group);
     }
-    const item = document.createElement("label");
+    const item = document.createElement("div");
     item.className = "route-item";
+    item.setAttribute("role", "group");
     item.dataset.search = normalize(route.label);
     item.innerHTML = `
       <span class="route-line-swatch" style="background:${route.color}"></span>
@@ -220,49 +255,54 @@
 
   function buildStopGroups() {
     if (state.stopGroups) return state.stopGroups;
-    // Kelompok halte bersama: nama sama dalam radius 80 m, atau koordinat hampir identik (<= 8 m).
-    // Ini mengakomodasi perbedaan digitasi kecil antar-koridor tanpa menyatukan halte berlawanan arah yang hanya berdekatan.
+    // Cocokkan nama kanonis (termasuk III B = 3B), lalu gunakan jarak untuk menghindari
+    // penggabungan nama serupa yang berada di lokasi berbeda.
     const groups = [];
     const buckets = new Map();
-    const cellLat = 80 / 110574;
-    const cellLonAt = lat => 80 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
-    const nameKey = value => normalize(value || "halte-tanpa-nama");
+    const cellLat = 100 / 110574;
+    const cellLonAt = lat => 100 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
     state.stops.forEach(feature => {
       const coord = feature.geometry.coordinates;
       const lat = coord[1], lon = coord[0];
+      if (!Array.isArray(coord) || !Number.isFinite(lon) || !Number.isFinite(lat)) return;
       const gx = Math.floor(lon / cellLonAt(lat)), gy = Math.floor(lat / cellLat);
-      const keyName = nameKey(feature.properties.__stopName);
+      const keyName = normalizeStopName(feature.properties.__stopName);
       let match = null;
-      for (let dx = -1; dx <= 1 && !match; dx++) {
-        for (let dy = -1; dy <= 1 && !match; dy++) {
-          for (const group of buckets.get((gx + dx) + "|" + (gy + dy)) || []) {
-            const distance = haversineKm(group.center, coord) * 1000;
-            const sameName = group.nameKeys.has(keyName);
-            if ((sameName && distance <= 80) || distance <= 8) { match = group; break; }
+      for (let dx=-1; dx<=1 && !match; dx++) for(let dy=-1;dy<=1 && !match;dy++) {
+        for(const group of buckets.get((gx+dx)+"|"+(gy+dy)) || []) {
+          const distance = haversineMeters(group.center, coord);
+          const exactName = keyName && group.nameKeys.has(keyName);
+          const similarName = keyName && [...group.nameKeys].some(existing => {
+            const maxLen=Math.max(existing.length,keyName.length);
+            return maxLen>=7 && editDistance(existing,keyName)<=1;
+          });
+          if ((exactName && distance<=100) || (similarName && distance<=45) || distance<=6) {
+            match=group; break;
           }
         }
       }
-      if (!match) {
-        match = { members: [], coords: [], center: coord, nameKeys: new Set([keyName]) };
+      if(!match){
+        match={members:[],coords:[],center:coord,nameKeys:new Set()};
         groups.push(match);
-        const bucketKey = gx + "|" + gy;
-        if (!buckets.has(bucketKey)) buckets.set(bucketKey, []);
+        const bucketKey=gx+"|"+gy;
+        if(!buckets.has(bucketKey)) buckets.set(bucketKey,[]);
         buckets.get(bucketKey).push(match);
       }
       match.members.push(feature);
-      match.nameKeys.add(keyName);
+      if(keyName) match.nameKeys.add(keyName);
       match.coords.push(coord);
-      match.center = [
-        match.coords.reduce((sum, c) => sum + c[0], 0) / match.coords.length,
-        match.coords.reduce((sum, c) => sum + c[1], 0) / match.coords.length
+      match.center=[
+        match.coords.reduce((sum,p)=>sum+p[0],0)/match.coords.length,
+        match.coords.reduce((sum,p)=>sum+p[1],0)/match.coords.length
       ];
     });
-    groups.forEach(group => {
-      group.routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
-      group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
-      group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
+    groups.forEach(group=>{
+      group.routeKeys=[...new Set(group.members.map(f=>f.properties.__routeKey).filter(Boolean))];
+      group.routeIds=[...new Set(group.members.map(f=>f.properties.__rawRouteId).filter(Boolean))];
+      group.names=[...new Set(group.members.map(f=>f.properties.__stopName).filter(Boolean))];
+      group.displayName=preferredStopName(group.names);
     });
-    state.stopGroups = groups;
+    state.stopGroups=groups;
     return groups;
   }
 
@@ -277,7 +317,7 @@
         type: "Feature", id: "stop-cluster-" + index,
         geometry: { type: "Point", coordinates: group.center },
         properties: {
-          __stopName: group.names[0] || "Halte", __stopNames: group.names,
+          __stopName: group.displayName || group.names[0] || "Halte", __stopNames: group.names,
           __routeKey: routeKeys[0] || "", __routeKeys: routeKeys, __visibleRouteKeys: visibleRouteKeys,
           __memberCount: members.length,
           __memberStops: members.map(f => ({
@@ -383,7 +423,7 @@
       bearing: config.map.bearing,
       maxPitch: 75,
       attributionControl: false,
-      canvasContextAttributes: { antialias: true }
+      canvasContextAttributes: { antialias: false }
     });
 
     state.map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
@@ -400,6 +440,19 @@
       setupMapEvents();
       setupControls();
     });
+    const mapCanvas = state.map.getCanvas();
+    mapCanvas.addEventListener("webglcontextlost", event => {
+      event.preventDefault();
+      console.warn("WebGL context lost; simulasi dijeda untuk melindungi peta.");
+      state.busAnimationOn = false;
+      if (state.busFrame) cancelAnimationFrame(state.busFrame);
+      state.busFrame = null;
+    }, false);
+    mapCanvas.addEventListener("webglcontextrestored", () => {
+      console.info("WebGL context restored; peta dirender ulang.");
+      state.map.resize();
+      state.map.triggerRepaint();
+    }, false);
     state.map.on("error", (event) => {
       if (event?.error?.message) console.warn("MapLibre:", event.error.message);
     });
