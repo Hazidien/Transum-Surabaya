@@ -135,7 +135,9 @@
 
     const checkbox = item.querySelector("input");
     item.addEventListener("click", (event) => {
-      if (event.target === checkbox) return;
+      // Area checkbox (termasuk kotak centang visual) hanya untuk on/off,
+      // jangan sekaligus menjalankan pemilihan koridor dan zoom peta.
+      if (event.target.closest('input[type="checkbox"]') || event.target.closest(".route-check")) return;
       selectRouteDetails(route.key);
       zoomToRoute(route.key);
     });
