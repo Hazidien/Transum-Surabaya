@@ -107,6 +107,19 @@
   }
 
   function addRoutePanel(route, index) {
+    const groupKey = route.key.startsWith("sby-") ? "suroboyo" : "wirawiri";
+    const groupTitle = groupKey === "suroboyo" ? "SUROBOYO BUS" : "WIRA WIRI";
+    let group = routeList.querySelector('.route-group[data-group="' + groupKey + '"]');
+    if (!group) {
+      group = document.createElement("section");
+      group.className = "route-group";
+      group.dataset.group = groupKey;
+      const heading = document.createElement("h3");
+      heading.className = "route-group-heading";
+      heading.textContent = groupTitle;
+      group.appendChild(heading);
+      routeList.appendChild(group);
+    }
     const item = document.createElement("label");
     item.className = "route-item";
     item.dataset.search = normalize(route.label);
@@ -118,7 +131,7 @@
       </span>
       <input type="checkbox" checked aria-label="Tampilkan ${escapeHtml(route.label)}" data-route-toggle="${route.key}">
       <span class="route-check">✓</span>`;
-    routeList.appendChild(item);
+    group.appendChild(item);
 
     const checkbox = item.querySelector("input");
     item.addEventListener("click", (event) => {
@@ -130,8 +143,16 @@
       state.routeVisibility.set(route.key, checkbox.checked);
       updateRouteVisibility(route.key);
       updateRouteCounter();
+      updateRouteGroupHeadings();
     });
     item.addEventListener("dblclick", () => zoomToRoute(route.key));
+  }
+
+  function updateRouteGroupHeadings() {
+    routeList.querySelectorAll(".route-group").forEach(group => {
+      const hasVisible = [...group.querySelectorAll(".route-item")].some(item => !item.hidden);
+      group.hidden = !hasVisible;
+    });
   }
 
   function updateRouteCounter() {
@@ -149,9 +170,6 @@
         const coverageEnabled = byId("coverageToggle")?.checked;
         state.map.setLayoutProperty(id, "visibility", visible && (!isCoverage || coverageEnabled) ? "visible" : "none");
       }
-    });
-    state.stops.forEach((feature) => {
-      if (feature.properties.__routeKey === routeKey) feature.properties.__routeVisible = visible;
     });
     refreshStopsSource();
     refreshSelectedBuffer();
@@ -196,28 +214,44 @@
 
   function buildStopGroups() {
     if (state.stopGroups) return state.stopGroups;
-    // Pengelompokan halte dan pencocokan kedekatan koridor hanya dihitung sekali.
-    // Saat checkbox rute diubah, kita cukup memfilter cache ini agar UI tidak freeze.
+    // Gabungkan hanya halte bernama sama yang benar-benar berdekatan.
+    // Route_Id (atau fallback dataset) menjadi sumber daftar koridor; tidak menebak layanan dari jarak ke semua garis rute.
     const groups = [];
-    const mergeDistanceMeters = 28;
+    const buckets = new Map();
+    const mergeDistanceMeters = 35;
+    const cellLat = mergeDistanceMeters / 110574;
+    const cellLonAt = lat => mergeDistanceMeters / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
+    const nameKey = value => normalize(value || "halte-tanpa-nama");
     state.stops.forEach(feature => {
       const coord = feature.geometry.coordinates;
-      let group = groups.find(candidate => haversineKm(candidate.center, coord) * 1000 <= mergeDistanceMeters);
-      if (!group) { group = { members: [], coords: [], center: coord }; groups.push(group); }
-      group.members.push(feature);
-      group.coords.push(coord);
-      group.center = [
-        group.coords.reduce((sum, c) => sum + c[0], 0) / group.coords.length,
-        group.coords.reduce((sum, c) => sum + c[1], 0) / group.coords.length
+      const lat = coord[1], lon = coord[0];
+      const lonCell = cellLonAt(lat);
+      const gx = Math.floor(lon / lonCell), gy = Math.floor(lat / cellLat);
+      const keyName = nameKey(feature.properties.__stopName);
+      let match = null;
+      for (let dx = -1; dx <= 1 && !match; dx++) {
+        for (let dy = -1; dy <= 1 && !match; dy++) {
+          const candidates = buckets.get(keyName + "|" + (gx + dx) + "|" + (gy + dy)) || [];
+          match = candidates.find(group => haversineKm(group.center, coord) * 1000 <= mergeDistanceMeters) || null;
+        }
+      }
+      if (!match) {
+        match = { members: [], coords: [], center: coord, names: [feature.properties.__stopName || "Halte"] };
+        groups.push(match);
+        const bucketKey = keyName + "|" + gx + "|" + gy;
+        if (!buckets.has(bucketKey)) buckets.set(bucketKey, []);
+        buckets.get(bucketKey).push(match);
+      }
+      match.members.push(feature);
+      match.coords.push(coord);
+      match.center = [
+        match.coords.reduce((sum, c) => sum + c[0], 0) / match.coords.length,
+        match.coords.reduce((sum, c) => sum + c[1], 0) / match.coords.length
       ];
     });
     groups.forEach(group => {
-      const routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
-      const routeProximityMeters = 100;
-      state.routes.forEach((entry, key) => {
-        if (!routeKeys.includes(key) && distancePointToRouteMeters(group.center, entry.data) <= routeProximityMeters) routeKeys.push(key);
-      });
-      group.routeKeys = routeKeys;
+      group.routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
+      group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
       group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
     });
     state.stopGroups = groups;
@@ -239,7 +273,7 @@
           __routeKey: routeKeys[0] || "", __routeKeys: routeKeys, __visibleRouteKeys: visibleRouteKeys,
           __memberCount: members.length,
           __memberStops: members.map(f => ({
-            name: f.properties.__stopName || "Halte tanpa nama", routeKey: f.properties.__routeKey || "",
+            name: f.properties.__stopName || "Halte tanpa nama", routeKey: f.properties.__routeKey || "", routeId: f.properties.__rawRouteId || "",
             id: f.properties.stop_id ?? f.properties.Stop_Id ?? f.properties.Id ?? f.properties.id ?? "—",
             coordinates: f.geometry.coordinates
           })),
@@ -1091,6 +1125,7 @@
       routeList.querySelectorAll(".route-item").forEach(item => {
         item.hidden = !!query && !item.dataset.search.includes(query);
       });
+      updateRouteGroupHeadings();
     });
   }
 
