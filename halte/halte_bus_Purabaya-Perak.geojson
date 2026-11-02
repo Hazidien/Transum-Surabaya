@@ -1,1 +1,777 @@
-{"type":"FeatureCollection","name":"halte_bus_Purabaya-Perak","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC::CRS84"}},"features":[{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pelabuhan Tanjung Perak"},"geometry":{"type":"Point","coordinates":[112.73291,-7.19887,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pelindo Place B"},"geometry":{"type":"Point","coordinates":[112.73416,-7.20547,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Halte Perak Timur"},"geometry":{"type":"Point","coordinates":[112.7326799,-7.2209585,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Tanjung Torawitan B"},"geometry":{"type":"Point","coordinates":[112.73204,-7.22485,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Ikan Kerapu B"},"geometry":{"type":"Point","coordinates":[112.73073,-7.22787,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Rajawali"},"geometry":{"type":"Point","coordinates":[112.7321,-7.23456,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Jembatan Merah"},"geometry":{"type":"Point","coordinates":[112.73554,-7.2357,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Veteran"},"geometry":{"type":"Point","coordinates":[112.73756,-7.23965,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Tugu Pahlawan"},"geometry":{"type":"Point","coordinates":[112.738428,-7.244023,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Siola"},"geometry":{"type":"Point","coordinates":[112.73782,-7.25726,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Tunjungan"},"geometry":{"type":"Point","coordinates":[112.7392414,-7.2597853,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Simpang Dukuh"},"geometry":{"type":"Point","coordinates":[112.74187,-7.2629,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Gubernur Suryo"},"geometry":{"type":"Point","coordinates":[112.7440154,-7.2637315,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pangsud"},"geometry":{"type":"Point","coordinates":[112.74505,-7.26634,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Sono Kembang"},"geometry":{"type":"Point","coordinates":[112.743836,-7.269589,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Urip Sumoharjo 2"},"geometry":{"type":"Point","coordinates":[112.74215,-7.27405,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pandegiling 2"},"geometry":{"type":"Point","coordinates":[112.74131,-7.27796,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Santa Maria"},"geometry":{"type":"Point","coordinates":[112.7403,-7.28356,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Darmo"},"geometry":{"type":"Point","coordinates":[112.73924,-7.28921,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Joyoboyo 2"},"geometry":{"type":"Point","coordinates":[112.73785,-7.29891,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"RSAL"},"geometry":{"type":"Point","coordinates":[112.73606,-7.30824,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Margorejo"},"geometry":{"type":"Point","coordinates":[112.7340204,-7.3180097,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"UIN"},"geometry":{"type":"Point","coordinates":[112.73318,-7.32179,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Jemur Ngawinan"},"geometry":{"type":"Point","coordinates":[112.73171,-7.32867,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Siwalankerto 2"},"geometry":{"type":"Point","coordinates":[112.72955,-7.33692,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Kerto Menanggal"},"geometry":{"type":"Point","coordinates":[112.7294722,-7.3435078,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Halte Suroboyo Bus Purabaya"},"geometry":{"type":"Point","coordinates":[112.7243936,-7.3520831,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Dukuh Menanggal"},"geometry":{"type":"Point","coordinates":[112.72888,-7.34345,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Siwalankerto"},"geometry":{"type":"Point","coordinates":[112.7290802,-7.3367318,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Taman Pelangi"},"geometry":{"type":"Point","coordinates":[112.7307745,-7.32934,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"RS Bhayangkara"},"geometry":{"type":"Point","coordinates":[112.73179,-7.32479,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Halte Ubhara"},"geometry":{"type":"Point","coordinates":[112.7324947,-7.3213899,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pusvetma"},"geometry":{"type":"Point","coordinates":[112.73365,-7.31594,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Terminal Joyoboyo"},"geometry":{"type":"Point","coordinates":[112.7363889,-7.2989993,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Museum BI"},"geometry":{"type":"Point","coordinates":[112.73901,-7.29434,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Rumah Sakit Darmo"},"geometry":{"type":"Point","coordinates":[112.73938,-7.28698,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Gozco"},"geometry":{"type":"Point","coordinates":[112.73996,-7.28391,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pandegiling"},"geometry":{"type":"Point","coordinates":[112.74108,-7.27784,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Urip Sumoharjo 1"},"geometry":{"type":"Point","coordinates":[112.74194,-7.27401,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Basra"},"geometry":{"type":"Point","coordinates":[112.74156,-7.27178,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Kaliasin"},"geometry":{"type":"Point","coordinates":[112.740923,-7.264812,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Embong Malang"},"geometry":{"type":"Point","coordinates":[112.73749,-7.26044,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Blauran"},"geometry":{"type":"Point","coordinates":[112.734052,-7.255178,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pirngadi"},"geometry":{"type":"Point","coordinates":[112.7349433,-7.2525513,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Masjid Kemayoran"},"geometry":{"type":"Point","coordinates":[112.73517,-7.24349,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pasar Turi"},"geometry":{"type":"Point","coordinates":[112.73698,-7.24614,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Indrapura"},"geometry":{"type":"Point","coordinates":[112.73212,-7.24083,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Ikan Kerapu A"},"geometry":{"type":"Point","coordinates":[112.72993,-7.22856,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Tanjung Torawitan A"},"geometry":{"type":"Point","coordinates":[112.73187,-7.224,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Barunawati A"},"geometry":{"type":"Point","coordinates":[112.7323,-7.22073,0]}},{"type":"Feature","properties":{"Route_Id":"Purabaya-Perak","Halte_name":"Pelindo Place A"},"geometry":{"type":"Point","coordinates":[112.73375,-7.20556,0]}}]}
+{
+  "type": "FeatureCollection",
+  "name": "halte_bus_Purabaya-Perak",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC::CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Pelabuhan Tanjung Perak"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73291,
+          -7.19887,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Pelindo Place B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73416,
+          -7.20547,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Halte Perak Timur"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7326799,
+          -7.2209585,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Tanjung Torawitan B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73204,
+          -7.22485,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Ikan Kerapu B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73073,
+          -7.22787,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Rajawali"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7321,
+          -7.23456,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Jembatan Merah"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73554,
+          -7.2357,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Veteran"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73756,
+          -7.23965,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Tugu Pahlawan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.738428,
+          -7.244023,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Siola"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73782,
+          -7.25726,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Tunjungan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7392414,
+          -7.2597853,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Simpang Dukuh"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74187,
+          -7.2629,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Gubernur Suryo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7440154,
+          -7.2637315,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Pangsud"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74505,
+          -7.26634,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Sono Kembang"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.743836,
+          -7.269589,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Urip Sumoharjo 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74215,
+          -7.27405,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Pandegiling 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74131,
+          -7.27796,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Santa Maria"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7403,
+          -7.28356,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Darmo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73924,
+          -7.28921,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Joyoboyo 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73785,
+          -7.29891,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "RSAL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73606,
+          -7.30824,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Margorejo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7340204,
+          -7.3180097,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "UIN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73318,
+          -7.32179,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Jemur Ngawinan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73171,
+          -7.32867,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Halte Siwalankerto B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72955,
+          -7.33692,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Kerto Menanggal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7294722,
+          -7.3435078,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Terminal Bungurasih"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7243936,
+          -7.3520831,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Dukuh Menanggal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72888,
+          -7.34345,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Halte Siwalankerto A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7290802,
+          -7.3367318,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Taman Pelangi"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7307745,
+          -7.32934,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "RS Bhayangkara"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73179,
+          -7.32479,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Halte Ubhara"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7324947,
+          -7.3213899,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Pusvetma"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73365,
+          -7.31594,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Terminal Joyoboyo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7363889,
+          -7.2989993,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Museum BI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73901,
+          -7.29434,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Rumah Sakit Darmo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73938,
+          -7.28698,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Gozco"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73996,
+          -7.28391,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Pandegiling"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74108,
+          -7.27784,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Urip Sumoharjo 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74194,
+          -7.27401,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Halte Basra"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74156,
+          -7.27178,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Halte Kaliasin"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.740923,
+          -7.264812,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Embong Malang"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73749,
+          -7.26044,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Blauran"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.734052,
+          -7.255178,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Halte Pingardi"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7349433,
+          -7.2525513,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Masjid Kemayoran"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73517,
+          -7.24349,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Pasar Turi"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73698,
+          -7.24614,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Indrapura"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73212,
+          -7.24083,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Ikan Kerapu A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72993,
+          -7.22856,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Tanjung Torawitan A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73187,
+          -7.224,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Barunawati A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7323,
+          -7.22073,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Purabaya-Perak",
+        "Halte_name": "Pelindo Place A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73375,
+          -7.20556,
+          0
+        ]
+      }
+    }
+  ]
+}
