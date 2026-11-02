@@ -343,7 +343,9 @@
       group.routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
       group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
       group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
-      const canonicalDisplay = group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
+      const canonicalDisplay = /^grahafamily[ab]$/.test(group.canonicalName)
+        ? "Graha Family " + group.canonicalName.slice(-1).toUpperCase()
+        : group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
         : preferredStopName(group.names);
       group.displayName = formatStopName(canonicalDisplay);
     });
