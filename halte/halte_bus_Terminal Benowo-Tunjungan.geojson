@@ -922,13 +922,13 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Benowo-Tunjungan",
-        "Halte_name": "Halte Basra"
+        "Halte_name": "Halte Basra 2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          112.74155863,
-          -7.2717881
+          112.74127125318658,
+          -7.268298986994151
         ]
       }
     },
