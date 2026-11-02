@@ -1,1 +1,1026 @@
-{"type":"FeatureCollection","name":"halte_bus_Kejawan Putih-Unesa","features":[{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte PCM"},"geometry":{"type":"Point","coordinates":[112.80560645,-7.27720617]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Kejawan Putih Tambak"},"geometry":{"type":"Point","coordinates":[112.80229794,-7.27661016]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Laguna"},"geometry":{"type":"Point","coordinates":[112.80133962,-7.27533136]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte PENS 1"},"geometry":{"type":"Point","coordinates":[112.793114,-7.27581798]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte PENS 2"},"geometry":{"type":"Point","coordinates":[112.79317104,-7.27559165]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte ITS"},"geometry":{"type":"Point","coordinates":[112.79000743,-7.27951421]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Bundaran ITS"},"geometry":{"type":"Point","coordinates":[112.78977902,-7.27921504]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Manyar Kerta Adi"},"geometry":{"type":"Point","coordinates":[112.78253478,-7.28062324]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Kertajaya Indah"},"geometry":{"type":"Point","coordinates":[112.78214689,-7.28020453]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Koni"},"geometry":{"type":"Point","coordinates":[112.77694797,-7.28032203]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Klampis"},"geometry":{"type":"Point","coordinates":[112.77576148,-7.28068417]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Gramedia"},"geometry":{"type":"Point","coordinates":[112.76353143,-7.27969962]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Samsat Manyar"},"geometry":{"type":"Point","coordinates":[112.76391932,-7.27942802]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Kertajaya 2"},"geometry":{"type":"Point","coordinates":[112.75946996,-7.27909983]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Kertajaya 1"},"geometry":{"type":"Point","coordinates":[112.75904784,-7.2786698]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Gubeng Airlangga"},"geometry":{"type":"Point","coordinates":[112.75622991,-7.27376964]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Unair"},"geometry":{"type":"Point","coordinates":[112.75643526,-7.27359989]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte RSUD Dr. Soetomo"},"geometry":{"type":"Point","coordinates":[112.75659498,-7.2692429]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Lapangan Hockey"},"geometry":{"type":"Point","coordinates":[112.75644667,-7.26761325]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"SMAN 4 Surabaya"},"geometry":{"type":"Point","coordinates":[112.75538567,-7.26539512]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Moestopo"},"geometry":{"type":"Point","coordinates":[112.75419917,-7.26438791]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Pemuda"},"geometry":{"type":"Point","coordinates":[112.74753653,-7.26525932]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Grand CIty"},"geometry":{"type":"Point","coordinates":[112.75030883,-7.26282615]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Balai Kota Surabaya"},"geometry":{"type":"Point","coordinates":[112.74785598,-7.26099278]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Gubernur SUryo"},"geometry":{"type":"Point","coordinates":[112.74407972,-7.26379942]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Simpang Dukuh"},"geometry":{"type":"Point","coordinates":[112.74175236,-7.26296196]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Kaliasin (Halte Timur)"},"geometry":{"type":"Point","coordinates":[112.74097657,-7.26472742]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Panglima Sudirman"},"geometry":{"type":"Point","coordinates":[112.74502664,-7.26635707]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Sono Kembang"},"geometry":{"type":"Point","coordinates":[112.74390859,-7.26950318]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Basuki Rahmat"},"geometry":{"type":"Point","coordinates":[112.74161546,-7.27182315]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Urip Sumoharjo 2"},"geometry":{"type":"Point","coordinates":[112.74214025,-7.27409783]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Pandegiling 1"},"geometry":{"type":"Point","coordinates":[112.74105643,-7.277855]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Pandegiling 2"},"geometry":{"type":"Point","coordinates":[112.74133024,-7.27795685]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Santa Maria"},"geometry":{"type":"Point","coordinates":[112.74030346,-7.28346805]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Gozco"},"geometry":{"type":"Point","coordinates":[112.73993839,-7.28383018]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Rumah Sakit Darmo"},"geometry":{"type":"Point","coordinates":[112.73934514,-7.28701012]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Bengawan 2"},"geometry":{"type":"Point","coordinates":[112.73793047,-7.2898845]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Bengawan 1"},"geometry":{"type":"Point","coordinates":[112.73801033,-7.28965817]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Kutai 1"},"geometry":{"type":"Point","coordinates":[112.73463338,-7.29127642]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Kutai 2"},"geometry":{"type":"Point","coordinates":[112.73454211,-7.29110667]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Indragiri"},"geometry":{"type":"Point","coordinates":[112.7302981,-7.29307572]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte KPU"},"geometry":{"type":"Point","coordinates":[112.72881498,-7.29261175]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Gedung Juang 45"},"geometry":{"type":"Point","coordinates":[112.72891766,-7.29234016]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Mayjend Sungkono"},"geometry":{"type":"Point","coordinates":[112.72086316,-7.29198935]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Darmo Park 1"},"geometry":{"type":"Point","coordinates":[112.7209088,-7.2917517]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Darmo Park 2"},"geometry":{"type":"Point","coordinates":[112.71749762,-7.29166117]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Park & Ride Mayjend Sungkono"},"geometry":{"type":"Point","coordinates":[112.71750903,-7.29138958]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Taman Makam Pahlawan 1"},"geometry":{"type":"Point","coordinates":[112.71503336,-7.2907785]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Taman Makam Pahlawan"},"geometry":{"type":"Point","coordinates":[112.71093766,-7.28969212]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Putat Gede 1"},"geometry":{"type":"Point","coordinates":[112.708211,-7.28856048]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Putat Gede 2"},"geometry":{"type":"Point","coordinates":[112.69890156,-7.28605954]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Darmo Permai"},"geometry":{"type":"Point","coordinates":[112.69812577,-7.28559556]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Pradah Kali Kendal"},"geometry":{"type":"Point","coordinates":[112.69228455,-7.28445259]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Patung Kuda 2"},"geometry":{"type":"Point","coordinates":[112.68602122,-7.28297012]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Patung Kuda 1"},"geometry":{"type":"Point","coordinates":[112.68530247,-7.2817932]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Yono Suwoyo 1"},"geometry":{"type":"Point","coordinates":[112.68137791,-7.2850071]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Yono Suwoyo 2"},"geometry":{"type":"Point","coordinates":[112.68140072,-7.28445259]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte PTC B"},"geometry":{"type":"Point","coordinates":[112.67762447,-7.28882076]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte PTC A"},"geometry":{"type":"Point","coordinates":[112.67729362,-7.28853785]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Graha Family Barat"},"geometry":{"type":"Point","coordinates":[112.67593599,-7.29307572]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Bundaran UNESA"},"geometry":{"type":"Point","coordinates":[112.67569641,-7.29831515]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte UNESA"},"geometry":{"type":"Point","coordinates":[112.67533133,-7.29837173]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Tunjungan"},"geometry":{"type":"Point","coordinates":[112.73922925,-7.25975272]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Siola"},"geometry":{"type":"Point","coordinates":[112.73780872,-7.25725666]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte SMPN 3"},"geometry":{"type":"Point","coordinates":[112.73601817,-7.25595748]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Sindoro"},"geometry":{"type":"Point","coordinates":[112.73350189,-7.25753387]}},{"type":"Feature","properties":{"Id":0,"Route_Id":"Kejawan Putih-Unesa","Halte_name":"Halte Embong Malang"},"geometry":{"type":"Point","coordinates":[112.73749106,-7.26045228]}}]}
+{
+  "type": "FeatureCollection",
+  "name": "halte_bus_Kejawan Putih-Unesa",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte PCM"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.80560645,
+          -7.27720617
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Kejawan Putih Tambak"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.80229794,
+          -7.27661016
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Laguna"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.80133962,
+          -7.27533136
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte PENS 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.793114,
+          -7.27581798
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte PENS 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.79317104,
+          -7.27559165
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte ITS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.79000743,
+          -7.27951421
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Bundaran ITS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.78977902,
+          -7.27921504
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Manyar Kerta Adi"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.78253478,
+          -7.28062324
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Kertajaya Indah"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.78214689,
+          -7.28020453
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Koni"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.77694797,
+          -7.28032203
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Klampis"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.77576148,
+          -7.28068417
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Gramedia"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.76353143,
+          -7.27969962
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Samsat Manyar"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.76391932,
+          -7.27942802
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Kertajaya 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75946996,
+          -7.27909983
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Kertajaya 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75904784,
+          -7.2786698
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Gubeng Airlangga"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75622991,
+          -7.27376964
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Unair"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75643526,
+          -7.27359989
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte RSUD Dr. Soetomo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75659498,
+          -7.2692429
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Lapangan Hockey"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75644667,
+          -7.26761325
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "SMAN 4 Surabaya"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75538567,
+          -7.26539512
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Moestopo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75419917,
+          -7.26438791
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Pemuda"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74753653,
+          -7.26525932
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Grand CIty"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.75030883,
+          -7.26282615
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Balai Kota Surabaya"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74785598,
+          -7.26099278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Gubernur SUryo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74407972,
+          -7.26379942
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Simpang Dukuh"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74175236,
+          -7.26296196
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Kaliasin (Halte Timur)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74097657,
+          -7.26472742
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Panglima Sudirman"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74502664,
+          -7.26635707
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Sono Kembang"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74390859,
+          -7.26950318
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Basuki Rahmat"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74161546,
+          -7.27182315
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Urip Sumoharjo 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74214025,
+          -7.27409783
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Pandegiling 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74105643,
+          -7.277855
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Pandegiling 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74133024,
+          -7.27795685
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Santa Maria"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.74030346,
+          -7.28346805
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Gozco"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73993839,
+          -7.28383018
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Rumah Sakit Darmo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73934514,
+          -7.28701012
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Bengawan 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73793047,
+          -7.2898845
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Bengawan 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73801033,
+          -7.28965817
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Kutai 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73463338,
+          -7.29127642
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Kutai 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73454211,
+          -7.29110667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Indragiri"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7302981,
+          -7.29307572
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte KPU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72881498,
+          -7.29261175
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Gedung Juang 45"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72891766,
+          -7.29234016
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Mayjend Sungkono"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72086316,
+          -7.29198935
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Darmo Park 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7209088,
+          -7.2917517
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Darmo Park 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71749762,
+          -7.29166117
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Park & Ride Mayjend Sungkono"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71750903,
+          -7.29138958
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Taman Makam Pahlawan 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71503336,
+          -7.2907785
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Taman Makam Pahlawan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71093766,
+          -7.28969212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Putat Gede 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.708211,
+          -7.28856048
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Putat Gede 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69890156,
+          -7.28605954
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Darmo Permai"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69812577,
+          -7.28559556
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Pradah Kali Kendal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69228455,
+          -7.28445259
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Patung Kuda 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.68602122,
+          -7.28297012
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Patung Kuda 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.68530247,
+          -7.2817932
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Yono Suwoyo 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.68137791,
+          -7.2850071
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Yono Suwoyo 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.68140072,
+          -7.28445259
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte PTC B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67762447,
+          -7.28882076
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte PTC A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67729362,
+          -7.28853785
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Graha Family B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67593599,
+          -7.29307572
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Bundaran UNESA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67569641,
+          -7.29831515
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte UNESA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67533133,
+          -7.29837173
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Tunjungan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73922925,
+          -7.25975272
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Siola"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73780872,
+          -7.25725666
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte SMPN 3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73601817,
+          -7.25595748
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Sindoro"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73350189,
+          -7.25753387
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Embong Malang"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73749106,
+          -7.26045228
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Id": 0,
+        "Route_Id": "Kejawan Putih-Unesa",
+        "Halte_name": "Halte Graha Family A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67579186269731,
+          -7.292419181424394
+        ]
+      }
+    }
+  ]
+}
