@@ -56,13 +56,21 @@
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, "");
 
-  // Samakan variasi angka Romawi/Arab dan awalan generik nama halte.
+  // Kanonisasi nama: abaikan awalan halte/shelter, samakan angka Romawi-Arab,
+  // dan satukan variasi spasi/tanda baca seperti Tanjung Sari/Tanjungsari.
   function normalizeStopName(value) {
-    let text = String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    text = text.replace(/\biii\b/g, "3").replace(/\bii\b/g, "2").replace(/\biv\b/g, "4")
-      .replace(/\bii\b/g, "2").replace(/\bi\b/g, "1");
+    let text = String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    text = text.replace(/\biii\b/g, "3").replace(/\bii\b/g, "2").replace(/\biv\b/g, "4").replace(/\bi\b/g, "1");
     text = text.replace(/\b(halte|shelter|bus stop|stop)\b/g, " ");
     return text.replace(/[^a-z0-9]+/g, "");
+  }
+
+  function formatStopName(value) {
+    const name = String(value ?? "").trim();
+    if (!name || /^halte\b/i.test(name)) return name || "Halte tanpa nama";
+    // Nama terminal/term tidak diberi awalan "Halte".
+    if (/^(terminal\b|term\.?\s)/i.test(name)) return name;
+    return "Halte " + name;
   }
 
   function editDistance(a, b) {
@@ -182,6 +190,12 @@
       updateRouteCounter();
       updateRouteGroupHeadings();
     });
+    item.querySelector(".route-check").addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      checkbox.checked = !checkbox.checked;
+      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     item.addEventListener("dblclick", () => zoomToRoute(route.key));
   }
 
@@ -207,13 +221,26 @@
       const coverageEnabled = byId("coverageToggle")?.checked === true;
       state.map.setLayoutProperty(id, "visibility", visible && (!isCoverage || coverageEnabled) ? "visible" : "none");
     });
-    // Perbarui satu sumber halte bersama agar titik yang dilayani koridor lain tetap tampil.
-    refreshStopsSource();
-    refreshSelectedBuffer();
-    if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) {
-      state.activeBusPopup.remove();
+    // Visibilitas halte diatur per-koridor melalui layer filter, bukan setData GeoJSON
+    // setiap checkbox berubah. Ini mencegah rebuild source besar dan mempertahankan titik
+    // halte bersama selama minimal satu koridor yang melayaninya masih aktif.
+    const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
+    const activeStopFilter = visibleKeys.length
+      ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
+      : ["==", ["get", "__showStop"], -1];
+    if (state.map.getLayer("stops-all")) {
+      state.map.setFilter("stops-all", activeStopFilter);
+      state.map.setLayoutProperty("stops-all", "visibility", state.stopsVisible ? "visible" : "none");
     }
-    requestAnimationFrame(() => state.map?.resize());
+    if (state.map.getLayer("stop-labels")) {
+      state.map.setFilter("stop-labels", activeStopFilter);
+      state.map.setLayoutProperty("stop-labels", "visibility", state.stopsVisible ? "visible" : "none");
+    }
+    refreshSelectedBuffer();
+    state.busMarkers.forEach((marker, busId) => {
+      if (busId.startsWith(routeKey + "::")) marker.getElement().style.display = visible && state.busesVisible ? "" : "none";
+    });
+    if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) state.activeBusPopup.remove();
   }
 
   function distancePointToRouteMeters(point, routeData) {
@@ -253,59 +280,99 @@
     return best;
   }
 
-  function buildStopGroups() {
-    if (state.stopGroups) return state.stopGroups;
-    // Cocokkan nama kanonis (termasuk III B = 3B), lalu gunakan jarak untuk menghindari
-    // penggabungan nama serupa yang berada di lokasi berbeda.
-    const groups = [];
-    const buckets = new Map();
-    const cellLat = 100 / 110574;
-    const cellLonAt = lat => 100 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
-    state.stops.forEach(feature => {
-      const coord = feature.geometry.coordinates;
-      const lat = coord[1], lon = coord[0];
-      if (!Array.isArray(coord) || !Number.isFinite(lon) || !Number.isFinite(lat)) return;
-      const gx = Math.floor(lon / cellLonAt(lat)), gy = Math.floor(lat / cellLat);
-      const keyName = normalizeStopName(feature.properties.__stopName);
-      let match = null;
-      for (let dx=-1; dx<=1 && !match; dx++) for(let dy=-1;dy<=1 && !match;dy++) {
-        for(const group of buckets.get((gx+dx)+"|"+(gy+dy)) || []) {
-          const distance = haversineMeters(group.center, coord);
-          const exactName = keyName && group.nameKeys.has(keyName);
-          const similarName = keyName && [...group.nameKeys].some(existing => {
-            const maxLen=Math.max(existing.length,keyName.length);
-            return maxLen>=7 && editDistance(existing,keyName)<=1;
-          });
-          if ((exactName && distance<=100) || (similarName && distance<=45) || distance<=6) {
-            match=group; break;
-          }
-        }
-      }
-      if(!match){
-        match={members:[],coords:[],center:coord,nameKeys:new Set()};
-        groups.push(match);
-        const bucketKey=gx+"|"+gy;
-        if(!buckets.has(bucketKey)) buckets.set(bucketKey,[]);
-        buckets.get(bucketKey).push(match);
-      }
-      match.members.push(feature);
-      if(keyName) match.nameKeys.add(keyName);
-      match.coords.push(coord);
-      match.center=[
-        match.coords.reduce((sum,p)=>sum+p[0],0)/match.coords.length,
-        match.coords.reduce((sum,p)=>sum+p[1],0)/match.coords.length
-      ];
-    });
-    groups.forEach(group=>{
-      group.routeKeys=[...new Set(group.members.map(f=>f.properties.__routeKey).filter(Boolean))];
-      group.routeIds=[...new Set(group.members.map(f=>f.properties.__rawRouteId).filter(Boolean))];
-      group.names=[...new Set(group.members.map(f=>f.properties.__stopName).filter(Boolean))];
-      group.displayName=preferredStopName(group.names);
-    });
-    state.stopGroups=groups;
-    return groups;
+  function canonicalStopGroupName(value) {
+    const key = normalizeStopName(value);
+    // Satukan variasi ejaan Family/Familly, tetapi pertahankan identitas halte A dan B.
+    // Dengan demikian A hanya bergabung dengan A lintas koridor, begitu juga B.
+    const graha = key.match(/^grahafamil(?:y|ly)([ab])$/);
+    if (graha) return "grahafamily" + graha[1];
+    // Variasi penulisan Jono/Yono Soewojo/Suwoyo merujuk halte Yono Suwoyo.
+    // Nomor 1 dan 2 tetap menjadi halte terpisah, tetapi masing-masing
+    // menggabungkan seluruh catatan lintas rute dalam radius pengelompokan.
+    const yono = key.match(/^(?:jono|yono)(?:soewojo|suwoyo)([12])$/);
+    if (yono) return "yonosuwoyo" + yono[1];
+    // "Basra" and "Basra 2" are duplicate records at the same physical stop.
+    if (key === "basra2") return "basra";
+    return key;
   }
 
+  function buildStopGroups() {
+    if (state.stopGroups) return state.stopGroups;
+    // Same canonical name can be merged across route datasets within 150 m.
+    // Distinct names (e.g. Samsat Tandes A/B or Tanjungsari A/B) stay separate.
+    const groups = [];
+    const groupsByName = new Map();
+
+    state.stops.forEach(feature => {
+      const coord = feature.geometry.coordinates;
+      if (!Array.isArray(coord) || !Number.isFinite(coord[0]) || !Number.isFinite(coord[1])) return;
+      const rawName = String(feature.properties.__stopName || "").trim();
+      const keyName = /^(halte|shelter)?\s*(tanpa nama|unnamed|unknown)$/i.test(rawName)
+        ? "" : canonicalStopGroupName(rawName);
+
+      let match = null;
+      if (keyName) {
+        const candidates = groupsByName.get(keyName) || [];
+        let nearestDistance = Infinity;
+        candidates.forEach(group => {
+          const distance = haversineMeters(group.center, coord);
+          if (distance <= 150 && distance < nearestDistance) {
+            match = group;
+            nearestDistance = distance;
+          }
+        });
+      }
+
+      // Satukan titik dari dataset/rute berbeda jika benar-benar berimpit.
+      // Ambang 3 m menghindari penggabungan halte A/B yang berada di sisi jalan berbeda.
+      if (!match) {
+        let nearestDistance = Infinity;
+        groups.forEach(group => {
+          const distance = haversineMeters(group.center, coord);
+          if (distance <= 3 && distance < nearestDistance) {
+            match = group;
+            nearestDistance = distance;
+          }
+        });
+      }
+
+      // Keep unnamed records independent so they cannot absorb named stops.
+      if (!match) {
+        match = { members: [], coords: [], center: coord, canonicalName: keyName };
+        groups.push(match);
+        if (keyName) {
+          if (!groupsByName.has(keyName)) groupsByName.set(keyName, []);
+          groupsByName.get(keyName).push(match);
+        }
+      }
+
+      match.members.push(feature);
+      match.coords.push(coord);
+    });
+
+    groups.forEach(group => {
+      // Use a real source coordinate closest to all members, not an invented centroid.
+      let best = group.coords[0], bestTotal = Infinity;
+      group.coords.forEach(candidate => {
+        const total = group.coords.reduce((sum, other) => sum + haversineMeters(candidate, other), 0);
+        if (total < bestTotal) { bestTotal = total; best = candidate; }
+      });
+      group.center = best;
+      group.routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
+      group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
+      group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
+      const canonicalDisplay = /^grahafamily[ab]$/.test(group.canonicalName)
+        ? "Graha Family " + group.canonicalName.slice(-1).toUpperCase()
+        : /^yonosuwoyo[12]$/.test(group.canonicalName)
+          ? "Yono Suwoyo " + group.canonicalName.slice(-1)
+          : group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
+          : preferredStopName(group.names);
+      group.displayName = formatStopName(canonicalDisplay);
+    });
+
+    state.stopGroups = groups;
+    return groups;
+  }
   function refreshStopsSource() {
     if (!state.map || !state.map.getSource("all-stops")) return;
     const groups = buildStopGroups();
@@ -317,11 +384,11 @@
         type: "Feature", id: "stop-cluster-" + index,
         geometry: { type: "Point", coordinates: group.center },
         properties: {
-          __stopName: group.displayName || group.names[0] || "Halte", __stopNames: group.names,
+          __stopName: group.displayName || formatStopName(group.names[0] || "Halte"), __stopNames: group.names,
           __routeKey: routeKeys[0] || "", __routeKeys: routeKeys, __visibleRouteKeys: visibleRouteKeys,
           __memberCount: members.length,
           __memberStops: members.map(f => ({
-            name: f.properties.__stopName || "Halte tanpa nama", routeKey: f.properties.__routeKey || "", routeId: f.properties.__rawRouteId || "",
+            name: formatStopName(f.properties.__stopName || "tanpa nama"), routeKey: f.properties.__routeKey || "", routeId: f.properties.__rawRouteId || "",
             id: f.properties.stop_id ?? f.properties.Stop_Id ?? f.properties.Id ?? f.properties.id ?? "—",
             coordinates: f.geometry.coordinates
           })),
@@ -549,7 +616,7 @@
           const properties = { ...(feature.properties || {}) };
           const rawRouteId = properties.Route_Id ?? properties.Route_Id_1 ?? properties.route_id ?? properties.routeId ?? "";
           const routeKey = matchRoute(rawRouteId, stopDataset.fallbackRouteKey);
-          const name = properties.Halte_name ?? properties.Halte_nama ?? properties.halte_name ?? properties.halte_nama ?? properties.stop_name ?? properties.name ?? "Halte tanpa nama";
+          const name = properties.Halte_name ?? properties.Halte_nama ?? properties.halte_name ?? properties.halte_nama ?? properties.stop_name ?? properties.name ?? "tanpa nama";
           properties.__routeKey = routeKey || "";
           properties.__stopName = String(name);
           properties.__rawRouteId = String(rawRouteId || "");
@@ -568,70 +635,68 @@
   function addStopLayers() {
     state.map.addSource("all-stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     refreshStopsSource();
-
-    config.routes.forEach(route => {
-      const layerId = "stops-" + route.key;
-      state.map.addLayer({
-        id: layerId, type: "circle", source: "all-stops",
-        filter: ["all", ["in", route.key, ["get", "__visibleRouteKeys"]], ["==", ["get", "__showStop"], 1]],
-        paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
-          "circle-color": "#FFFFFF",
-          "circle-stroke-color": "#173B63",
-          "circle-stroke-width": 2.2,
-          "circle-opacity": 0.98
-        }
-      });
-      state.map.on("click", layerId, (event) => {
-        const feature = event.features?.[0];
-        if (!feature) return;
-        showStopDetails(feature);
-      });
-      state.map.on("mouseenter", layerId, (event) => {
-        state.map.getCanvas().style.cursor = "pointer";
-        const feature = event.features?.[0];
-        if (!feature) return;
-        if (state.hoverStopPopup) state.hoverStopPopup.remove();
-        state.hoverStopPopup = new maplibregl.Popup({
-          closeButton: false, closeOnClick: false, offset: 10, className: "stop-hover-popup"
-        }).setLngLat(feature.geometry.coordinates)
-          .setHTML('<div class="stop-hover-label">' + escapeHtml(feature.properties.__stopName || "Halte") + '</div>')
-          .addTo(state.map);
-      });
-      state.map.on("mouseleave", layerId, () => {
-        state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "";
-        if (state.hoverStopPopup) {
-          state.hoverStopPopup.remove();
-          state.hoverStopPopup = null;
-        }
-      });
+    const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
+    const activeStopFilter = visibleKeys.length
+      ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
+      : ["==", ["get", "__showStop"], -1];
+    // Satu layer untuk semua titik halte bersama. Layer per-rute sebelumnya
+    // menggambar fitur yang sama berulang kali ketika satu halte dilayani banyak koridor.
+    state.map.addLayer({
+      id: "stops-all", type: "circle", source: "all-stops",
+      filter: activeStopFilter,
+      layout: { visibility: state.stopsVisible ? "visible" : "none" },
+      paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
+        "circle-color": "#FFFFFF",
+        "circle-stroke-color": "#173B63",
+        "circle-stroke-width": 2.2,
+        "circle-opacity": 0.98
+      }
+    });
+    state.map.on("click", "stops-all", event => {
+      const feature=event.features?.[0];
+      if(feature) showStopDetails(feature);
+    });
+    state.map.on("mouseenter", "stops-all", event => {
+      state.map.getCanvas().style.cursor="pointer";
+      const feature=event.features?.[0];
+      if(!feature) return;
+      if(state.hoverStopPopup) state.hoverStopPopup.remove();
+      state.hoverStopPopup=new maplibregl.Popup({
+        closeButton:false,closeOnClick:false,offset:10,className:"stop-hover-popup"
+      }).setLngLat(feature.geometry.coordinates)
+        .setHTML('<div class="stop-hover-label">'+escapeHtml(feature.properties.__stopName || "Halte")+'</div>')
+        .addTo(state.map);
+    });
+    state.map.on("mouseleave", "stops-all", () => {
+      state.map.getCanvas().style.cursor=state.finderMode ? "crosshair" : "";
+      if(state.hoverStopPopup){state.hoverStopPopup.remove();state.hoverStopPopup=null;}
     });
 
-    if (!state.map.getLayer("stop-labels")) {
-      state.map.addLayer({
-        id: "stop-labels", type: "symbol", source: "all-stops",
-        filter: ["==", ["get", "__showStop"], 1],
-        minzoom: 10.5,
-        layout: {
-          "text-field": ["get", "__stopName"],
-          "visibility": "none",
-          "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
-          "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
-          "text-offset": [0, 1.15],
-          "text-anchor": "top",
-          "text-allow-overlap": false,
-          "text-ignore-placement": false
-        },
-        paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
+    state.map.addLayer({
+      id: "stop-labels", type: "symbol", source: "all-stops",
+      filter: activeStopFilter,
+      minzoom: 10.5,
+      layout: {
+        "text-field": ["get", "__stopName"],
+        "visibility": "none",
+        "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
+        "text-offset": [0, 1.15],
+        "text-anchor": "top",
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
+      },
+      paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
+    });
+    byId("stopsToggle").addEventListener("change", event => {
+      state.stopsVisible=event.target.checked;
+      ["stops-all","stop-labels"].forEach(id=>{
+        if(state.map.getLayer(id)) state.map.setLayoutProperty(id,"visibility",state.stopsVisible ? "visible":"none");
       });
-    }
-
-    byId("stopsToggle").addEventListener("change", (event) => {
-      state.stopsVisible = event.target.checked;
-      refreshStopsSource();
+      refreshSelectedBuffer();
     });
   }
-
 
   function stopBufferPolygon(feature, radiusMeters, steps = 48) {
     const [lon, lat] = feature.geometry.coordinates;
@@ -712,7 +777,10 @@
     state.selectedRouteKey = routeKey;
     const coords = routeCoordinates(entry.data);
     const lengthKm = routeLengthKm(coords);
-    const stops = state.stops.filter(f => f.properties.__routeKey === routeKey);
+    const stops = buildStopGroups().filter(group => group.routeKeys.includes(routeKey)).map(group => ({
+      type: "Feature", geometry: { type: "Point", coordinates: group.center },
+      properties: { __stopName: group.displayName, __routeKey: routeKey, __routeKeys: group.routeKeys, __rawRouteId: group.routeIds.join(" · ") }
+    }));
     const indexedStops = stops.map(feature => {
       let nearestIndex = 0, nearestDistance = Infinity;
       const point = feature.geometry.coordinates;
@@ -735,7 +803,7 @@
       <div class="route-stop-list">${indexedStops.length ? indexedStops.map((item, i) => `
         <button class="route-stop-item" data-stop-index="${i}">
           <span class="route-stop-number">${i + 1}</span>
-          <span class="route-stop-name">${escapeHtml(item.feature.properties.__stopName || "Halte tanpa nama")}</span>
+          <span class="route-stop-name">${escapeHtml(formatStopName(item.feature.properties.__stopName || "tanpa nama"))}</span>
           <small>${Math.round(item.nearestDistance)} m dari garis</small>
         </button>`).join("") : '<p class="result-note">Belum ada data halte untuk koridor ini. Tambahkan GeoJSON halte yang sesuai.</p>'}
       </div>`;
@@ -790,7 +858,7 @@
     const routeLabel = routeNameByKey(routeKey);
     const rawRouteIds = [...new Set(members.map(member => member.routeId).filter(Boolean))];
     byId("mapDetailKicker").textContent = "INFORMASI HALTE";
-    byId("mapDetailTitle").textContent = (p.__memberCount > 1 ? "Halte bersama · " : "") + (p.__stopName || "Halte tanpa nama");
+    byId("mapDetailTitle").textContent = p.__stopName || "Halte tanpa nama";
     const bufferToggle = byId("coverageToggle");
     if (bufferToggle && !bufferToggle.checked) {
       bufferToggle.checked = true;
@@ -801,13 +869,13 @@
     byId("mapDetailContent").innerHTML = `
       <div class="route-metrics stop-metrics">
         <div class="route-metric"><strong>${escapeHtml(routeLabels.length ? [...new Set(routeLabels.map(r => r.label.split(" · ")[0]))].join(" / ") : "—")}</strong><small>operator/layanan</small></div>
-        <div class="route-metric"><strong>${p.__memberCount || 1}</strong><small>titik halte digabung</small></div>
+        <div class="route-metric"><strong>${routeLabels.length}</strong><small>rute yang melayani</small></div>
         <div class="route-metric"><strong>${state.bufferRadius} m</strong><small>radius indikatif</small></div>
       </div>
       <div class="route-stop-heading">Dilayani koridor (${routeLabels.length})</div>
       <div class="served-route-list">${routeLabels.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
       ${rawRouteIds.length ? '<p class="result-note">Route_Id: ' + rawRouteIds.map(escapeHtml).join(" · ") + '</p>' : ""}
-      ${p.__memberCount > 1 ? '<p class="result-note">Titik halte berdekatan digabung pada peta. Informasi ini mencakup ' + p.__memberCount + ' titik halte dari dataset dan ' + routeLabels.length + ' koridor unik.</p>' : ""}
+      ${p.__memberCount > 1 ? '<p class="result-note">Titik halte dari beberapa dataset digabung menjadi satu lokasi. Seluruh koridor yang melayani lokasi ini ditampilkan di atas.</p>' : ""}
       <p class="result-note">Buffer lingkaran hanya ditampilkan untuk halte yang dipilih. Radius dapat diubah dari panel kiri. Jarak merupakan radius geometris, bukan jaminan akses trotoar.</p>
       <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>`;
     byId("mapDetailPanel").hidden = false;
@@ -1323,7 +1391,23 @@
   function searchStop(queryText) {
     const query = normalize(queryText);
     if (!query) return;
-    const candidates = state.stops.filter(feature => normalize(feature.properties.__stopName).includes(query));
+    const candidates = buildStopGroups().map(group => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: group.center },
+      properties: {
+        __stopName: group.displayName,
+        __routeKey: group.routeKeys[0] || "",
+        __routeKeys: group.routeKeys,
+        __memberCount: group.members.length,
+        __memberStops: group.members.map(member => ({
+          name: formatStopName(member.properties.__stopName || "tanpa nama"),
+          routeKey: member.properties.__routeKey || "",
+          routeId: member.properties.__rawRouteId || "",
+          id: member.properties.Id ?? member.properties.id ?? "—",
+          coordinates: member.geometry.coordinates
+        }))
+      }
+    })).filter(feature => normalize(feature.properties.__stopName).includes(query));
     if (!candidates.length) {
       nearestResult.innerHTML = '<div class="result-placeholder">Nama halte tidak ditemukan. Pastikan data halte sudah dimuat.</div>';
       return;
@@ -1403,7 +1487,18 @@
     if (state.clickMarker) state.clickMarker.remove();
     state.clickMarker = new maplibregl.Marker({ color: "#f8fafc" }).setLngLat(origin).addTo(state.map);
 
-    const nearby = state.stops.map(feature => ({
+    const groupedStops = buildStopGroups().map(group => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: group.center },
+      properties: {
+        __stopName: group.displayName,
+        __routeKey: group.routeKeys[0] || "",
+        __routeKeys: group.routeKeys,
+        __rawRouteId: group.routeIds.join(" · "),
+        __memberCount: group.members.length
+      }
+    }));
+    const nearby = groupedStops.map(feature => ({
       feature,
       straightMeters: haversineMeters(origin, feature.geometry.coordinates)
     })).sort((a, b) => a.straightMeters - b.straightMeters)
@@ -1480,6 +1575,10 @@
     }
 
     const props = best.feature.properties || {};
+    const nearestRouteKeys = Array.isArray(props.__routeKeys) ? props.__routeKeys : [props.__routeKey].filter(Boolean);
+    const nearestRoutes = [...new Set(nearestRouteKeys)].map(key => ({
+      key, label: routeNameByKey(key), color: config.routes.find(route => route.key === key)?.color || "#38BDF8"
+    }));
     const distance = best.route.distanceKm * 1000;
     const distanceText = distance >= 1000 ? (distance / 1000).toFixed(2) + " km" : Math.round(distance) + " m";
     const timeText = Math.max(1, Math.round(best.route.durationMinutes)) + " menit";
@@ -1504,8 +1603,8 @@
         <div class="route-metric"><strong>${escapeHtml(distanceText)}</strong><small>jarak ${routingFailed ? "garis lurus" : "berjalan kaki"}</small></div>
         <div class="route-metric"><strong>${escapeHtml(timeText)}</strong><small>estimasi jalan kaki</small></div>
       </div>
-      <div class="route-stop-heading">Dilayani koridor</div>
-      <div class="served-route-chip" style="--route-color:${config.routes.find(r => r.key === props.__routeKey)?.color || "#38BDF8"}">${escapeHtml(routeNameByKey(props.__routeKey))}</div>
+      <div class="route-stop-heading">Dilayani koridor (${nearestRoutes.length})</div>
+      <div class="served-route-list">${nearestRoutes.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
       <p class="result-note">${escapeHtml(note)}</p>
       <button id="clearNearestFromPanel" class="toolbar-button" style="width:100%;justify-content:center">× Hapus hasil pencarian</button>`;
     byId("mapDetailPanel").hidden = false;
