@@ -723,15 +723,15 @@
         id: "stop-circle-buffer-fill", type: "fill", source: "stop-circle-buffers",
         paint: { "fill-color": ["match", ["get", "__routeKey"],
           "sby-benowo", "#00D9FF", "sby-kejawan", "#00D9FF", "sby-purabaya", "#00D9FF",
-          "ww-gunung-anyar", "#00D9FF", "ww-tow", "#00D9FF", "#00D9FF"], "fill-opacity": 0.34 },
-        layout: { visibility: "none" }
+          "ww-gunung-anyar", "#00D9FF", "ww-tow", "#00D9FF", "#00D9FF"], "fill-opacity": 0 },
+        layout: { visibility: "visible" }
       });
       state.map.addLayer({
         id: "stop-circle-buffer-outline", type: "line", source: "stop-circle-buffers",
         paint: { "line-color": ["match", ["get", "__routeKey"],
           "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
-          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 2.4, "line-opacity": 0.98 },
-        layout: { visibility: toggle.checked ? "visible" : "none" }
+          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 2.4, "line-opacity": 0 },
+        layout: { visibility: "visible" }
       });
     }
     const refresh = () => {
@@ -880,12 +880,7 @@
     byId("mapDetailKicker").textContent = "INFORMASI HALTE";
     byId("mapDetailTitle").textContent = p.__stopName || "Halte tanpa nama";
     const bufferToggle = byId("coverageToggle");
-    if (bufferToggle && !bufferToggle.checked) {
-      bufferToggle.checked = true;
-      ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
-        if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", "visible");
-      });
-    }
+    if (bufferToggle && !bufferToggle.checked) bufferToggle.checked = true;
     byId("mapDetailContent").innerHTML = `
       <div class="route-metrics stop-metrics">
         <div class="route-metric"><strong>${escapeHtml(routeLabels.length ? [...new Set(routeLabels.map(r => r.label.split(" · ")[0]))].join(" / ") : "—")}</strong><small>operator/layanan</small></div>
