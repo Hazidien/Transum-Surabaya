@@ -932,16 +932,22 @@
       speed.value = String(dockSpeed.value);
       applyBusSpeed(dockSpeed.value);
     });
-    if (dockToggle) dockToggle.addEventListener("change", () => {
-      byId("busesToggle").checked = dockToggle.checked;
-      state.busesVisible = dockToggle.checked;
+    const setBusesVisible = visible => {
+      state.busesVisible = !!visible;
+      byId("busesToggle").checked = state.busesVisible;
+      if (dockToggle) dockToggle.checked = state.busesVisible;
       state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
-    });
-    byId("busesToggle").addEventListener("change", event => {
-      state.busesVisible = event.target.checked;
-      if (dockToggle) dockToggle.checked = event.target.checked;
-      state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
-    });
+      if (!state.busesVisible) {
+        if (state.busFrame) cancelAnimationFrame(state.busFrame);
+        state.busFrame = null;
+        state.busLastTime = 0;
+      } else if (state.busAnimationOn && !state.busFrame) {
+        state.busLastTime = 0;
+        state.busFrame = requestAnimationFrame(animateBusMarkers);
+      }
+    };
+    if (dockToggle) dockToggle.addEventListener("change", () => setBusesVisible(dockToggle.checked));
+    byId("busesToggle").addEventListener("change", event => setBusesVisible(event.target.checked));
     byId("closeMapDetail").addEventListener("click", () => {
       if (state.clickMarker) state.clickMarker.remove();
       state.clickMarker = null;
