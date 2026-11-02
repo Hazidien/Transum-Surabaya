@@ -56,13 +56,21 @@
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, "");
 
-  // Samakan variasi angka Romawi/Arab dan awalan generik nama halte.
+  // Kanonisasi nama: abaikan awalan halte/shelter, samakan angka Romawi-Arab,
+  // dan satukan variasi spasi/tanda baca seperti Tanjung Sari/Tanjungsari.
   function normalizeStopName(value) {
-    let text = String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    text = text.replace(/\biii\b/g, "3").replace(/\bii\b/g, "2").replace(/\biv\b/g, "4")
-      .replace(/\bii\b/g, "2").replace(/\bi\b/g, "1");
+    let text = String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    text = text.replace(/\biii\b/g, "3").replace(/\bii\b/g, "2").replace(/\biv\b/g, "4").replace(/\bi\b/g, "1");
     text = text.replace(/\b(halte|shelter|bus stop|stop)\b/g, " ");
     return text.replace(/[^a-z0-9]+/g, "");
+  }
+
+  function formatStopName(value) {
+    const name = String(value ?? "").trim();
+    if (!name || /^(halte|shelter|bus stop|stop)\b/i.test(name)) return name || "Halte tanpa nama";
+    // Nama terminal/term tidak diberi awalan "Halte".
+    if (/^(terminal\b|term\.?\s)/i.test(name)) return name;
+    return "Halte " + name;
   }
 
   function editDistance(a, b) {
@@ -274,62 +282,75 @@
 
   function buildStopGroups() {
     if (state.stopGroups) return state.stopGroups;
-    // Satu halte fisik dapat muncul di beberapa dataset/rute dengan sedikit selisih digitasi.
-    // Nama kanonis menangani "Satelit III B" = "Satelit 3B"; kedekatan spasial
-    // hingga 250 m dipakai untuk nama yang sama. Akhiran A/B dan nomor tetap dibedakan.
+    // Exact canonical names are one logical stop across all datasets/routes,
+    // even when digitized coordinates differ. Use a real member coordinate (medoid),
+    // never an artificial average point between distant platforms.
     const groups = [];
-    const buckets = new Map();
-    const cellLat = 160 / 110574;
-    const cellLonAt = lat => 160 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
+    const exactGroups = new Map();
+    const fuzzyBuckets = new Map();
+    const cellMeters = 100;
+    const cellLat = cellMeters / 110574;
+    const cellLonAt = lat => cellMeters / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
     const suffixOf = value => (value.match(/([a-z])$/i) || [,""])[1].toLowerCase();
+
     state.stops.forEach(feature => {
       const coord = feature.geometry.coordinates;
       if (!Array.isArray(coord) || !Number.isFinite(coord[0]) || !Number.isFinite(coord[1])) return;
-      const lat=coord[1], lon=coord[0], gx=Math.floor(lon/cellLonAt(lat)), gy=Math.floor(lat/cellLat);
+      const lat=coord[1], lon=coord[0];
       const rawName=String(feature.properties.__stopName || "").trim();
       const keyName=/^(halte|shelter)?\s*(tanpa nama|unnamed|unknown)$/i.test(rawName) ? "" : normalizeStopName(rawName);
-      let match=null;
-      for(let dx=-1;dx<=1 && !match;dx++) for(let dy=-1;dy<=1 && !match;dy++) {
-        for(const group of buckets.get((gx+dx)+"|"+(gy+dy)) || []) {
-          const distance=haversineMeters(group.center,coord);
-          const exactName=keyName && group.nameKeys.has(keyName);
-          const fuzzyName=keyName && [...group.nameKeys].some(existing => {
-            if (suffixOf(existing)!==suffixOf(keyName)) return false;
-            const longest=Math.max(existing.length,keyName.length);
-            return longest>=8 && editDistance(existing,keyName)<=Math.max(1,Math.floor(longest*0.10));
-          });
-          // Nama identik: toleransi digitasi 250 m. Nama typo ringan: 100 m.
-          // Tanpa nama: hanya gabung bila koordinat nyaris sama.
-          if ((exactName && distance<=150) || (fuzzyName && distance<=80) || (!keyName && distance<=6)) {
-            match=group; break;
+      let match = keyName ? exactGroups.get(keyName) || null : null;
+
+      // For minor spelling differences, merge only when the stops are spatially close.
+      if (!match) {
+        const gx=Math.floor(lon/cellLonAt(lat)), gy=Math.floor(lat/cellLat);
+        for(let dx=-1;dx<=1 && !match;dx++) for(let dy=-1;dy<=1 && !match;dy++) {
+          for(const group of fuzzyBuckets.get((gx+dx)+"|"+(gy+dy)) || []) {
+            const distance=haversineMeters(group.center,coord);
+            const fuzzyName=keyName && [...group.nameKeys].some(existing => {
+              if (suffixOf(existing)!==suffixOf(keyName)) return false;
+              const longest=Math.max(existing.length,keyName.length);
+              return longest>=8 && editDistance(existing,keyName)<=Math.max(1,Math.floor(longest*0.15));
+            });
+            if ((fuzzyName && distance<=80) || (!keyName && distance<=6)) { match=group; break; }
           }
         }
       }
-      if(!match){
-        match={members:[],coords:[],center:coord,nameKeys:new Set()};
+
+      if(!match) {
+        match={members:[],coords:[],center:coord,nameKeys:new Set(),bucketKeys:[]};
         groups.push(match);
+        if(keyName) exactGroups.set(keyName,match);
+        const gx=Math.floor(lon/cellLonAt(lat)), gy=Math.floor(lat/cellLat);
         const bucketKey=gx+"|"+gy;
-        if(!buckets.has(bucketKey)) buckets.set(bucketKey,[]);
-        buckets.get(bucketKey).push(match);
+        if(!fuzzyBuckets.has(bucketKey)) fuzzyBuckets.set(bucketKey,[]);
+        fuzzyBuckets.get(bucketKey).push(match);
+      } else if(keyName && !exactGroups.has(keyName)) {
+        exactGroups.set(keyName,match);
       }
+
       match.members.push(feature);
       if(keyName) match.nameKeys.add(keyName);
       match.coords.push(coord);
-      match.center=[
-        match.coords.reduce((sum,p)=>sum+p[0],0)/match.coords.length,
-        match.coords.reduce((sum,p)=>sum+p[1],0)/match.coords.length
-      ];
     });
+
     groups.forEach(group=>{
+      // Choose the recorded coordinate nearest to all other member coordinates.
+      // This preserves a real mapped stop position even when source datasets disagree.
+      let best=group.coords[0], bestTotal=Infinity;
+      group.coords.forEach(candidate=>{
+        const total=group.coords.reduce((sum,other)=>sum+haversineMeters(candidate,other),0);
+        if(total<bestTotal){bestTotal=total;best=candidate;}
+      });
+      group.center=best;
       group.routeKeys=[...new Set(group.members.map(f=>f.properties.__routeKey).filter(Boolean))];
       group.routeIds=[...new Set(group.members.map(f=>f.properties.__rawRouteId).filter(Boolean))];
       group.names=[...new Set(group.members.map(f=>f.properties.__stopName).filter(Boolean))];
-      group.displayName=preferredStopName(group.names);
+      group.displayName=formatStopName(preferredStopName(group.names));
     });
     state.stopGroups=groups;
     return groups;
   }
-
   function refreshStopsSource() {
     if (!state.map || !state.map.getSource("all-stops")) return;
     const groups = buildStopGroups();
@@ -341,11 +362,11 @@
         type: "Feature", id: "stop-cluster-" + index,
         geometry: { type: "Point", coordinates: group.center },
         properties: {
-          __stopName: group.displayName || group.names[0] || "Halte", __stopNames: group.names,
+          __stopName: group.displayName || formatStopName(group.names[0] || "Halte"), __stopNames: group.names,
           __routeKey: routeKeys[0] || "", __routeKeys: routeKeys, __visibleRouteKeys: visibleRouteKeys,
           __memberCount: members.length,
           __memberStops: members.map(f => ({
-            name: f.properties.__stopName || "Halte tanpa nama", routeKey: f.properties.__routeKey || "", routeId: f.properties.__rawRouteId || "",
+            name: formatStopName(f.properties.__stopName || "tanpa nama"), routeKey: f.properties.__routeKey || "", routeId: f.properties.__rawRouteId || "",
             id: f.properties.stop_id ?? f.properties.Stop_Id ?? f.properties.Id ?? f.properties.id ?? "—",
             coordinates: f.geometry.coordinates
           })),
@@ -573,7 +594,7 @@
           const properties = { ...(feature.properties || {}) };
           const rawRouteId = properties.Route_Id ?? properties.Route_Id_1 ?? properties.route_id ?? properties.routeId ?? "";
           const routeKey = matchRoute(rawRouteId, stopDataset.fallbackRouteKey);
-          const name = properties.Halte_name ?? properties.Halte_nama ?? properties.halte_name ?? properties.halte_nama ?? properties.stop_name ?? properties.name ?? "Halte tanpa nama";
+          const name = properties.Halte_name ?? properties.Halte_nama ?? properties.halte_name ?? properties.halte_nama ?? properties.stop_name ?? properties.name ?? "tanpa nama";
           properties.__routeKey = routeKey || "";
           properties.__stopName = String(name);
           properties.__rawRouteId = String(rawRouteId || "");
@@ -734,7 +755,10 @@
     state.selectedRouteKey = routeKey;
     const coords = routeCoordinates(entry.data);
     const lengthKm = routeLengthKm(coords);
-    const stops = state.stops.filter(f => f.properties.__routeKey === routeKey);
+    const stops = buildStopGroups().filter(group => group.routeKeys.includes(routeKey)).map(group => ({
+      type: "Feature", geometry: { type: "Point", coordinates: group.center },
+      properties: { __stopName: group.displayName, __routeKey: routeKey, __routeKeys: group.routeKeys, __rawRouteId: group.routeIds.join(" · ") }
+    }));
     const indexedStops = stops.map(feature => {
       let nearestIndex = 0, nearestDistance = Infinity;
       const point = feature.geometry.coordinates;
@@ -757,7 +781,7 @@
       <div class="route-stop-list">${indexedStops.length ? indexedStops.map((item, i) => `
         <button class="route-stop-item" data-stop-index="${i}">
           <span class="route-stop-number">${i + 1}</span>
-          <span class="route-stop-name">${escapeHtml(item.feature.properties.__stopName || "Halte tanpa nama")}</span>
+          <span class="route-stop-name">${escapeHtml(formatStopName(item.feature.properties.__stopName || "tanpa nama"))}</span>
           <small>${Math.round(item.nearestDistance)} m dari garis</small>
         </button>`).join("") : '<p class="result-note">Belum ada data halte untuk koridor ini. Tambahkan GeoJSON halte yang sesuai.</p>'}
       </div>`;
@@ -812,7 +836,7 @@
     const routeLabel = routeNameByKey(routeKey);
     const rawRouteIds = [...new Set(members.map(member => member.routeId).filter(Boolean))];
     byId("mapDetailKicker").textContent = "INFORMASI HALTE";
-    byId("mapDetailTitle").textContent = (p.__memberCount > 1 ? "Halte bersama · " : "") + (p.__stopName || "Halte tanpa nama");
+    byId("mapDetailTitle").textContent = p.__stopName || "Halte tanpa nama";
     const bufferToggle = byId("coverageToggle");
     if (bufferToggle && !bufferToggle.checked) {
       bufferToggle.checked = true;
