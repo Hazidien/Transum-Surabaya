@@ -397,7 +397,7 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Kaliasin (Halte Timur)"
+        "Halte_name": "Halte Kaliasin"
       },
       "geometry": {
         "type": "Point",
@@ -442,7 +442,7 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Halte Basuki Rahmat"
+        "Halte_name": "Halte Basra"
       },
       "geometry": {
         "type": "Point",
