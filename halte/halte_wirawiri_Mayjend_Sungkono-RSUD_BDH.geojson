@@ -23,7 +23,7 @@
       "properties": {
         "OID_": 0,
         "Route_Id": "Mayjend_Sungkono-RSUD_BDH",
-        "Halte_name": "Halte Darmo Park A"
+        "Halte_name": "Halte Darmo Park 1"
       },
       "geometry": {
         "type": "Point",
@@ -1623,7 +1623,7 @@
       "properties": {
         "OID_": 0,
         "Route_Id": "Mayjend_Sungkono-RSUD_BDH",
-        "Halte_name": "Park and Ride Mayjen Sungkono"
+        "Halte_name": "Halte Darmo Park 2"
       },
       "geometry": {
         "type": "Point",
@@ -1639,7 +1639,7 @@
       "properties": {
         "OID_": 0,
         "Route_Id": "Mayjend_Sungkono-RSUD_BDH",
-        "Halte_name": "Halte Darmo Park A"
+        "Halte_name": "Halte Darmo Park 1"
       },
       "geometry": {
         "type": "Point",
