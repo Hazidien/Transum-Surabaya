@@ -692,7 +692,7 @@
     byId("stopsToggle").addEventListener("change", event => {
       state.stopsVisible = event.target.checked;
       if (state.map.getLayer("stops-all")) state.map.setLayoutProperty("stops-all", "visibility", state.stopsVisible ? "visible" : "none");
-      if (state.map.getLayer("stop-labels")) state.map.setLayoutProperty("stop-labels", "visibility", "none");
+      if (state.map.getLayer("stop-labels")) state.map.setLayoutProperty("stop-labels", "visibility", state.stopsVisible ? "visible" : "none");
       if (state.stopsVisible) refreshSelectedBuffer();
       else setBufferLayerVisibility(false);
     });
