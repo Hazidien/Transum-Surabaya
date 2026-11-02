@@ -1071,7 +1071,7 @@
   }
 
   function animateBusMarkers(now) {
-    if (!state.busAnimationOn) return;
+    if (!state.busAnimationOn || !state.busesVisible) { state.busFrame = null; return; }
     if (now - state.busLastRender < 33) {
       state.busFrame = requestAnimationFrame(animateBusMarkers);
       return;
