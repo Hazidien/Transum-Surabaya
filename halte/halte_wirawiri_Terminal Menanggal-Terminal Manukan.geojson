@@ -1,1 +1,1707 @@
-{"type":"FeatureCollection","name":"halte_wirawiri_Terminal Menanggal-Terminal Manukan","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC::CRS84"}},"features":[{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SWK Dukuh Menanggal"},"geometry":{"type":"Point","coordinates":[112.72775,-7.34352,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Dukuh Menanggal"},"geometry":{"type":"Point","coordinates":[112.7289363,-7.3434819,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kantor Dinas Perhubungan Jawa"},"geometry":{"type":"Point","coordinates":[112.72891,-7.34065,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"GPT Kristus Menanggal"},"geometry":{"type":"Point","coordinates":[112.72656,-7.33941,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Simpang Menanggal"},"geometry":{"type":"Point","coordinates":[112.72475,-7.34258,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Term. Menanggal"},"geometry":{"type":"Point","coordinates":[112.7224929,-7.3416021,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kantor DPW PKB Jatim"},"geometry":{"type":"Point","coordinates":[112.72363,-7.3385,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Gayungsari Barat"},"geometry":{"type":"Point","coordinates":[112.7195613,-7.3375573,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Gayungsari Timur"},"geometry":{"type":"Point","coordinates":[112.72129,-7.33789,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMAN 15"},"geometry":{"type":"Point","coordinates":[112.71883,-7.34067,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SDN Menanggal 601"},"geometry":{"type":"Point","coordinates":[112.71767,-7.33946,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SWK Gayungan"},"geometry":{"type":"Point","coordinates":[112.71648,-7.3376,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMPN 22"},"geometry":{"type":"Point","coordinates":[112.71692,-7.3372,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Masjid Al Akbar Surabaya"},"geometry":{"type":"Point","coordinates":[112.7148,-7.33514,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Pasar Rakyat Jambangan"},"geometry":{"type":"Point","coordinates":[112.7149778,-7.3350532,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Pagesangan Indah A"},"geometry":{"type":"Point","coordinates":[112.71236,-7.33297,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Pagesangan Indah B"},"geometry":{"type":"Point","coordinates":[112.71216,-7.3329,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Pasar Pagesangan B"},"geometry":{"type":"Point","coordinates":[112.71069,-7.33281,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Pasar Pagesangan A"},"geometry":{"type":"Point","coordinates":[112.71082,-7.33287,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kebonsari Tengah A"},"geometry":{"type":"Point","coordinates":[112.71092,-7.33072,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kebonsari Tengah B"},"geometry":{"type":"Point","coordinates":[112.71101,-7.33066,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SD Darul Ulum A"},"geometry":{"type":"Point","coordinates":[112.71191,-7.32831,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SD Darul Ulum B"},"geometry":{"type":"Point","coordinates":[112.71195,-7.32845,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SWK Jambangan A"},"geometry":{"type":"Point","coordinates":[112.71374,-7.32284,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SWK Jambangan B"},"geometry":{"type":"Point","coordinates":[112.71378,-7.32288,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Jambangan Indah A"},"geometry":{"type":"Point","coordinates":[112.71527,-7.3191513,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Jambangan Indah B"},"geometry":{"type":"Point","coordinates":[112.71532,-7.3192,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Universitas Merdeka A"},"geometry":{"type":"Point","coordinates":[112.7182,-7.31929,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Universitas Merdeka B"},"geometry":{"type":"Point","coordinates":[112.71819,-7.31937,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Puri Kencana A"},"geometry":{"type":"Point","coordinates":[112.72107,-7.32013,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Puri Kencana B"},"geometry":{"type":"Point","coordinates":[112.7208334,-7.3201705,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMP Baitussalam A"},"geometry":{"type":"Point","coordinates":[112.72237,-7.31711,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMP Baitussalam B"},"geometry":{"type":"Point","coordinates":[112.72253,-7.31709,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Sekolah Al Falah Ketintang A"},"geometry":{"type":"Point","coordinates":[112.72361,-7.31303,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Sekolah Al Falah Ketintang B"},"geometry":{"type":"Point","coordinates":[112.72363,-7.31322,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SDN Ketintang 1 A"},"geometry":{"type":"Point","coordinates":[112.72515,-7.30927,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SDN Ketintang 1 B"},"geometry":{"type":"Point","coordinates":[112.7252,-7.3094,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ketintang Tengah A"},"geometry":{"type":"Point","coordinates":[112.72703,-7.30881,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ketintang Tengah B"},"geometry":{"type":"Point","coordinates":[112.72718,-7.30899,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Telkom University A"},"geometry":{"type":"Point","coordinates":[112.72938,-7.30985,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Telkom University B"},"geometry":{"type":"Point","coordinates":[112.72941,-7.30995,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ketintang Timur PTT"},"geometry":{"type":"Point","coordinates":[112.73123,-7.30976,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Jetis Kulon A"},"geometry":{"type":"Point","coordinates":[112.73222,-7.30987,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Jetis Kulon B"},"geometry":{"type":"Point","coordinates":[112.73257,-7.30797,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ketintang"},"geometry":{"type":"Point","coordinates":[112.734908,-7.310006,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMPN 32"},"geometry":{"type":"Point","coordinates":[112.73465,-7.30745,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"RSI A. Yani"},"geometry":{"type":"Point","coordinates":[112.7353795,-7.3062341,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Wonokromo A"},"geometry":{"type":"Point","coordinates":[112.73678,-7.30224,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Wonokromo B"},"geometry":{"type":"Point","coordinates":[112.73708,-7.30212,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Terminal Joyoboyo"},"geometry":{"type":"Point","coordinates":[112.7363889,-7.2989993,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Joyoboyo 2"},"geometry":{"type":"Point","coordinates":[112.73785,-7.29891,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Marmoyo"},"geometry":{"type":"Point","coordinates":[112.73946,-7.29638,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"KBS"},"geometry":{"type":"Point","coordinates":[112.7386,-7.29537,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ciliwung B"},"geometry":{"type":"Point","coordinates":[112.73579,-7.29306,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ciliwung A"},"geometry":{"type":"Point","coordinates":[112.73589,-7.29312,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Simpang Adityawarman B"},"geometry":{"type":"Point","coordinates":[112.73294,-7.29514,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Simpang Adityawarman A"},"geometry":{"type":"Point","coordinates":[112.73274,-7.29529,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Aditya Warman"},"geometry":{"type":"Point","coordinates":[112.73058,-7.29333,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"KPU"},"geometry":{"type":"Point","coordinates":[112.72883,-7.29264,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Gedung Juang 45"},"geometry":{"type":"Point","coordinates":[112.72124,-7.29178,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Mayjend Sungkono"},"geometry":{"type":"Point","coordinates":[112.72097,-7.29202,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Darmo Park 1"},"geometry":{"type":"Point","coordinates":[112.7175366,-7.2913882,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Darmo Park A"},"geometry":{"type":"Point","coordinates":[112.71745,-7.29167,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Park and Ride Mayjen Sungkono"},"geometry":{"type":"Point","coordinates":[112.71518,-7.29085,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Taman Makam Pahlawan A"},"geometry":{"type":"Point","coordinates":[112.7111,-7.28974,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Taman Makam Pahlawan 2"},"geometry":{"type":"Point","coordinates":[112.70832,-7.28854,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Putat Gede A"},"geometry":{"type":"Point","coordinates":[112.69886,-7.28603,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Putat Gede B"},"geometry":{"type":"Point","coordinates":[112.6987,-7.28575,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Darmo Permai Timur B"},"geometry":{"type":"Point","coordinates":[112.70033,-7.28364,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Darmo Permai Timur A"},"geometry":{"type":"Point","coordinates":[112.69997,-7.28344,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Simpang Darmo Baru Barat B"},"geometry":{"type":"Point","coordinates":[112.69769,-7.28044,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Simpang Darmo Baru Barat A"},"geometry":{"type":"Point","coordinates":[112.6977334,-7.280694,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ikado A"},"geometry":{"type":"Point","coordinates":[112.69831,-7.27499,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ikado B"},"geometry":{"type":"Point","coordinates":[112.69847,-7.27538,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Sukomanunggal Jaya A"},"geometry":{"type":"Point","coordinates":[112.69856,-7.27259,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Sukomanunggal Jaya B"},"geometry":{"type":"Point","coordinates":[112.69876,-7.27246,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kejaksaan Negeri Surabaya A"},"geometry":{"type":"Point","coordinates":[112.6949,-7.26921,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kejaksaan Negeri Surabaya B"},"geometry":{"type":"Point","coordinates":[112.69484,-7.269,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Satelit Indah B"},"geometry":{"type":"Point","coordinates":[112.69379,-7.26569,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Satelit Indah A"},"geometry":{"type":"Point","coordinates":[112.69365,-7.26583,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Satelit Utara B"},"geometry":{"type":"Point","coordinates":[112.69019,-7.26436,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Satelit Utara A"},"geometry":{"type":"Point","coordinates":[112.69032,-7.2645,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Darmo Indah Timur B"},"geometry":{"type":"Point","coordinates":[112.6859173,-7.2640246,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Darmo Indah Timur A"},"geometry":{"type":"Point","coordinates":[112.68584,-7.26406,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kantor Imigrasi Tanjung Perak A"},"geometry":{"type":"Point","coordinates":[112.68416,-7.26166,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kantor Imigrasi Tanjung Perak B"},"geometry":{"type":"Point","coordinates":[112.68427,-7.26165,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Karangpoh A"},"geometry":{"type":"Point","coordinates":[112.68287,-7.2588,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"PT. Asterindo Plast"},"geometry":{"type":"Point","coordinates":[112.682957,-7.259067,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Balongsari"},"geometry":{"type":"Point","coordinates":[112.6785714,-7.2592213,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Bibis A"},"geometry":{"type":"Point","coordinates":[112.6762,-7.25818,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Bibis B"},"geometry":{"type":"Point","coordinates":[112.67623,-7.25836,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMPN 47 A"},"geometry":{"type":"Point","coordinates":[112.671456,-7.2633193,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMPN 47 B"},"geometry":{"type":"Point","coordinates":[112.67151,-7.2632646,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMKN 13 B"},"geometry":{"type":"Point","coordinates":[112.67314,-7.26297,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMKN 13 A"},"geometry":{"type":"Point","coordinates":[112.6731446,-7.2631139,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Term. Manukan"},"geometry":{"type":"Point","coordinates":[112.6665154,-7.2682053,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMPN 47 B"},"geometry":{"type":"Point","coordinates":[112.6715019,-7.2632931,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Term. Manukan"},"geometry":{"type":"Point","coordinates":[112.6664913,-7.2683262,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMPN 47 B"},"geometry":{"type":"Point","coordinates":[112.6715019,-7.2632931,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Karangpoh A"},"geometry":{"type":"Point","coordinates":[112.6828652,-7.2588596,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Wonokromo B"},"geometry":{"type":"Point","coordinates":[112.7370205,-7.3020863,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Masjid Al Akbar Surabaya"},"geometry":{"type":"Point","coordinates":[112.714812,-7.335059,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SWK Gayungan"},"geometry":{"type":"Point","coordinates":[112.7164651,-7.3375979,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMAN 15"},"geometry":{"type":"Point","coordinates":[112.7188212,-7.3406987,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Kantor Dinas Perhubungan Jawa"},"geometry":{"type":"Point","coordinates":[112.7289028,-7.3406765,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMPN 22"},"geometry":{"type":"Point","coordinates":[112.7169253,-7.3371505,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"SMPN 22"},"geometry":{"type":"Point","coordinates":[112.7169253,-7.3371505,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Pasar Rakyat Jambangan"},"geometry":{"type":"Point","coordinates":[112.7150042,-7.335087,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Jambangan Indah A"},"geometry":{"type":"Point","coordinates":[112.7152857,-7.3191651,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ketintang Timur PTT"},"geometry":{"type":"Point","coordinates":[112.7312382,-7.309721,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Ketintang, Wonokromo, Kec. Wonokromo, Surabaya, J*"},"geometry":{"type":"Point","coordinates":[112.735003,-7.3100206,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Terminal Joyoboyo"},"geometry":{"type":"Point","coordinates":[112.7364252,-7.2989987,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"KBS"},"geometry":{"type":"Point","coordinates":[112.7386494,-7.2953458,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Putat Gede A"},"geometry":{"type":"Point","coordinates":[112.6988689,-7.2859815,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Putat Gede B"},"geometry":{"type":"Point","coordinates":[112.6986907,-7.2857963,0]}},{"type":"Feature","properties":{"Route_Id":"Terminal Menanggal-Terminal Manukan","Halte_name":"Term. Manukan"},"geometry":{"type":"Point","coordinates":[112.6664913,-7.2683262,0]}}]}
+{
+  "type": "FeatureCollection",
+  "name": "halte_wirawiri_Terminal Menanggal-Terminal Manukan",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC::CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SWK Dukuh Menanggal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72775,
+          -7.34352,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Dukuh Menanggal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7289363,
+          -7.3434819,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kantor Dinas Perhubungan Jawa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72891,
+          -7.34065,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "GPT Kristus Menanggal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72656,
+          -7.33941,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Simpang Menanggal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72475,
+          -7.34258,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Term. Menanggal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7224929,
+          -7.3416021,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kantor DPW PKB Jatim"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72363,
+          -7.3385,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Gayungsari Barat"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7195613,
+          -7.3375573,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Gayungsari Timur"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72129,
+          -7.33789,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMAN 15"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71883,
+          -7.34067,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SDN Menanggal 601"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71767,
+          -7.33946,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SWK Gayungan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71648,
+          -7.3376,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMPN 22"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71692,
+          -7.3372,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Masjid Al Akbar Surabaya"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7148,
+          -7.33514,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Pasar Rakyat Jambangan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7149778,
+          -7.3350532,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Pagesangan Indah A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71236,
+          -7.33297,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Pagesangan Indah B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71216,
+          -7.3329,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Pasar Pagesangan B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71069,
+          -7.33281,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Pasar Pagesangan A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71082,
+          -7.33287,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kebonsari Tengah A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71092,
+          -7.33072,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kebonsari Tengah B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71101,
+          -7.33066,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SD Darul Ulum A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71191,
+          -7.32831,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SD Darul Ulum B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71195,
+          -7.32845,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SWK Jambangan A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71374,
+          -7.32284,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SWK Jambangan B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71378,
+          -7.32288,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Jambangan Indah A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71527,
+          -7.3191513,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Jambangan Indah B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71532,
+          -7.3192,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Universitas Merdeka A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7182,
+          -7.31929,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Universitas Merdeka B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71819,
+          -7.31937,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Puri Kencana A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72107,
+          -7.32013,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Puri Kencana B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7208334,
+          -7.3201705,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMP Baitussalam A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72237,
+          -7.31711,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMP Baitussalam B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72253,
+          -7.31709,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Sekolah Al Falah Ketintang A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72361,
+          -7.31303,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Sekolah Al Falah Ketintang B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72363,
+          -7.31322,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SDN Ketintang 1 A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72515,
+          -7.30927,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SDN Ketintang 1 B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7252,
+          -7.3094,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ketintang Tengah A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72703,
+          -7.30881,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ketintang Tengah B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72718,
+          -7.30899,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Telkom University A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72938,
+          -7.30985,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Telkom University B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72941,
+          -7.30995,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ketintang Timur PTT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73123,
+          -7.30976,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Jetis Kulon A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73222,
+          -7.30987,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Jetis Kulon B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73257,
+          -7.30797,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ketintang"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.734908,
+          -7.310006,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMPN 32"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73465,
+          -7.30745,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "RSI A. Yani"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7353795,
+          -7.3062341,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Wonokromo A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73678,
+          -7.30224,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Wonokromo B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73708,
+          -7.30212,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Terminal Joyoboyo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7363889,
+          -7.2989993,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Joyoboyo 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73785,
+          -7.29891,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Marmoyo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73946,
+          -7.29638,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "KBS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7386,
+          -7.29537,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ciliwung B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73579,
+          -7.29306,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ciliwung A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73589,
+          -7.29312,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Simpang Adityawarman B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73294,
+          -7.29514,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Simpang Adityawarman A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73274,
+          -7.29529,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Aditya Warman"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.73058,
+          -7.29333,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "KPU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72883,
+          -7.29264,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Gedung Juang 45"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72124,
+          -7.29178,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Mayjend Sungkono"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.72097,
+          -7.29202,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Darmo Park A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7175366,
+          -7.2913882,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Darmo Park A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71745,
+          -7.29167,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Park and Ride Mayjen Sungkono"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.71518,
+          -7.29085,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Taman Makam Pahlawan A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7111,
+          -7.28974,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Taman Makam Pahlawan 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.70832,
+          -7.28854,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Putat Gede A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69886,
+          -7.28603,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Putat Gede B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6987,
+          -7.28575,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Darmo Permai Timur B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.70033,
+          -7.28364,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Darmo Permai Timur A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69997,
+          -7.28344,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Simpang Darmo Baru Barat B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69769,
+          -7.28044,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Simpang Darmo Baru Barat A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6977334,
+          -7.280694,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ikado A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69831,
+          -7.27499,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ikado B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69847,
+          -7.27538,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Sukomanunggal Jaya A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69856,
+          -7.27259,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Sukomanunggal Jaya B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69876,
+          -7.27246,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kejaksaan Negeri Surabaya A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6949,
+          -7.26921,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kejaksaan Negeri Surabaya B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69484,
+          -7.269,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Satelit Indah B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69379,
+          -7.26569,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Satelit Indah A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69365,
+          -7.26583,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Satelit Utara B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69019,
+          -7.26436,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Satelit Utara A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.69032,
+          -7.2645,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Darmo Indah Timur B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6859173,
+          -7.2640246,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Darmo Indah Timur A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.68584,
+          -7.26406,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kantor Imigrasi Tanjung Perak A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.68416,
+          -7.26166,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kantor Imigrasi Tanjung Perak B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.68427,
+          -7.26165,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Karangpoh A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.68287,
+          -7.2588,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "PT. Asterindo Plast"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.682957,
+          -7.259067,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Balongsari"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6785714,
+          -7.2592213,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Bibis A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6762,
+          -7.25818,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Bibis B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67623,
+          -7.25836,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMPN 47 A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.671456,
+          -7.2633193,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMPN 47 B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67151,
+          -7.2632646,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMKN 13 B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.67314,
+          -7.26297,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMKN 13 A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6731446,
+          -7.2631139,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Term. Manukan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6665154,
+          -7.2682053,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMPN 47 B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6715019,
+          -7.2632931,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Term. Manukan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6664913,
+          -7.2683262,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Karangpoh A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6828652,
+          -7.2588596,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Wonokromo B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7370205,
+          -7.3020863,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Masjid Al Akbar Surabaya"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.714812,
+          -7.335059,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SWK Gayungan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7164651,
+          -7.3375979,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMAN 15"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7188212,
+          -7.3406987,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Kantor Dinas Perhubungan Jawa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7289028,
+          -7.3406765,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "SMPN 22"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7169253,
+          -7.3371505,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Pasar Rakyat Jambangan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7150042,
+          -7.335087,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Jambangan Indah A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7152857,
+          -7.3191651,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ketintang Timur PTT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7312382,
+          -7.309721,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Ketintang, Wonokromo, Kec. Wonokromo, Surabaya, J*"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.735003,
+          -7.3100206,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Terminal Joyoboyo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7364252,
+          -7.2989987,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "KBS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.7386494,
+          -7.2953458,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Putat Gede A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6988689,
+          -7.2859815,
+          0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Route_Id": "Terminal Menanggal-Terminal Manukan",
+        "Halte_name": "Halte Putat Gede B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.6986907,
+          -7.2857963,
+          0
+        ]
+      }
+    }
+  ]
+}
