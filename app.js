@@ -823,13 +823,13 @@
     byId("mapDetailContent").innerHTML = `
       <div class="route-metrics stop-metrics">
         <div class="route-metric"><strong>${escapeHtml(routeLabels.length ? [...new Set(routeLabels.map(r => r.label.split(" · ")[0]))].join(" / ") : "—")}</strong><small>operator/layanan</small></div>
-        <div class="route-metric"><strong>${p.__memberCount || 1}</strong><small>titik halte digabung</small></div>
+        <div class="route-metric"><strong>${routeLabels.length}</strong><small>rute yang melayani</small></div>
         <div class="route-metric"><strong>${state.bufferRadius} m</strong><small>radius indikatif</small></div>
       </div>
       <div class="route-stop-heading">Dilayani koridor (${routeLabels.length})</div>
       <div class="served-route-list">${routeLabels.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
       ${rawRouteIds.length ? '<p class="result-note">Route_Id: ' + rawRouteIds.map(escapeHtml).join(" · ") + '</p>' : ""}
-      ${p.__memberCount > 1 ? '<p class="result-note">Titik halte berdekatan digabung pada peta. Informasi ini mencakup ' + p.__memberCount + ' titik halte dari dataset dan ' + routeLabels.length + ' koridor unik.</p>' : ""}
+      ${p.__memberCount > 1 ? '<p class="result-note">Titik halte dari beberapa dataset digabung menjadi satu lokasi. Seluruh koridor yang melayani lokasi ini ditampilkan di atas.</p>' : ""}
       <p class="result-note">Buffer lingkaran hanya ditampilkan untuk halte yang dipilih. Radius dapat diubah dari panel kiri. Jarak merupakan radius geometris, bukan jaminan akses trotoar.</p>
       <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>`;
     byId("mapDetailPanel").hidden = false;
