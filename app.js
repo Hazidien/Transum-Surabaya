@@ -56,21 +56,13 @@
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, "");
 
-  // Kanonisasi nama: abaikan awalan halte/shelter, samakan angka Romawi-Arab,
-  // dan satukan variasi spasi/tanda baca seperti Tanjung Sari/Tanjungsari.
+  // Samakan variasi angka Romawi/Arab dan awalan generik nama halte.
   function normalizeStopName(value) {
-    let text = String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    text = text.replace(/\biii\b/g, "3").replace(/\bii\b/g, "2").replace(/\biv\b/g, "4").replace(/\bi\b/g, "1");
+    let text = String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    text = text.replace(/\biii\b/g, "3").replace(/\bii\b/g, "2").replace(/\biv\b/g, "4")
+      .replace(/\bii\b/g, "2").replace(/\bi\b/g, "1");
     text = text.replace(/\b(halte|shelter|bus stop|stop)\b/g, " ");
     return text.replace(/[^a-z0-9]+/g, "");
-  }
-
-  function formatStopName(value) {
-    const name = String(value ?? "").trim();
-    if (!name || /^halte\b/i.test(name)) return name || "Halte tanpa nama";
-    // Nama terminal/term tidak diberi awalan "Halte".
-    if (/^(terminal\b|term\.?\s)/i.test(name)) return name;
-    return "Halte " + name;
   }
 
   function editDistance(a, b) {
@@ -120,22 +112,13 @@
 
   async function loadGeoJSON(path) {
     const encodedPath = path.split("/").map(segment => encodeURIComponent(segment)).join("/");
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 20000);
-    try {
-      const response = await fetch(encodedPath, { cache: "no-cache", signal: controller.signal });
-      if (!response.ok) throw new Error("HTTP " + response.status + " — " + path);
-      const data = await response.json();
-      if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) {
-        throw new Error("Format GeoJSON harus FeatureCollection: " + path);
-      }
-      return data;
-    } catch (error) {
-      if (error && error.name === "AbortError") throw new Error("Waktu tunggu habis saat memuat " + path);
-      throw error;
-    } finally {
-      window.clearTimeout(timeoutId);
+    const response = await fetch(encodedPath, { cache: "no-cache" });
+    if (!response.ok) throw new Error("HTTP " + response.status + " — " + path);
+    const data = await response.json();
+    if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) {
+      throw new Error("Format GeoJSON harus FeatureCollection: " + path);
     }
+    return data;
   }
 
   function matchRoute(routeId, fallbackKey) {
@@ -199,12 +182,6 @@
       updateRouteCounter();
       updateRouteGroupHeadings();
     });
-    item.querySelector(".route-check").addEventListener("click", event => {
-      event.preventDefault();
-      event.stopPropagation();
-      checkbox.checked = !checkbox.checked;
-      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
-    });
     item.addEventListener("dblclick", () => zoomToRoute(route.key));
   }
 
@@ -230,19 +207,13 @@
       const coverageEnabled = byId("coverageToggle")?.checked === true;
       state.map.setLayoutProperty(id, "visibility", visible && (!isCoverage || coverageEnabled) ? "visible" : "none");
     });
-    // Perbarui GeoJSON halte gabungan, bukan ekspresi filter dinamis MapLibre.
-    // Ini menjaga halte lintas-rute tetap satu titik dan menghindari renderer blank
-    // saat koridor dimatikan berulang kali.
+    // Perbarui satu sumber halte bersama agar titik yang dilayani koridor lain tetap tampil.
     refreshStopsSource();
-    setStopLayerVisibility(state.stopsVisible);
     refreshSelectedBuffer();
-    state.busMarkers.forEach((marker, busId) => {
-      if (busId.startsWith(routeKey + "::")) {
-        marker.getElement().style.visibility = visible && state.busesVisible ? "visible" : "hidden";
-        marker.getElement().style.pointerEvents = visible && state.busesVisible ? "auto" : "none";
-      }
-    });
-    if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) state.activeBusPopup.remove();
+    if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) {
+      state.activeBusPopup.remove();
+    }
+    requestAnimationFrame(() => state.map?.resize());
   }
 
   function distancePointToRouteMeters(point, routeData) {
@@ -282,124 +253,81 @@
     return best;
   }
 
-  function canonicalStopGroupName(value) {
-    const key = normalizeStopName(value);
-    // Satukan variasi ejaan Family/Familly, tetapi pertahankan identitas halte A dan B.
-    // Dengan demikian A hanya bergabung dengan A lintas koridor, begitu juga B.
-    const graha = key.match(/^grahafamil(?:y|ly)([ab])$/);
-    if (graha) return "grahafamily" + graha[1];
-    // Variasi penulisan Jono/Yono Soewojo/Suwoyo merujuk halte Yono Suwoyo.
-    // Nomor 1 dan 2 tetap menjadi halte terpisah, tetapi masing-masing
-    // menggabungkan seluruh catatan lintas rute dalam radius pengelompokan.
-    const yono = key.match(/^(?:jono|yono)(?:soewojo|suwoyo)([12])$/);
-    if (yono) return "yonosuwoyo" + yono[1];
-    // "Basra" and "Basra 2" are duplicate records at the same physical stop.
-    if (key === "basra2") return "basra";
-    return key;
-  }
-
   function buildStopGroups() {
     if (state.stopGroups) return state.stopGroups;
-    // Same canonical name can be merged across route datasets within 150 m.
-    // Distinct names (e.g. Samsat Tandes A/B or Tanjungsari A/B) stay separate.
+    // Cocokkan nama kanonis (termasuk III B = 3B), lalu gunakan jarak untuk menghindari
+    // penggabungan nama serupa yang berada di lokasi berbeda.
     const groups = [];
-    const groupsByName = new Map();
-
+    const buckets = new Map();
+    const cellLat = 100 / 110574;
+    const cellLonAt = lat => 100 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
     state.stops.forEach(feature => {
       const coord = feature.geometry.coordinates;
-      if (!Array.isArray(coord) || !Number.isFinite(coord[0]) || !Number.isFinite(coord[1])) return;
-      const rawName = String(feature.properties.__stopName || "").trim();
-      const keyName = /^(halte|shelter)?\s*(tanpa nama|unnamed|unknown)$/i.test(rawName)
-        ? "" : canonicalStopGroupName(rawName);
-
+      const lat = coord[1], lon = coord[0];
+      if (!Array.isArray(coord) || !Number.isFinite(lon) || !Number.isFinite(lat)) return;
+      const gx = Math.floor(lon / cellLonAt(lat)), gy = Math.floor(lat / cellLat);
+      const keyName = normalizeStopName(feature.properties.__stopName);
       let match = null;
-      if (keyName) {
-        const candidates = groupsByName.get(keyName) || [];
-        let nearestDistance = Infinity;
-        candidates.forEach(group => {
+      for (let dx=-1; dx<=1 && !match; dx++) for(let dy=-1;dy<=1 && !match;dy++) {
+        for(const group of buckets.get((gx+dx)+"|"+(gy+dy)) || []) {
           const distance = haversineMeters(group.center, coord);
-          if (distance <= 150 && distance < nearestDistance) {
-            match = group;
-            nearestDistance = distance;
+          const exactName = keyName && group.nameKeys.has(keyName);
+          const similarName = keyName && [...group.nameKeys].some(existing => {
+            const maxLen=Math.max(existing.length,keyName.length);
+            return maxLen>=7 && editDistance(existing,keyName)<=1;
+          });
+          if ((exactName && distance<=100) || (similarName && distance<=45) || distance<=6) {
+            match=group; break;
           }
-        });
-      }
-
-      // Satukan titik dari dataset/rute berbeda jika benar-benar berimpit.
-      // Ambang 3 m menghindari penggabungan halte A/B yang berada di sisi jalan berbeda.
-      if (!match) {
-        let nearestDistance = Infinity;
-        groups.forEach(group => {
-          const distance = haversineMeters(group.center, coord);
-          if (distance <= 3 && distance < nearestDistance) {
-            match = group;
-            nearestDistance = distance;
-          }
-        });
-      }
-
-      // Keep unnamed records independent so they cannot absorb named stops.
-      if (!match) {
-        match = { members: [], coords: [], center: coord, canonicalName: keyName };
-        groups.push(match);
-        if (keyName) {
-          if (!groupsByName.has(keyName)) groupsByName.set(keyName, []);
-          groupsByName.get(keyName).push(match);
         }
       }
-
+      if(!match){
+        match={members:[],coords:[],center:coord,nameKeys:new Set()};
+        groups.push(match);
+        const bucketKey=gx+"|"+gy;
+        if(!buckets.has(bucketKey)) buckets.set(bucketKey,[]);
+        buckets.get(bucketKey).push(match);
+      }
       match.members.push(feature);
+      if(keyName) match.nameKeys.add(keyName);
       match.coords.push(coord);
+      match.center=[
+        match.coords.reduce((sum,p)=>sum+p[0],0)/match.coords.length,
+        match.coords.reduce((sum,p)=>sum+p[1],0)/match.coords.length
+      ];
     });
-
-    groups.forEach(group => {
-      // Use a real source coordinate closest to all members, not an invented centroid.
-      let best = group.coords[0], bestTotal = Infinity;
-      group.coords.forEach(candidate => {
-        const total = group.coords.reduce((sum, other) => sum + haversineMeters(candidate, other), 0);
-        if (total < bestTotal) { bestTotal = total; best = candidate; }
-      });
-      group.center = best;
-      group.routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
-      group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
-      group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
-      const canonicalDisplay = /^grahafamily[ab]$/.test(group.canonicalName)
-        ? "Graha Family " + group.canonicalName.slice(-1).toUpperCase()
-        : /^yonosuwoyo[12]$/.test(group.canonicalName)
-          ? "Yono Suwoyo " + group.canonicalName.slice(-1)
-          : group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
-          : preferredStopName(group.names);
-      group.displayName = formatStopName(canonicalDisplay);
+    groups.forEach(group=>{
+      group.routeKeys=[...new Set(group.members.map(f=>f.properties.__routeKey).filter(Boolean))];
+      group.routeIds=[...new Set(group.members.map(f=>f.properties.__rawRouteId).filter(Boolean))];
+      group.names=[...new Set(group.members.map(f=>f.properties.__stopName).filter(Boolean))];
+      group.displayName=preferredStopName(group.names);
     });
-
-    state.stopGroups = groups;
+    state.stopGroups=groups;
     return groups;
   }
+
   function refreshStopsSource() {
     if (!state.map || !state.map.getSource("all-stops")) return;
     const groups = buildStopGroups();
-    const features = groups.flatMap((group, index) => {
+    const features = groups.map((group, index) => {
       const members = group.members;
       const routeKeys = group.routeKeys;
       const visibleRouteKeys = routeKeys.filter(key => state.routeVisibility.get(key) !== false);
-      // Jangan kirim halte ke renderer jika seluruh koridor pelayanannya dimatikan.
-      // Halte gabungan tetap tampil selama minimal satu koridor masih aktif.
-      if (!visibleRouteKeys.length) return [];
-      return [{
+      return {
         type: "Feature", id: "stop-cluster-" + index,
         geometry: { type: "Point", coordinates: group.center },
         properties: {
-          __stopName: group.displayName || formatStopName(group.names[0] || "Halte"), __stopNames: group.names,
+          __stopName: group.displayName || group.names[0] || "Halte", __stopNames: group.names,
           __routeKey: routeKeys[0] || "", __routeKeys: routeKeys, __visibleRouteKeys: visibleRouteKeys,
           __memberCount: members.length,
           __memberStops: members.map(f => ({
-            name: formatStopName(f.properties.__stopName || "tanpa nama"), routeKey: f.properties.__routeKey || "", routeId: f.properties.__rawRouteId || "",
+            name: f.properties.__stopName || "Halte tanpa nama", routeKey: f.properties.__routeKey || "", routeId: f.properties.__rawRouteId || "",
             id: f.properties.stop_id ?? f.properties.Stop_Id ?? f.properties.Id ?? f.properties.id ?? "—",
             coordinates: f.geometry.coordinates
           })),
-          __showStop: state.stopsVisible ? 1 : 0
+          __showStop: state.stopsVisible && visibleRouteKeys.length ? 1 : 0
         }
-      }];
+      };
     });
     state.map.getSource("all-stops").setData({ type: "FeatureCollection", features });
   }
@@ -536,86 +464,75 @@
   async function addLoadedData() {
     setStatus("Memuat rute dan halte…");
     const failures = [];
-    try {
-      for (const [index, route] of config.routes.entries()) {
-        addRoutePanel(route, index);
-        state.routeVisibility.set(route.key, true);
-        try {
-          const data = await loadGeoJSON(route.file);
-          const sourceId = "route-source-" + route.key;
-          const bounds = boundsForFeatureCollection(data);
-          state.map.addSource(sourceId, { type: "geojson", data });
-          const haloId = "route-halo-" + route.key;
-          const lineId = "route-line-" + route.key;
-          state.map.addLayer({
-            id: haloId, type: "line", source: sourceId,
-            layout: { "line-cap": "round", "line-join": "round" },
-            paint: { "line-color": "#07101e", "line-width": 7, "line-opacity": 0.95 }
-          });
-          state.map.addLayer({
-            id: lineId, type: "line", source: sourceId,
-            layout: { "line-cap": "round", "line-join": "round" },
-            paint: { "line-color": route.color, "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 15, 5], "line-opacity": 0.98 }
-          });
-          state.map.on("click", lineId, (event) => {
-            selectRouteDetails(route.key);
-            state.map.flyTo({ center: event.lngLat, zoom: Math.max(13, state.map.getZoom()), duration: 450 });
-          });
-          state.map.on("mouseenter", lineId, () => state.map.getCanvas().style.cursor = "pointer");
-          state.map.on("mouseleave", lineId, () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
-          state.routes.set(route.key, { data, bounds, sourceId });
-          state.routeLayerIds.set(route.key, [haloId, lineId]);
-          const countEl = byId("route-count-" + route.key);
-          if (countEl) countEl.textContent = data.features.length;
-        } catch (error) {
-          failures.push(error.message);
-          console.error("Gagal memuat rute " + route.label + ":", error);
-          const countEl = byId("route-count-" + route.key);
-          if (countEl) countEl.textContent = "belum diunggah";
-        }
+
+    for (const [index, route] of config.routes.entries()) {
+      addRoutePanel(route, index);
+      state.routeVisibility.set(route.key, true);
+      try {
+        const data = await loadGeoJSON(route.file);
+        const sourceId = "route-source-" + route.key;
+        const bounds = boundsForFeatureCollection(data);
+        state.map.addSource(sourceId, { type: "geojson", data });
+        const haloId = "route-halo-" + route.key;
+        const lineId = "route-line-" + route.key;
+        state.map.addLayer({
+          id: haloId, type: "line", source: sourceId,
+          layout: { "line-cap": "round", "line-join": "round" },
+          paint: { "line-color": "#07101e", "line-width": 7, "line-opacity": 0.95 }
+        });
+        state.map.addLayer({
+          id: lineId, type: "line", source: sourceId,
+          layout: { "line-cap": "round", "line-join": "round" },
+          paint: { "line-color": route.color, "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 15, 5], "line-opacity": 0.98 }
+        });
+        state.map.on("click", lineId, (event) => {
+          selectRouteDetails(route.key);
+          state.map.flyTo({ center: event.lngLat, zoom: Math.max(13, state.map.getZoom()), duration: 450 });
+        });
+        state.map.on("mouseenter", lineId, () => state.map.getCanvas().style.cursor = "pointer");
+        state.map.on("mouseleave", lineId, () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
+        state.routes.set(route.key, { data, bounds, sourceId });
+        state.routeLayerIds.set(route.key, [haloId, lineId]);
+        const countEl = byId("route-count-" + route.key);
+        if (countEl) countEl.textContent = data.features.length;
+      } catch (error) {
+        failures.push(error.message);
+        const countEl = byId("route-count-" + route.key);
+        if (countEl) countEl.textContent = "belum diunggah";
       }
+    }
 
-      await loadAllStops(failures);
-      addStopLayers();
-      setupCircleBuffers();
-      setupBusSimulation();
-      updateRouteCounter();
-      wireRouteSearch();
+    await loadAllStops(failures);
+    addStopLayers();
+    setupCircleBuffers();
+    setupBusSimulation();
+    await setupCoverage(failures);
+    setupBuildings(failures);
+    updateRouteCounter();
+    wireRouteSearch();
 
-      // Peta inti (rute, halte, dan kontrol simulasi) sudah siap.
-      // Jangan biarkan layer opsional menahan seluruh layar pada overlay loading.
+    const allBounds = new maplibregl.LngLatBounds();
+    let hasBounds = false;
+    state.routes.forEach(route => {
+      if (route.bounds && !route.bounds.isEmpty()) {
+        allBounds.extend(route.bounds.getSouthWest());
+        allBounds.extend(route.bounds.getNorthEast());
+        hasBounds = true;
+      }
+    });
+    // Keep the configured opening view. Do not auto-fit all corridors, which can zoom out unexpectedly.
+
+    if (failures.length) {
+      setStatus(state.routes.size + "/" + config.routes.length + " rute · data belum lengkap");
+      showError("Peta dasar sudah tampil, tetapi beberapa GeoJSON belum ditemukan atau tidak terbaca. Unggah berkas menggunakan nama yang tercantum di folder README, lalu muat ulang website. Detail teknis ada di console browser.");
+      console.warn("Berkas data belum tersedia:", failures);
       hideLoadingOverlay();
-      setStatus(state.routes.size + "/" + config.routes.length + " rute · menyiapkan layer tambahan…");
-
-      try {
-        await setupCoverage(failures);
-      } catch (error) {
-        failures.push("Layer cakupan: " + error.message);
-        console.warn("Layer cakupan dilewati:", error);
-      }
-      try {
-        setupBuildings(failures);
-      } catch (error) {
-        failures.push("Layer bangunan: " + error.message);
-        console.warn("Layer bangunan dilewati:", error);
-      }
-
-      if (failures.length) {
-        setStatus(state.routes.size + "/" + config.routes.length + " rute · beberapa data tidak tersedia");
-        console.warn("Berkas/layer yang tidak tersedia:", failures);
-        showError("Peta tetap dapat digunakan, tetapi sebagian data/layer tambahan gagal dimuat. Periksa Console untuk detail.");
-      } else {
-        hideError();
-        setStatus(state.routes.size + " rute · data siap");
-      }
       openCreditModal(true);
-    } catch (error) {
-      console.error("Kesalahan saat menyiapkan WebGIS:", error);
-      setStatus(state.routes.size + "/" + config.routes.length + " rute · pemuatan sebagian");
-      showError("Peta dasar sudah tampil, tetapi ada kesalahan saat menyiapkan data. Fitur yang berhasil dimuat tetap dapat digunakan. Buka Console untuk detail teknis.");
-    } finally {
-      // Selalu lepaskan overlay, termasuk bila salah satu fungsi inisialisasi gagal.
+    } else {
+      hideError();
+      setStatus(state.routes.size + " rute · data siap");
       hideLoadingOverlay();
+      openCreditModal(true);
     }
   }
 
@@ -632,7 +549,7 @@
           const properties = { ...(feature.properties || {}) };
           const rawRouteId = properties.Route_Id ?? properties.Route_Id_1 ?? properties.route_id ?? properties.routeId ?? "";
           const routeKey = matchRoute(rawRouteId, stopDataset.fallbackRouteKey);
-          const name = properties.Halte_name ?? properties.Halte_nama ?? properties.halte_name ?? properties.halte_nama ?? properties.stop_name ?? properties.name ?? "tanpa nama";
+          const name = properties.Halte_name ?? properties.Halte_nama ?? properties.halte_name ?? properties.halte_nama ?? properties.stop_name ?? properties.name ?? "Halte tanpa nama";
           properties.__routeKey = routeKey || "";
           properties.__stopName = String(name);
           properties.__rawRouteId = String(rawRouteId || "");
@@ -651,61 +568,70 @@
   function addStopLayers() {
     state.map.addSource("all-stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     refreshStopsSource();
-    // Satu layer untuk semua titik halte bersama. Layer per-rute sebelumnya
-    // menggambar fitur yang sama berulang kali ketika satu halte dilayani banyak koridor.
-    state.map.addLayer({
-      id: "stops-all", type: "circle", source: "all-stops",
-      layout: { visibility: state.stopsVisible ? "visible" : "none" },
-      paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
-        "circle-color": "#FFFFFF",
-        "circle-stroke-color": "#173B63",
-        "circle-stroke-width": 2.2,
-        "circle-opacity": 0.98
-      }
-    });
-    state.map.on("click", "stops-all", event => {
-      const feature=event.features?.[0];
-      if(feature) showStopDetails(feature);
-    });
-    state.map.on("mouseenter", "stops-all", event => {
-      state.map.getCanvas().style.cursor="pointer";
-      const feature=event.features?.[0];
-      if(!feature) return;
-      if(state.hoverStopPopup) state.hoverStopPopup.remove();
-      state.hoverStopPopup=new maplibregl.Popup({
-        closeButton:false,closeOnClick:false,offset:10,className:"stop-hover-popup"
-      }).setLngLat(feature.geometry.coordinates)
-        .setHTML('<div class="stop-hover-label">'+escapeHtml(feature.properties.__stopName || "Halte")+'</div>')
-        .addTo(state.map);
-    });
-    state.map.on("mouseleave", "stops-all", () => {
-      state.map.getCanvas().style.cursor=state.finderMode ? "crosshair" : "";
-      if(state.hoverStopPopup){state.hoverStopPopup.remove();state.hoverStopPopup=null;}
+
+    config.routes.forEach(route => {
+      const layerId = "stops-" + route.key;
+      state.map.addLayer({
+        id: layerId, type: "circle", source: "all-stops",
+        filter: ["all", ["in", route.key, ["get", "__visibleRouteKeys"]], ["==", ["get", "__showStop"], 1]],
+        paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
+          "circle-color": "#FFFFFF",
+          "circle-stroke-color": "#173B63",
+          "circle-stroke-width": 2.2,
+          "circle-opacity": 0.98
+        }
+      });
+      state.map.on("click", layerId, (event) => {
+        const feature = event.features?.[0];
+        if (!feature) return;
+        showStopDetails(feature);
+      });
+      state.map.on("mouseenter", layerId, (event) => {
+        state.map.getCanvas().style.cursor = "pointer";
+        const feature = event.features?.[0];
+        if (!feature) return;
+        if (state.hoverStopPopup) state.hoverStopPopup.remove();
+        state.hoverStopPopup = new maplibregl.Popup({
+          closeButton: false, closeOnClick: false, offset: 10, className: "stop-hover-popup"
+        }).setLngLat(feature.geometry.coordinates)
+          .setHTML('<div class="stop-hover-label">' + escapeHtml(feature.properties.__stopName || "Halte") + '</div>')
+          .addTo(state.map);
+      });
+      state.map.on("mouseleave", layerId, () => {
+        state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "";
+        if (state.hoverStopPopup) {
+          state.hoverStopPopup.remove();
+          state.hoverStopPopup = null;
+        }
+      });
     });
 
-    state.map.addLayer({
-      id: "stop-labels", type: "symbol", source: "all-stops",
-      filter: activeStopFilter,
-      minzoom: 10.5,
-      layout: {
-        "text-field": ["get", "__stopName"],
-        "visibility": "visible",
-        "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
-        "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
-        "text-offset": [0, 1.15],
-        "text-anchor": "top",
-        "text-allow-overlap": false,
-        "text-ignore-placement": false
-      },
-      paint: { "text-color": "#f8fafc", "text-opacity": 0, "text-halo-color": "rgba(16,24,39,0)", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
-    });
-    byId("stopsToggle").addEventListener("change", event => {
+    if (!state.map.getLayer("stop-labels")) {
+      state.map.addLayer({
+        id: "stop-labels", type: "symbol", source: "all-stops",
+        filter: ["==", ["get", "__showStop"], 1],
+        minzoom: 10.5,
+        layout: {
+          "text-field": ["get", "__stopName"],
+          "visibility": "none",
+          "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
+          "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
+          "text-offset": [0, 1.15],
+          "text-anchor": "top",
+          "text-allow-overlap": false,
+          "text-ignore-placement": false
+        },
+        paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
+      });
+    }
+
+    byId("stopsToggle").addEventListener("change", (event) => {
       state.stopsVisible = event.target.checked;
-      setStopLayerVisibility(state.stopsVisible);
-      refreshSelectedBuffer();
+      refreshStopsSource();
     });
   }
+
 
   function stopBufferPolygon(feature, radiusMeters, steps = 48) {
     const [lon, lat] = feature.geometry.coordinates;
@@ -732,15 +658,15 @@
         id: "stop-circle-buffer-fill", type: "fill", source: "stop-circle-buffers",
         paint: { "fill-color": ["match", ["get", "__routeKey"],
           "sby-benowo", "#00D9FF", "sby-kejawan", "#00D9FF", "sby-purabaya", "#00D9FF",
-          "ww-gunung-anyar", "#00D9FF", "ww-tow", "#00D9FF", "#00D9FF"], "fill-opacity": 0 },
-        layout: { visibility: "visible" }
+          "ww-gunung-anyar", "#00D9FF", "ww-tow", "#00D9FF", "#00D9FF"], "fill-opacity": 0.34 },
+        layout: { visibility: "none" }
       });
       state.map.addLayer({
         id: "stop-circle-buffer-outline", type: "line", source: "stop-circle-buffers",
         paint: { "line-color": ["match", ["get", "__routeKey"],
           "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
-          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 2.4, "line-opacity": 0 },
-        layout: { visibility: "visible" }
+          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 2.4, "line-opacity": 0.98 },
+        layout: { visibility: toggle.checked ? "visible" : "none" }
       });
     }
     const refresh = () => {
@@ -751,8 +677,10 @@
     };
     slider.addEventListener("input", refresh);
     toggle.addEventListener("change", () => {
-      if (toggle.checked) refreshSelectedBuffer();
-      else setBufferLayerVisibility(false);
+      ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
+        if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", toggle.checked ? "visible" : "none");
+      });
+      refreshSelectedBuffer();
     });
     refresh();
     refreshSelectedBuffer();
@@ -760,30 +688,15 @@
 
   function haversineKm(a, b) { return haversineMeters(a, b) / 1000; }
 
-  function routeLineParts(routeData) {
-    // Keep every LineString/MultiLineString part independent. Never join
-    // disconnected road segments just because they belong to one feature.
-    const parts = [];
-    const addLine = line => {
-      if (!Array.isArray(line)) return;
-      const clean = line.filter(coord => Array.isArray(coord) &&
-        Number.isFinite(coord[0]) && Number.isFinite(coord[1]) &&
-        coord[0] >= 112 && coord[0] <= 113.5 && coord[1] >= -8 && coord[1] <= -6.5);
-      if (clean.length >= 2) parts.push(clean);
-    };
-    const visitGeometry = geometry => {
-      if (!geometry) return;
-      if (geometry.type === "LineString") addLine(geometry.coordinates);
-      else if (geometry.type === "MultiLineString") (geometry.coordinates || []).forEach(addLine);
-      else if (geometry.type === "GeometryCollection") (geometry.geometries || []).forEach(visitGeometry);
-    };
-    (routeData.features || []).forEach(feature => visitGeometry(feature.geometry));
-    return parts;
-  }
-
-  // Flattened coordinates are retained only for non-animation summaries.
   function routeCoordinates(routeData) {
-    return routeLineParts(routeData).flat();
+    const coords = [];
+    const walk = c => {
+      if (!Array.isArray(c)) return;
+      if (typeof c[0] === "number" && typeof c[1] === "number") coords.push(c);
+      else c.forEach(walk);
+    };
+    (routeData.features || []).forEach(f => { if (f.geometry) walk(f.geometry.coordinates); });
+    return coords;
   }
 
   function routeLengthKm(coords) {
@@ -799,10 +712,7 @@
     state.selectedRouteKey = routeKey;
     const coords = routeCoordinates(entry.data);
     const lengthKm = routeLengthKm(coords);
-    const stops = buildStopGroups().filter(group => group.routeKeys.includes(routeKey)).map(group => ({
-      type: "Feature", geometry: { type: "Point", coordinates: group.center },
-      properties: { __stopName: group.displayName, __routeKey: routeKey, __routeKeys: group.routeKeys, __rawRouteId: group.routeIds.join(" · ") }
-    }));
+    const stops = state.stops.filter(f => f.properties.__routeKey === routeKey);
     const indexedStops = stops.map(feature => {
       let nearestIndex = 0, nearestDistance = Infinity;
       const point = feature.geometry.coordinates;
@@ -825,7 +735,7 @@
       <div class="route-stop-list">${indexedStops.length ? indexedStops.map((item, i) => `
         <button class="route-stop-item" data-stop-index="${i}">
           <span class="route-stop-number">${i + 1}</span>
-          <span class="route-stop-name">${escapeHtml(formatStopName(item.feature.properties.__stopName || "tanpa nama"))}</span>
+          <span class="route-stop-name">${escapeHtml(item.feature.properties.__stopName || "Halte tanpa nama")}</span>
           <small>${Math.round(item.nearestDistance)} m dari garis</small>
         </button>`).join("") : '<p class="result-note">Belum ada data halte untuk koridor ini. Tambahkan GeoJSON halte yang sesuai.</p>'}
       </div>`;
@@ -842,42 +752,6 @@
   }
 
 
-  function setLayerVisibilitySafely(ids, visible) {
-    const map = state.map;
-    if (!map) return;
-    ids.forEach(id => {
-      try {
-        // setLayoutProperty adalah operasi lokal pada layer yang sudah ada.
-        // Jangan memanggil setFilter / setData saat toggle buffer.
-        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
-      } catch (error) {
-        console.warn("Gagal mengubah visibilitas layer " + id + ":", error);
-      }
-    });
-    try { map.triggerRepaint(); } catch (_) {}
-  }
-
-  function setBufferLayerVisibility(visible) {
-    // Toggle buffer hanya mengubah visibilitas layer. Jangan memasang filter
-    // yang merujuk properti yang tidak ada pada GeoJSON buffer.
-    setLayerVisibilitySafely(["stop-circle-buffer-fill", "stop-circle-buffer-outline"], !!visible);
-  }
-
-  function setStopLayerVisibility(visible) {
-    const map = state.map;
-    if (!map || !map.isStyleLoaded()) return;
-    // Toggle titik hanya mengubah layout visibility. Data halte sudah difilter
-    // ketika koridor berubah, sehingga tidak ada filter ekspresi yang dibangun ulang.
-    ["stops-all", "stop-labels"].forEach(id => {
-      try {
-        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
-      } catch (error) {
-        console.warn("Gagal memperbarui layer halte " + id + ":", error);
-      }
-    });
-    try { map.triggerRepaint(); } catch (_) {}
-  }
-
   function refreshSelectedBuffer() {
     const source = state.map?.getSource("stop-circle-buffers");
     if (!source) return;
@@ -886,13 +760,8 @@
       ? stop.properties.__routeKeys
       : [stop?.properties?.__routeKey].filter(Boolean);
     const hasVisibleService = selectedRouteKeys.some(key => state.routeVisibility.get(key) !== false);
-    const enabled = byId("coverageToggle").checked && !!stop && state.stopsVisible && hasVisibleService;
-    if (!enabled) {
-      setBufferLayerVisibility(false);
-      return;
-    }
-    source.setData({ type: "FeatureCollection", features: [stopBufferPolygon(stop, state.bufferRadius)] });
-    setBufferLayerVisibility(true);
+    const enabled = byId("coverageToggle").checked && stop && state.stopsVisible && hasVisibleService;
+    source.setData({ type: "FeatureCollection", features: enabled ? [stopBufferPolygon(stop, state.bufferRadius)] : [] });
   }
 
   function showStopDetails(feature) {
@@ -921,19 +790,24 @@
     const routeLabel = routeNameByKey(routeKey);
     const rawRouteIds = [...new Set(members.map(member => member.routeId).filter(Boolean))];
     byId("mapDetailKicker").textContent = "INFORMASI HALTE";
-    byId("mapDetailTitle").textContent = p.__stopName || "Halte tanpa nama";
+    byId("mapDetailTitle").textContent = (p.__memberCount > 1 ? "Halte bersama · " : "") + (p.__stopName || "Halte tanpa nama");
     const bufferToggle = byId("coverageToggle");
-    if (bufferToggle && !bufferToggle.checked) bufferToggle.checked = true;
+    if (bufferToggle && !bufferToggle.checked) {
+      bufferToggle.checked = true;
+      ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
+        if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", "visible");
+      });
+    }
     byId("mapDetailContent").innerHTML = `
       <div class="route-metrics stop-metrics">
         <div class="route-metric"><strong>${escapeHtml(routeLabels.length ? [...new Set(routeLabels.map(r => r.label.split(" · ")[0]))].join(" / ") : "—")}</strong><small>operator/layanan</small></div>
-        <div class="route-metric"><strong>${routeLabels.length}</strong><small>rute yang melayani</small></div>
+        <div class="route-metric"><strong>${p.__memberCount || 1}</strong><small>titik halte digabung</small></div>
         <div class="route-metric"><strong>${state.bufferRadius} m</strong><small>radius indikatif</small></div>
       </div>
       <div class="route-stop-heading">Dilayani koridor (${routeLabels.length})</div>
       <div class="served-route-list">${routeLabels.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
       ${rawRouteIds.length ? '<p class="result-note">Route_Id: ' + rawRouteIds.map(escapeHtml).join(" · ") + '</p>' : ""}
-      ${p.__memberCount > 1 ? '<p class="result-note">Titik halte dari beberapa dataset digabung menjadi satu lokasi. Seluruh koridor yang melayani lokasi ini ditampilkan di atas.</p>' : ""}
+      ${p.__memberCount > 1 ? '<p class="result-note">Titik halte berdekatan digabung pada peta. Informasi ini mencakup ' + p.__memberCount + ' titik halte dari dataset dan ' + routeLabels.length + ' koridor unik.</p>' : ""}
       <p class="result-note">Buffer lingkaran hanya ditampilkan untuk halte yang dipilih. Radius dapat diubah dari panel kiri. Jarak merupakan radius geometris, bukan jaminan akses trotoar.</p>
       <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>`;
     byId("mapDetailPanel").hidden = false;
@@ -950,38 +824,30 @@
     const dockButton = byId("busDockPlay");
     const dockSpeed = byId("busDockSpeed");
     const dockToggle = byId("busDockVisible");
-
+    // Selector expresses the displayed acceleration. Each setting unit maps to 3x
+    // the previous movement rate: 10x is the previous 30x baseline; 30x is 3x faster.
     const applyBusSpeed = value => {
       state.busSpeedSetting = Math.max(1, Number(value) || 1);
-      // Preserve the established control scale: 30x is the default, 60x is fastest.
-      state.busSpeedMultiplier = state.busSpeedSetting;
+      state.busSpeedMultiplier = state.busSpeedSetting * 3;
       byId("busSpeedValue").textContent = state.busSpeedSetting + "×";
       if (dockSpeed) dockSpeed.value = String(state.busSpeedSetting);
+      if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = state.busSpeedSetting + "×";
     };
     applyBusSpeed(30);
-
+    // Pra-hitung geometri dan halte per koridor sekali saja. Hindari menghitung ulang
+    // seluruh garis (ribuan vertex) pada setiap frame animasi.
     state.routeAnimationCache.clear();
-    state.busStopDistances.clear();
-
     config.routes.forEach(route => {
-      const entry = state.routes.get(route.key);
-      if (!entry) return;
-      const parts = routeLineParts(entry.data).map(coords => {
-        const cumulative = [0];
-        for (let i = 1; i < coords.length; i++) {
-          cumulative[i] = cumulative[i - 1] + haversineKm(coords[i - 1], coords[i]);
-        }
-        return { coords, cumulative, length: cumulative[cumulative.length - 1] };
-      }).filter(part => part.length > 0.02);
-      const totalLength = parts.reduce((sum, part) => sum + part.length, 0);
-      if (!parts.length || !totalLength) {
-        console.warn("Simulasi dilewati: geometri rute tidak memiliki ruas valid", route.key);
-        return;
-      }
-      const stopDistances = getRouteStopDistances(route.key, parts, totalLength);
-      state.routeAnimationCache.set(route.key, { parts, length: totalLength, stopDistances });
+      const entry=state.routes.get(route.key);
+      if(!entry) return;
+      const coords=routeCoordinates(entry.data);
+      if(coords.length<2) return;
+      const cumulative=[0];
+      for(let i=1;i<coords.length;i++) cumulative[i]=cumulative[i-1]+haversineKm(coords[i-1],coords[i]);
+      const length=cumulative[cumulative.length-1];
+      const stopDistances=getRouteStopDistances(route.key,coords,length);
+      state.routeAnimationCache.set(route.key,{coords,cumulative,length,stopDistances});
     });
-
     speed.value = "30";
     if (dockSpeed) dockSpeed.value = "30";
     speed.addEventListener("input", () => applyBusSpeed(speed.value));
@@ -989,30 +855,16 @@
       speed.value = String(dockSpeed.value);
       applyBusSpeed(dockSpeed.value);
     });
-
-    const setBusesVisible = visible => {
-      state.busesVisible = !!visible;
-      byId("busesToggle").checked = state.busesVisible;
-      if (dockToggle) dockToggle.checked = state.busesVisible;
-      state.busMarkers.forEach(marker => {
-        const element = marker.getElement();
-        if (!element) return;
-        element.style.display = state.busesVisible ? "" : "none";
-        element.style.visibility = state.busesVisible ? "visible" : "hidden";
-        element.style.pointerEvents = state.busesVisible ? "auto" : "none";
-      });
-      if (!state.busesVisible) {
-        if (state.busFrame) cancelAnimationFrame(state.busFrame);
-        state.busFrame = null;
-        state.busLastTime = 0;
-      } else if (state.busAnimationOn && !state.busFrame) {
-        state.busLastTime = 0;
-        state.busFrame = requestAnimationFrame(animateBusMarkers);
-      }
-    };
-    if (dockToggle) dockToggle.addEventListener("change", () => setBusesVisible(dockToggle.checked));
-    byId("busesToggle").addEventListener("change", event => setBusesVisible(event.target.checked));
-
+    if (dockToggle) dockToggle.addEventListener("change", () => {
+      byId("busesToggle").checked = dockToggle.checked;
+      state.busesVisible = dockToggle.checked;
+      state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
+    });
+    byId("busesToggle").addEventListener("change", event => {
+      state.busesVisible = event.target.checked;
+      if (dockToggle) dockToggle.checked = event.target.checked;
+      state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
+    });
     byId("closeMapDetail").addEventListener("click", () => {
       if (state.clickMarker) state.clickMarker.remove();
       state.clickMarker = null;
@@ -1023,7 +875,6 @@
       state.selectedStop = null;
       refreshSelectedBuffer();
     });
-
     const toggleSimulation = () => {
       state.busAnimationOn = !state.busAnimationOn;
       button.innerHTML = state.busAnimationOn ? "<span>Ⅱ</span> Jeda simulasi bus" : "<span>▶</span> Mulai simulasi bus";
@@ -1039,33 +890,8 @@
     button.addEventListener("click", toggleSimulation);
     if (dockButton) dockButton.addEventListener("click", toggleSimulation);
     if (byId("simBusCount")) byId("simBusCount").textContent = getTotalSimulatedFleet() + " bus";
+    // Start a clearly labelled simulation on load, matching the reference's running timeline.
     toggleSimulation();
-  }
-
-  function interpolatePart(parts, progressKm) {
-    let remaining = Math.max(0, progressKm);
-    for (const part of parts) {
-      if (remaining <= part.length) {
-        const coords = part.coords;
-        const cumulative = part.cumulative;
-        let low = 1, high = cumulative.length - 1;
-        while (low < high) {
-          const mid = (low + high) >> 1;
-          if (cumulative[mid] < remaining) low = mid + 1;
-          else high = mid;
-        }
-        const i = low;
-        const segment = cumulative[i] - cumulative[i - 1];
-        const t = segment ? Math.max(0, Math.min(1, (remaining - cumulative[i - 1]) / segment)) : 0;
-        return [
-          coords[i - 1][0] + (coords[i][0] - coords[i - 1][0]) * t,
-          coords[i - 1][1] + (coords[i][1] - coords[i - 1][1]) * t
-        ];
-      }
-      remaining -= part.length;
-    }
-    const lastPart = parts[parts.length - 1];
-    return lastPart.coords[lastPart.coords.length - 1];
   }
 
   function interpolateRoute(coords, progressKm) {
@@ -1139,53 +965,45 @@
     });
   }
 
-  function getRouteStopDistances(routeKey, parts, routeLength) {
+  function getRouteStopDistances(routeKey, coords, routeLength) {
     if (state.busStopDistances.has(routeKey)) return state.busStopDistances.get(routeKey);
+    const cumulative = [0];
+    for (let i = 1; i < coords.length; i++) cumulative[i] = cumulative[i - 1] + haversineKm(coords[i - 1], coords[i]);
     const points = state.stops.filter(stop => stop.properties.__routeKey === routeKey);
     const distances = [];
     points.forEach(stop => {
       const point = stop.geometry.coordinates;
       let bestDistanceMeters = Infinity;
       let bestAlongKm = null;
-      let precedingPartLength = 0;
-      parts.forEach(part => {
-        const { coords, cumulative } = part;
-        for (let i = 1; i < coords.length; i++) {
-          const a = coords[i - 1], b = coords[i];
-          const meanLat = (a[1] + b[1] + point[1]) / 3 * Math.PI / 180;
-          const sx = 111.32 * Math.cos(meanLat);
-          const sy = 110.57;
-          const ax = a[0] * sx, ay = a[1] * sy;
-          const bx = b[0] * sx, by = b[1] * sy;
-          const px = point[0] * sx, py = point[1] * sy;
-          const dx = bx - ax, dy = by - ay;
-          const denom = dx * dx + dy * dy;
-          const t = denom ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / denom)) : 0;
-          const q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-          const distanceMeters = haversineKm(point, q) * 1000;
-          if (distanceMeters < bestDistanceMeters) {
-            bestDistanceMeters = distanceMeters;
-            bestAlongKm = precedingPartLength + cumulative[i - 1] +
-              haversineKm(a, b) * t;
-          }
+      for (let i = 1; i < coords.length; i++) {
+        const a = coords[i - 1], b = coords[i];
+        const meanLat = (a[1] + b[1] + point[1]) / 3 * Math.PI / 180;
+        const sx = 111.32 * Math.cos(meanLat);
+        const sy = 110.57;
+        const ax = a[0] * sx, ay = a[1] * sy;
+        const bx = b[0] * sx, by = b[1] * sy;
+        const px = point[0] * sx, py = point[1] * sy;
+        const dx = bx - ax, dy = by - ay;
+        const denom = dx * dx + dy * dy;
+        const t = denom ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / denom)) : 0;
+        const q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+        const distanceMeters = haversineKm(point, q) * 1000;
+        if (distanceMeters < bestDistanceMeters) {
+          bestDistanceMeters = distanceMeters;
+          bestAlongKm = cumulative[i - 1] + haversineKm(a, b) * t;
         }
-        precedingPartLength += part.length;
-      });
+      }
+      // Stop points can sit slightly away from the digitized route centerline.
       if (bestAlongKm !== null && bestDistanceMeters <= 250) distances.push(bestAlongKm);
     });
-    distances.sort((a, b) => a - b);
-    const unique = distances.filter((value, index) =>
-      index === 0 || value - distances[index - 1] > 0.08
-    );
+    distances.sort((x, y) => x - y);
+    const unique = distances.filter((value, index) => index === 0 || value - distances[index - 1] > 0.08);
     state.busStopDistances.set(routeKey, unique);
     return unique;
   }
 
   function animateBusMarkers(now) {
-    if (!state.busAnimationOn || !state.busesVisible) {
-      state.busFrame = null;
-      return;
-    }
+    if (!state.busAnimationOn) return;
     if (now - state.busLastRender < 33) {
       state.busFrame = requestAnimationFrame(animateBusMarkers);
       return;
@@ -1195,61 +1013,50 @@
     const elapsedMs = Math.min(250, now - state.busLastTime);
     const deltaHours = elapsedMs / 3600000 * state.busSpeedMultiplier;
     state.busLastTime = now;
-
     state.simulationMinutes = (state.simulationMinutes + elapsedMs / 1000 * state.busSpeedMultiplier * 0.5) % (24 * 60);
     const hh = String(Math.floor(state.simulationMinutes / 60)).padStart(2, "0");
     const mm = String(Math.floor(state.simulationMinutes % 60)).padStart(2, "0");
     if (byId("simulationClock")) byId("simulationClock").textContent = hh + ":" + mm;
 
     config.routes.forEach(route => {
-      const routePrefix = route.key + "::";
-      const routeVisible = state.routeVisibility.get(route.key) !== false;
       const entry = state.routes.get(route.key);
-      const cache = state.routeAnimationCache.get(route.key);
-      if (!entry || !routeVisible || !state.busesVisible || !cache) {
+      const routeVisible = state.routeVisibility.get(route.key) !== false;
+      if (!entry || !routeVisible || !state.busesVisible) {
         state.busMarkers.forEach((marker, busId) => {
-          if (!busId.startsWith(routePrefix)) return;
-          const element = marker.getElement();
-          if (element) {
-            element.style.visibility = "hidden";
-            element.style.pointerEvents = "none";
-          }
+          if (busId.startsWith(route.key + "::")) marker.getElement().style.display = "none";
         });
         return;
       }
-
-      const { parts, length, stopDistances } = cache;
+      const cache = state.routeAnimationCache.get(route.key);
+      if (!cache || cache.coords.length < 2) return;
+      const {coords,length,stopDistances} = cache;
       const fleet = getFleetConfig(route.key);
       const count = Math.max(1, Math.min(40, Number(fleet.count) || 1));
-      const nominalSpeed = route.key.startsWith("ww-") ? 15 : 20;
+      const simulationMovementSpeed = route.key.startsWith("ww-") ? 15 : 20;
+      const popupNominalSpeed = route.key.startsWith("ww-") ? 25 : 20;
       for (let i = 0; i < count; i++) {
-        const busId = routePrefix + String(i + 1).padStart(2, "0");
+        const busId = route.key + "::" + String(i + 1).padStart(2, "0");
         let marker = state.busMarkers.get(busId);
         if (!marker) {
-          const element = document.createElement("button");
-          element.type = "button";
-          element.className = "bus-marker";
-          element.textContent = "";
-          element.style.background = route.color;
-          element.setAttribute("aria-label", "Buka informasi bus simulasi " + (i + 1));
-          element.title = "SIMULASI — klik untuk informasi bus";
-          marker = new maplibregl.Marker({ element, anchor: "center" })
-            .setLngLat(interpolatePart(parts, length * i / count))
-            .addTo(state.map);
-          element.addEventListener("click", event => {
+          const el = document.createElement("button");
+          el.type = "button";
+          el.className = "bus-marker";
+          el.textContent = "";
+          el.style.background = route.color;
+          el.setAttribute("aria-label", "Buka informasi bus simulasi " + (i + 1));
+          el.title = "SIMULASI — klik untuk informasi bus";
+          marker = new maplibregl.Marker({ element: el, anchor: "center" })
+            .setLngLat(interpolateRouteCached(cache, length * i / count)).addTo(state.map);
+          el.addEventListener("click", event => {
             event.stopPropagation();
-            createBusPopup(route, busId, fleet, nominalSpeed, marker);
+            createBusPopup(route, busId, fleet, popupNominalSpeed, marker);
           });
           state.busMarkers.set(busId, marker);
           state.busProgress.set(busId, length * i / count);
         }
-
-        const element = marker.getElement();
-        element.style.display = "";
-        element.style.visibility = "visible";
-        element.style.pointerEvents = "auto";
-
+        marker.getElement().style.display = "";
         const previousProgress = state.busProgress.get(busId) || 0;
+        const stopsAlongRoute = stopDistances;
         const waitState = state.busStopWait.get(busId);
         let progress = previousProgress;
         if (waitState && waitState.remainingMs > 0) {
@@ -1257,28 +1064,28 @@
           progress = waitState.stopProgress;
           if (waitState.remainingMs <= 0) state.busStopWait.delete(busId);
         } else {
-          const proposed = previousProgress + nominalSpeed * deltaHours;
-          const nextStop = stopDistances.find(stopDistance =>
-            stopDistance > previousProgress + 0.001 &&
-            stopDistance <= proposed + 0.001
-          );
-          if (nextStop !== undefined) {
+          const proposed = previousProgress + simulationMovementSpeed * deltaHours;
+          let nextStop = null;
+          if (length > 0) {
+            for (const stopDistance of stopsAlongRoute) {
+              const ahead = stopDistance > previousProgress + 0.001 && stopDistance <= proposed + 0.001;
+              const wrapped = proposed >= length && stopDistance <= (proposed % length);
+              if (ahead || wrapped) { nextStop = stopDistance; break; }
+            }
+          }
+          if (nextStop !== null) {
             progress = nextStop;
             state.busStopWait.set(busId, { stopProgress: nextStop, remainingMs: 2200 });
           } else {
-            progress = length > 0 ? proposed % length : 0;
+            progress = length > 0 ? proposed % length : proposed;
           }
         }
-
         state.busProgress.set(busId, progress);
-        marker.setLngLat(interpolatePart(parts, progress));
-        if (state.activeBusPopup && state.activeBusId === busId) {
-          state.activeBusPopup.setLngLat(marker.getLngLat());
-        }
+        marker.setLngLat(interpolateRouteCached(cache, progress));
+        if (state.activeBusPopup && state.activeBusId === busId) state.activeBusPopup.setLngLat(marker.getLngLat());
       }
     });
-
-    if (byId("simBusCount")) byId("simBusCount").textContent = String(state.busMarkers.size || getTotalSimulatedFleet()) + " bus";
+    if (byId("simBusCount")) byId("simBusCount").textContent = getTotalSimulatedFleet() + " bus";
     state.busFrame = requestAnimationFrame(animateBusMarkers);
   }
 
@@ -1516,23 +1323,7 @@
   function searchStop(queryText) {
     const query = normalize(queryText);
     if (!query) return;
-    const candidates = buildStopGroups().map(group => ({
-      type: "Feature",
-      geometry: { type: "Point", coordinates: group.center },
-      properties: {
-        __stopName: group.displayName,
-        __routeKey: group.routeKeys[0] || "",
-        __routeKeys: group.routeKeys,
-        __memberCount: group.members.length,
-        __memberStops: group.members.map(member => ({
-          name: formatStopName(member.properties.__stopName || "tanpa nama"),
-          routeKey: member.properties.__routeKey || "",
-          routeId: member.properties.__rawRouteId || "",
-          id: member.properties.Id ?? member.properties.id ?? "—",
-          coordinates: member.geometry.coordinates
-        }))
-      }
-    })).filter(feature => normalize(feature.properties.__stopName).includes(query));
+    const candidates = state.stops.filter(feature => normalize(feature.properties.__stopName).includes(query));
     if (!candidates.length) {
       nearestResult.innerHTML = '<div class="result-placeholder">Nama halte tidak ditemukan. Pastikan data halte sudah dimuat.</div>';
       return;
@@ -1612,18 +1403,7 @@
     if (state.clickMarker) state.clickMarker.remove();
     state.clickMarker = new maplibregl.Marker({ color: "#f8fafc" }).setLngLat(origin).addTo(state.map);
 
-    const groupedStops = buildStopGroups().map(group => ({
-      type: "Feature",
-      geometry: { type: "Point", coordinates: group.center },
-      properties: {
-        __stopName: group.displayName,
-        __routeKey: group.routeKeys[0] || "",
-        __routeKeys: group.routeKeys,
-        __rawRouteId: group.routeIds.join(" · "),
-        __memberCount: group.members.length
-      }
-    }));
-    const nearby = groupedStops.map(feature => ({
+    const nearby = state.stops.map(feature => ({
       feature,
       straightMeters: haversineMeters(origin, feature.geometry.coordinates)
     })).sort((a, b) => a.straightMeters - b.straightMeters)
@@ -1700,10 +1480,6 @@
     }
 
     const props = best.feature.properties || {};
-    const nearestRouteKeys = Array.isArray(props.__routeKeys) ? props.__routeKeys : [props.__routeKey].filter(Boolean);
-    const nearestRoutes = [...new Set(nearestRouteKeys)].map(key => ({
-      key, label: routeNameByKey(key), color: config.routes.find(route => route.key === key)?.color || "#38BDF8"
-    }));
     const distance = best.route.distanceKm * 1000;
     const distanceText = distance >= 1000 ? (distance / 1000).toFixed(2) + " km" : Math.round(distance) + " m";
     const timeText = Math.max(1, Math.round(best.route.durationMinutes)) + " menit";
@@ -1728,8 +1504,8 @@
         <div class="route-metric"><strong>${escapeHtml(distanceText)}</strong><small>jarak ${routingFailed ? "garis lurus" : "berjalan kaki"}</small></div>
         <div class="route-metric"><strong>${escapeHtml(timeText)}</strong><small>estimasi jalan kaki</small></div>
       </div>
-      <div class="route-stop-heading">Dilayani koridor (${nearestRoutes.length})</div>
-      <div class="served-route-list">${nearestRoutes.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
+      <div class="route-stop-heading">Dilayani koridor</div>
+      <div class="served-route-chip" style="--route-color:${config.routes.find(r => r.key === props.__routeKey)?.color || "#38BDF8"}">${escapeHtml(routeNameByKey(props.__routeKey))}</div>
       <p class="result-note">${escapeHtml(note)}</p>
       <button id="clearNearestFromPanel" class="toolbar-button" style="width:100%;justify-content:center">× Hapus hasil pencarian</button>`;
     byId("mapDetailPanel").hidden = false;
