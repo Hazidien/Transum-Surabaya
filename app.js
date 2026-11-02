@@ -67,7 +67,7 @@
 
   function formatStopName(value) {
     const name = String(value ?? "").trim();
-    if (!name || /^(halte|shelter|bus stop|stop)\b/i.test(name)) return name || "Halte tanpa nama";
+    if (!name || /^halte\b/i.test(name)) return name || "Halte tanpa nama";
     // Nama terminal/term tidak diberi awalan "Halte".
     if (/^(terminal\b|term\.?\s)/i.test(name)) return name;
     return "Halte " + name;
