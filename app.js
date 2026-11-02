@@ -690,11 +690,11 @@
       paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
     });
     byId("stopsToggle").addEventListener("change", event => {
-      state.stopsVisible=event.target.checked;
-      ["stops-all","stop-labels"].forEach(id=>{
-        if(state.map.getLayer(id)) state.map.setLayoutProperty(id,"visibility",state.stopsVisible ? "visible":"none");
-      });
-      refreshSelectedBuffer();
+      state.stopsVisible = event.target.checked;
+      if (state.map.getLayer("stops-all")) state.map.setLayoutProperty("stops-all", "visibility", state.stopsVisible ? "visible" : "none");
+      if (state.map.getLayer("stop-labels")) state.map.setLayoutProperty("stop-labels", "visibility", "none");
+      if (state.stopsVisible) refreshSelectedBuffer();
+      else setBufferLayerVisibility(false);
     });
   }
 
