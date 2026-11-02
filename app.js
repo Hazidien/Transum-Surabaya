@@ -694,7 +694,7 @@
     byId("stopsToggle").addEventListener("change", event => {
       state.stopsVisible = event.target.checked;
       setStopLayerVisibility(state.stopsVisible);
-      setBufferLayerVisibility(state.stopsVisible && byId("coverageToggle").checked && !!state.selectedStop);
+      refreshSelectedBuffer();
     });
   }
 
