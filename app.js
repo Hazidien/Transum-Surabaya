@@ -818,28 +818,48 @@
   }
 
 
-  function setBufferLayerVisibility(visible) {
-    // Gunakan filter layer agar toggle tidak mengubah paint/layout berulang kali.
-    // Ini menghindari rebuild state renderer saat beberapa kontrol diubah berurutan.
-    const filter = visible ? null : ["==", ["get", "__bufferVisible"], true];
-    ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
-      if (state.map?.getLayer(id)) state.map.setFilter(id, filter);
+  function setLayerVisibilitySafely(ids, visible) {
+    const map = state.map;
+    if (!map || !map.isStyleLoaded()) return;
+    ids.forEach(id => {
+      try {
+        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+      } catch (error) {
+        // Satu layer yang gagal tidak boleh menghentikan interaksi layer lainnya.
+        console.warn("Gagal mengubah visibilitas layer " + id + ":", error);
+      }
     });
+    try { map.triggerRepaint(); } catch (_) {}
+  }
+
+  function setBufferLayerVisibility(visible) {
+    // Toggle buffer hanya mengubah visibilitas layer. Jangan memasang filter
+    // yang merujuk properti yang tidak ada pada GeoJSON buffer.
+    setLayerVisibilitySafely(["stop-circle-buffer-fill", "stop-circle-buffer-outline"], !!visible);
   }
 
   function setStopLayerVisibility(visible) {
+    const map = state.map;
+    if (!map || !map.isStyleLoaded()) return;
     const visibleKeys = config.routes
       .filter(route => state.routeVisibility.get(route.key) !== false)
       .map(route => route.key);
     const routeFilter = visibleKeys.length
       ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
       : ["==", ["get", "__showStop"], -1];
-    const filter = visible
-      ? routeFilter
-      : ["all", routeFilter, ["==", ["get", "__showStop"], -1]];
+    // Filter koridor tetap stabil; on/off titik halte memakai layout visibility.
+    // Ini menghindari filter kontradiktif yang dapat menyebabkan renderer MapLibre
+    // gagal ketika beberapa layer dimatikan berurutan.
     ["stops-all", "stop-labels"].forEach(id => {
-      if (state.map?.getLayer(id)) state.map.setFilter(id, filter);
+      try {
+        if (!map.getLayer(id)) return;
+        map.setFilter(id, routeFilter);
+        map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+      } catch (error) {
+        console.warn("Gagal memperbarui layer halte " + id + ":", error);
+      }
     });
+    try { map.triggerRepaint(); } catch (_) {}
   }
 
   function refreshSelectedBuffer() {
@@ -949,8 +969,15 @@
       state.busesVisible = !!visible;
       byId("busesToggle").checked = state.busesVisible;
       if (dockToggle) dockToggle.checked = state.busesVisible;
-      state.busMarkers.forEach(marker => { marker.getElement().style.visibility = state.busesVisible ? "visible" : "hidden";
-        marker.getElement().style.pointerEvents = state.busesVisible ? "auto" : "none"; });
+      // Bus adalah marker DOM, bukan layer WebGL. Sembunyikan marker tanpa
+      // menghapusnya dari peta agar toggle berulang tidak merusak canvas.
+      state.busMarkers.forEach(marker => {
+        const element = marker.getElement();
+        if (!element) return;
+        element.style.display = state.busesVisible ? "" : "none";
+        element.style.visibility = state.busesVisible ? "visible" : "hidden";
+        element.style.pointerEvents = state.busesVisible ? "auto" : "none";
+      });
       if (!state.busesVisible) {
         if (state.busFrame) cancelAnimationFrame(state.busFrame);
         state.busFrame = null;
