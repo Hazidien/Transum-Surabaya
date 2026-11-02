@@ -280,10 +280,20 @@
     return best;
   }
 
+  function canonicalStopGroupName(value) {
+    const key = normalizeStopName(value);
+    // Explicit aliases confirmed from the current route datasets.
+    // Graha Family A/B are represented as one shared stop.
+    if (/^grahafamil(?:y|ly)[ab]$/.test(key)) return "grahafamily";
+    // "Basra" and "Basra 2" are duplicate records at the same physical stop.
+    if (key === "basra2") return "basra";
+    return key;
+  }
+
   function buildStopGroups() {
     if (state.stopGroups) return state.stopGroups;
-    // Merge ONLY equivalent normalized names, and only when their coordinates
-    // are within 80 m. Different names (including A/B and 1/2) remain separate.
+    // Same canonical name can be merged across route datasets within 150 m.
+    // Distinct names (e.g. Samsat Tandes A/B or Tanjungsari A/B) stay separate.
     const groups = [];
     const groupsByName = new Map();
 
@@ -292,7 +302,7 @@
       if (!Array.isArray(coord) || !Number.isFinite(coord[0]) || !Number.isFinite(coord[1])) return;
       const rawName = String(feature.properties.__stopName || "").trim();
       const keyName = /^(halte|shelter)?\s*(tanpa nama|unnamed|unknown)$/i.test(rawName)
-        ? "" : normalizeStopName(rawName);
+        ? "" : canonicalStopGroupName(rawName);
 
       let match = null;
       if (keyName) {
@@ -300,17 +310,16 @@
         let nearestDistance = Infinity;
         candidates.forEach(group => {
           const distance = haversineMeters(group.center, coord);
-          if (distance <= 80 && distance < nearestDistance) {
+          if (distance <= 150 && distance < nearestDistance) {
             match = group;
             nearestDistance = distance;
           }
         });
       }
 
-      // Unnamed records are deliberately not merged with named or differently
-      // named stops; they remain visible instead of disappearing into another stop.
+      // Keep unnamed records independent so they cannot absorb named stops.
       if (!match) {
-        match = { members: [], coords: [], center: coord, nameKeys: new Set() };
+        match = { members: [], coords: [], center: coord, canonicalName: keyName };
         groups.push(match);
         if (keyName) {
           if (!groupsByName.has(keyName)) groupsByName.set(keyName, []);
@@ -319,12 +328,11 @@
       }
 
       match.members.push(feature);
-      if (keyName) match.nameKeys.add(keyName);
       match.coords.push(coord);
     });
 
     groups.forEach(group => {
-      // Select an actual source coordinate nearest to all group members.
+      // Use a real source coordinate closest to all members, not an invented centroid.
       let best = group.coords[0], bestTotal = Infinity;
       group.coords.forEach(candidate => {
         const total = group.coords.reduce((sum, other) => sum + haversineMeters(candidate, other), 0);
@@ -334,7 +342,9 @@
       group.routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
       group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
       group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
-      group.displayName = formatStopName(preferredStopName(group.names));
+      const canonicalDisplay = group.canonicalName === "grahafamily" ? "Graha Family"
+        : group.canonicalName === "basra" ? "Basra" : preferredStopName(group.names);
+      group.displayName = formatStopName(canonicalDisplay);
     });
 
     state.stopGroups = groups;
