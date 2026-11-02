@@ -687,7 +687,7 @@
         "text-allow-overlap": false,
         "text-ignore-placement": false
       },
-      paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
+      paint: { "text-color": "#f8fafc", "text-opacity": 0, "text-halo-color": "rgba(16,24,39,0)", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
     });
     byId("stopsToggle").addEventListener("change", event => {
       state.stopsVisible = event.target.checked;
