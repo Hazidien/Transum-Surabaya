@@ -1449,7 +1449,18 @@
     if (state.clickMarker) state.clickMarker.remove();
     state.clickMarker = new maplibregl.Marker({ color: "#f8fafc" }).setLngLat(origin).addTo(state.map);
 
-    const nearby = state.stops.map(feature => ({
+    const groupedStops = buildStopGroups().map(group => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: group.center },
+      properties: {
+        __stopName: group.displayName,
+        __routeKey: group.routeKeys[0] || "",
+        __routeKeys: group.routeKeys,
+        __rawRouteId: group.routeIds.join(" · "),
+        __memberCount: group.members.length
+      }
+    }));
+    const nearby = groupedStops.map(feature => ({
       feature,
       straightMeters: haversineMeters(origin, feature.geometry.coordinates)
     })).sort((a, b) => a.straightMeters - b.straightMeters)
@@ -1526,6 +1537,10 @@
     }
 
     const props = best.feature.properties || {};
+    const nearestRouteKeys = Array.isArray(props.__routeKeys) ? props.__routeKeys : [props.__routeKey].filter(Boolean);
+    const nearestRoutes = [...new Set(nearestRouteKeys)].map(key => ({
+      key, label: routeNameByKey(key), color: config.routes.find(route => route.key === key)?.color || "#38BDF8"
+    }));
     const distance = best.route.distanceKm * 1000;
     const distanceText = distance >= 1000 ? (distance / 1000).toFixed(2) + " km" : Math.round(distance) + " m";
     const timeText = Math.max(1, Math.round(best.route.durationMinutes)) + " menit";
@@ -1550,8 +1565,8 @@
         <div class="route-metric"><strong>${escapeHtml(distanceText)}</strong><small>jarak ${routingFailed ? "garis lurus" : "berjalan kaki"}</small></div>
         <div class="route-metric"><strong>${escapeHtml(timeText)}</strong><small>estimasi jalan kaki</small></div>
       </div>
-      <div class="route-stop-heading">Dilayani koridor</div>
-      <div class="served-route-chip" style="--route-color:${config.routes.find(r => r.key === props.__routeKey)?.color || "#38BDF8"}">${escapeHtml(routeNameByKey(props.__routeKey))}</div>
+      <div class="route-stop-heading">Dilayani koridor (${nearestRoutes.length})</div>
+      <div class="served-route-list">${nearestRoutes.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
       <p class="result-note">${escapeHtml(note)}</p>
       <button id="clearNearestFromPanel" class="toolbar-button" style="width:100%;justify-content:center">× Hapus hasil pencarian</button>`;
     byId("mapDetailPanel").hidden = false;
