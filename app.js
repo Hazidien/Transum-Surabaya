@@ -282,9 +282,10 @@
 
   function canonicalStopGroupName(value) {
     const key = normalizeStopName(value);
-    // Explicit aliases confirmed from the current route datasets.
-    // Graha Family A/B are represented as one shared stop.
-    if (/^grahafamil(?:y|ly)[ab]$/.test(key)) return "grahafamily";
+    // Satukan variasi ejaan Family/Familly, tetapi pertahankan identitas halte A dan B.
+    // Dengan demikian A hanya bergabung dengan A lintas koridor, begitu juga B.
+    const graha = key.match(/^grahafamil(?:y|ly)([ab])$/);
+    if (graha) return "grahafamily" + graha[1];
     // "Basra" and "Basra 2" are duplicate records at the same physical stop.
     if (key === "basra2") return "basra";
     return key;
@@ -342,8 +343,7 @@
       group.routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
       group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
       group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
-      const canonicalDisplay = group.canonicalName === "grahafamily" ? "Graha Family"
-        : group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
+      const canonicalDisplay = group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
         : preferredStopName(group.names);
       group.displayName = formatStopName(canonicalDisplay);
     });
