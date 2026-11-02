@@ -1369,7 +1369,23 @@
   function searchStop(queryText) {
     const query = normalize(queryText);
     if (!query) return;
-    const candidates = state.stops.filter(feature => normalize(feature.properties.__stopName).includes(query));
+    const candidates = buildStopGroups().map(group => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: group.center },
+      properties: {
+        __stopName: group.displayName,
+        __routeKey: group.routeKeys[0] || "",
+        __routeKeys: group.routeKeys,
+        __memberCount: group.members.length,
+        __memberStops: group.members.map(member => ({
+          name: formatStopName(member.properties.__stopName || "tanpa nama"),
+          routeKey: member.properties.__routeKey || "",
+          routeId: member.properties.__rawRouteId || "",
+          id: member.properties.Id ?? member.properties.id ?? "—",
+          coordinates: member.geometry.coordinates
+        }))
+      }
+    })).filter(feature => normalize(feature.properties.__stopName).includes(query));
     if (!candidates.length) {
       nearestResult.innerHTML = '<div class="result-placeholder">Nama halte tidak ditemukan. Pastikan data halte sudah dimuat.</div>';
       return;
