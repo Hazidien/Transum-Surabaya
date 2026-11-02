@@ -286,6 +286,11 @@
     // Dengan demikian A hanya bergabung dengan A lintas koridor, begitu juga B.
     const graha = key.match(/^grahafamil(?:y|ly)([ab])$/);
     if (graha) return "grahafamily" + graha[1];
+    // Variasi penulisan Jono/Yono Soewojo/Suwoyo merujuk halte Yono Suwoyo.
+    // Nomor 1 dan 2 tetap menjadi halte terpisah, tetapi masing-masing
+    // menggabungkan seluruh catatan lintas rute dalam radius pengelompokan.
+    const yono = key.match(/^(?:jono|yono)(?:soewojo|suwoyo)([12])$/);
+    if (yono) return "yonosuwoyo" + yono[1];
     // "Basra" and "Basra 2" are duplicate records at the same physical stop.
     if (key === "basra2") return "basra";
     return key;
@@ -345,8 +350,10 @@
       group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
       const canonicalDisplay = /^grahafamily[ab]$/.test(group.canonicalName)
         ? "Graha Family " + group.canonicalName.slice(-1).toUpperCase()
-        : group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
-        : preferredStopName(group.names);
+        : /^yonosuwoyo[12]$/.test(group.canonicalName)
+          ? "Yono Suwoyo " + group.canonicalName.slice(-1)
+          : group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
+          : preferredStopName(group.names);
       group.displayName = formatStopName(canonicalDisplay);
     });
 
