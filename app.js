@@ -316,7 +316,11 @@
         let nearestDistance = Infinity;
         candidates.forEach(group => {
           const distance = haversineMeters(group.center, coord);
-          if (distance <= 150 && distance < nearestDistance) {
+          // Terminal Bungurasih is represented by several datasets with
+          // slightly different stop coordinates; treat this named terminal
+          // as one interchange within a 250 m tolerance.
+          const mergeRadius = keyName === "terminalbungurasih" ? 250 : 150;
+          if (distance <= mergeRadius && distance < nearestDistance) {
             match = group;
             nearestDistance = distance;
           }
@@ -365,7 +369,7 @@
         ? "Graha Family " + group.canonicalName.slice(-1).toUpperCase()
         : /^yonosuwoyo[12]$/.test(group.canonicalName)
           ? "Yono Suwoyo " + group.canonicalName.slice(-1)
-          : group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
+          : group.canonicalName === "basra" ? "Basra"
           : preferredStopName(group.names);
       group.displayName = formatStopName(canonicalDisplay);
     });
