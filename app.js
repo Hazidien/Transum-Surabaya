@@ -279,14 +279,15 @@
     // hingga 250 m dipakai untuk nama yang sama. Akhiran A/B dan nomor tetap dibedakan.
     const groups = [];
     const buckets = new Map();
-    const cellLat = 260 / 110574;
-    const cellLonAt = lat => 260 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
+    const cellLat = 160 / 110574;
+    const cellLonAt = lat => 160 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
     const suffixOf = value => (value.match(/([a-z])$/i) || [,""])[1].toLowerCase();
     state.stops.forEach(feature => {
       const coord = feature.geometry.coordinates;
       if (!Array.isArray(coord) || !Number.isFinite(coord[0]) || !Number.isFinite(coord[1])) return;
       const lat=coord[1], lon=coord[0], gx=Math.floor(lon/cellLonAt(lat)), gy=Math.floor(lat/cellLat);
-      const keyName=normalizeStopName(feature.properties.__stopName);
+      const rawName=String(feature.properties.__stopName || "").trim();
+      const keyName=/^(halte|shelter)?\s*(tanpa nama|unnamed|unknown)$/i.test(rawName) ? "" : normalizeStopName(rawName);
       let match=null;
       for(let dx=-1;dx<=1 && !match;dx++) for(let dy=-1;dy<=1 && !match;dy++) {
         for(const group of buckets.get((gx+dx)+"|"+(gy+dy)) || []) {
@@ -299,7 +300,7 @@
           });
           // Nama identik: toleransi digitasi 250 m. Nama typo ringan: 100 m.
           // Tanpa nama: hanya gabung bila koordinat nyaris sama.
-          if ((exactName && distance<=250) || (fuzzyName && distance<=100) || (!keyName && distance<=6)) {
+          if ((exactName && distance<=150) || (fuzzyName && distance<=80) || (!keyName && distance<=6)) {
             match=group; break;
           }
         }
