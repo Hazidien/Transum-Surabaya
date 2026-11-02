@@ -343,7 +343,8 @@
       group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
       group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
       const canonicalDisplay = group.canonicalName === "grahafamily" ? "Graha Family"
-        : group.canonicalName === "basra" ? "Basra" : preferredStopName(group.names);
+        : group.canonicalName === "basra" && group.names.some(name => normalizeStopName(name) === "basra") ? "Basra"
+        : preferredStopName(group.names);
       group.displayName = formatStopName(canonicalDisplay);
     });
 
