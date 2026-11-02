@@ -230,12 +230,11 @@
       : ["==", ["get", "__showStop"], -1];
     if (state.map.getLayer("stops-all")) {
       state.map.setFilter("stops-all", activeStopFilter);
-      state.map.setLayoutProperty("stops-all", "visibility", state.stopsVisible ? "visible" : "none");
     }
     if (state.map.getLayer("stop-labels")) {
       state.map.setFilter("stop-labels", activeStopFilter);
-      state.map.setLayoutProperty("stop-labels", "visibility", state.stopsVisible ? "visible" : "none");
     }
+    setStopLayerVisibility(state.stopsVisible);
     refreshSelectedBuffer();
     state.busMarkers.forEach((marker, busId) => {
       if (busId.startsWith(routeKey + "::")) marker.getElement().style.visibility = visible && state.busesVisible ? "visible" : "hidden";
@@ -680,7 +679,7 @@
       minzoom: 10.5,
       layout: {
         "text-field": ["get", "__stopName"],
-        "visibility": "none",
+        "visibility": "visible",
         "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
         "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
         "text-offset": [0, 1.15],
