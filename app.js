@@ -697,6 +697,78 @@
     });
   }
 
+
+
+  function haversineKm(a, b) { return haversineMeters(a, b) / 1000; }
+
+  function routeCoordinates(routeData) {
+    const coords = [];
+    const walk = c => {
+      if (!Array.isArray(c)) return;
+      if (typeof c[0] === "number" && typeof c[1] === "number") coords.push(c);
+      else c.forEach(walk);
+    };
+    (routeData.features || []).forEach(f => { if (f.geometry) walk(f.geometry.coordinates); });
+    return coords;
+  }
+
+  function routeLengthKm(coords) {
+    let total = 0;
+    for (let i = 1; i < coords.length; i++) total += haversineKm(coords[i - 1], coords[i]);
+    return total;
+  }
+
+  function selectRouteDetails(routeKey) {
+    const route = config.routes.find(r => r.key === routeKey);
+    const entry = state.routes.get(routeKey);
+    if (!route || !entry) return;
+    state.selectedRouteKey = routeKey;
+    const coords = routeCoordinates(entry.data);
+    const lengthKm = routeLengthKm(coords);
+    const stops = buildStopGroups().filter(group => group.routeKeys.includes(routeKey)).map(group => ({
+      type: "Feature", geometry: { type: "Point", coordinates: group.center },
+      properties: { __stopName: group.displayName, __routeKey: routeKey, __routeKeys: group.routeKeys, __rawRouteId: group.routeIds.join(" · ") }
+    }));
+    const indexedStops = stops.map(feature => {
+      let nearestIndex = 0, nearestDistance = Infinity;
+      const point = feature.geometry.coordinates;
+      coords.forEach((coord, i) => {
+        const d = haversineMeters(point, coord);
+        if (d < nearestDistance) { nearestDistance = d; nearestIndex = i; }
+      });
+      return { feature, nearestIndex, nearestDistance };
+    }).sort((a, b) => a.nearestIndex - b.nearestIndex);
+    byId("mapDetailKicker").textContent = "DETAIL KORIDOR";
+    byId("mapDetailTitle").textContent = route.label;
+    byId("mapDetailContent").innerHTML = `
+      <div class="route-metrics">
+        <div class="route-metric"><strong>${stops.length}</strong><small>halte</small></div>
+        <div class="route-metric"><strong>${lengthKm.toFixed(1)} km</strong><small>panjang rute*</small></div>
+        <div class="route-metric"><strong>${indexedStops.filter(s => s.nearestDistance <= 100).length}</strong><small>titik dekat garis</small></div>
+      </div>
+      <p class="result-note">*Panjang dihitung dari geometri garis pada GeoJSON, bukan jadwal atau jarak operasional resmi.</p>
+      <div class="route-stop-heading">Halte sepanjang rute</div>
+      <div class="route-stop-list">${indexedStops.length ? indexedStops.map((item, i) => `
+        <button class="route-stop-item" data-stop-index="${i}">
+          <span class="route-stop-number">${i + 1}</span>
+          <span class="route-stop-name">${escapeHtml(formatStopName(item.feature.properties.__stopName || "tanpa nama"))}</span>
+          <small>${Math.round(item.nearestDistance)} m dari garis</small>
+        </button>`).join("") : '<p class="result-note">Belum ada data halte untuk koridor ini. Tambahkan GeoJSON halte yang sesuai.</p>'}
+      </div>`;
+    byId("mapDetailPanel").hidden = false;
+    if (byId("mapHelpPanel")) byId("mapHelpPanel").hidden = true;
+    byId("mapDetailContent").querySelectorAll("[data-stop-index]").forEach(button => {
+      button.addEventListener("click", () => {
+        const item = indexedStops[Number(button.dataset.stopIndex)];
+        if (!item) return;
+        showStopDetails(item.feature);
+        state.map.flyTo({ center: item.feature.geometry.coordinates, zoom: 16, duration: 650 });
+      });
+    });
+  }
+
+
+
   function showStopDetails(feature) {
     if (!feature || !feature.geometry || feature.geometry.type !== "Point") return;
     state.selectedStop = feature;
@@ -1006,6 +1078,7 @@
     if (byId("simBusCount")) byId("simBusCount").textContent = getTotalSimulatedFleet() + " bus";
     state.busFrame = requestAnimationFrame(animateBusMarkers);
   }
+
 
   function setupBuildings(failures) {
     const toggle = byId("buildingsToggle");
