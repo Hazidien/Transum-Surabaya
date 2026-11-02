@@ -216,15 +216,16 @@
     // Visibilitas halte diatur per-koridor melalui layer filter, bukan setData GeoJSON
     // setiap checkbox berubah. Ini mencegah rebuild source besar dan mempertahankan titik
     // halte bersama selama minimal satu koridor yang melayaninya masih aktif.
-    const stopLayerId = "stops-" + routeKey;
-    if (state.map.getLayer(stopLayerId)) {
-      state.map.setLayoutProperty(stopLayerId, "visibility", visible && state.stopsVisible ? "visible" : "none");
-    }
     const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
+    const activeStopFilter = visibleKeys.length
+      ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
+      : ["==", ["get", "__showStop"], -1];
+    if (state.map.getLayer("stops-all")) {
+      state.map.setFilter("stops-all", activeStopFilter);
+      state.map.setLayoutProperty("stops-all", "visibility", state.stopsVisible ? "visible" : "none");
+    }
     if (state.map.getLayer("stop-labels")) {
-      state.map.setFilter("stop-labels", visibleKeys.length
-        ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
-        : ["==", ["get", "__showStop"], -1]);
+      state.map.setFilter("stop-labels", activeStopFilter);
       state.map.setLayoutProperty("stop-labels", "visibility", state.stopsVisible ? "visible" : "none");
     }
     refreshSelectedBuffer();
@@ -273,26 +274,32 @@
 
   function buildStopGroups() {
     if (state.stopGroups) return state.stopGroups;
-    // Cocokkan nama kanonis (termasuk III B = 3B), lalu gunakan jarak untuk menghindari
-    // penggabungan nama serupa yang berada di lokasi berbeda.
+    // Satu halte fisik dapat muncul di beberapa dataset/rute dengan sedikit selisih digitasi.
+    // Nama kanonis menangani "Satelit III B" = "Satelit 3B"; kedekatan spasial
+    // hingga 250 m dipakai untuk nama yang sama. Akhiran A/B dan nomor tetap dibedakan.
     const groups = [];
     const buckets = new Map();
-    const cellLat = 100 / 110574;
-    const cellLonAt = lat => 100 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
+    const cellLat = 260 / 110574;
+    const cellLonAt = lat => 260 / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
+    const suffixOf = value => (value.match(/([a-z])$/i) || [,""])[1].toLowerCase();
     state.stops.forEach(feature => {
       const coord = feature.geometry.coordinates;
-      const lat = coord[1], lon = coord[0];
-      if (!Array.isArray(coord) || !Number.isFinite(lon) || !Number.isFinite(lat)) return;
-      const gx = Math.floor(lon / cellLonAt(lat)), gy = Math.floor(lat / cellLat);
-      const keyName = normalizeStopName(feature.properties.__stopName);
-      let match = null;
-      for (let dx=-1; dx<=1 && !match; dx++) for(let dy=-1;dy<=1 && !match;dy++) {
+      if (!Array.isArray(coord) || !Number.isFinite(coord[0]) || !Number.isFinite(coord[1])) return;
+      const lat=coord[1], lon=coord[0], gx=Math.floor(lon/cellLonAt(lat)), gy=Math.floor(lat/cellLat);
+      const keyName=normalizeStopName(feature.properties.__stopName);
+      let match=null;
+      for(let dx=-1;dx<=1 && !match;dx++) for(let dy=-1;dy<=1 && !match;dy++) {
         for(const group of buckets.get((gx+dx)+"|"+(gy+dy)) || []) {
-          const distance = haversineMeters(group.center, coord);
-          const exactName = keyName && group.nameKeys.has(keyName);
-          // Jangan gabungkan varian halte A/B atau 1/2 hanya karena mirip secara ejaan.
-          // Variasi seperti III B dan 3B sudah disamakan oleh normalizeStopName.
-          if ((exactName && distance<=80) || distance<=6) {
+          const distance=haversineMeters(group.center,coord);
+          const exactName=keyName && group.nameKeys.has(keyName);
+          const fuzzyName=keyName && [...group.nameKeys].some(existing => {
+            if (suffixOf(existing)!==suffixOf(keyName)) return false;
+            const longest=Math.max(existing.length,keyName.length);
+            return longest>=8 && editDistance(existing,keyName)<=Math.max(1,Math.floor(longest*0.10));
+          });
+          // Nama identik: toleransi digitasi 250 m. Nama typo ringan: 100 m.
+          // Tanpa nama: hanya gabung bila koordinat nyaris sama.
+          if ((exactName && distance<=250) || (fuzzyName && distance<=100) || (!keyName && distance<=6)) {
             match=group; break;
           }
         }
@@ -584,85 +591,68 @@
   function addStopLayers() {
     state.map.addSource("all-stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     refreshStopsSource();
-
-    config.routes.forEach(route => {
-      const layerId = "stops-" + route.key;
-      state.map.addLayer({
-        id: layerId, type: "circle", source: "all-stops",
-        filter: ["in", route.key, ["get", "__routeKeys"]],
-        layout: { visibility: state.routeVisibility.get(route.key) !== false && state.stopsVisible ? "visible" : "none" },
-        paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
-          "circle-color": "#FFFFFF",
-          "circle-stroke-color": "#173B63",
-          "circle-stroke-width": 2.2,
-          "circle-opacity": 0.98
-        }
-      });
-      state.map.on("click", layerId, (event) => {
-        const feature = event.features?.[0];
-        if (!feature) return;
-        showStopDetails(feature);
-      });
-      state.map.on("mouseenter", layerId, (event) => {
-        state.map.getCanvas().style.cursor = "pointer";
-        const feature = event.features?.[0];
-        if (!feature) return;
-        if (state.hoverStopPopup) state.hoverStopPopup.remove();
-        state.hoverStopPopup = new maplibregl.Popup({
-          closeButton: false, closeOnClick: false, offset: 10, className: "stop-hover-popup"
-        }).setLngLat(feature.geometry.coordinates)
-          .setHTML('<div class="stop-hover-label">' + escapeHtml(feature.properties.__stopName || "Halte") + '</div>')
-          .addTo(state.map);
-      });
-      state.map.on("mouseleave", layerId, () => {
-        state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "";
-        if (state.hoverStopPopup) {
-          state.hoverStopPopup.remove();
-          state.hoverStopPopup = null;
-        }
-      });
+    const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
+    const activeStopFilter = visibleKeys.length
+      ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
+      : ["==", ["get", "__showStop"], -1];
+    // Satu layer untuk semua titik halte bersama. Layer per-rute sebelumnya
+    // menggambar fitur yang sama berulang kali ketika satu halte dilayani banyak koridor.
+    state.map.addLayer({
+      id: "stops-all", type: "circle", source: "all-stops",
+      filter: activeStopFilter,
+      layout: { visibility: state.stopsVisible ? "visible" : "none" },
+      paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
+        "circle-color": "#FFFFFF",
+        "circle-stroke-color": "#173B63",
+        "circle-stroke-width": 2.2,
+        "circle-opacity": 0.98
+      }
+    });
+    state.map.on("click", "stops-all", event => {
+      const feature=event.features?.[0];
+      if(feature) showStopDetails(feature);
+    });
+    state.map.on("mouseenter", "stops-all", event => {
+      state.map.getCanvas().style.cursor="pointer";
+      const feature=event.features?.[0];
+      if(!feature) return;
+      if(state.hoverStopPopup) state.hoverStopPopup.remove();
+      state.hoverStopPopup=new maplibregl.Popup({
+        closeButton:false,closeOnClick:false,offset:10,className:"stop-hover-popup"
+      }).setLngLat(feature.geometry.coordinates)
+        .setHTML('<div class="stop-hover-label">'+escapeHtml(feature.properties.__stopName || "Halte")+'</div>')
+        .addTo(state.map);
+    });
+    state.map.on("mouseleave", "stops-all", () => {
+      state.map.getCanvas().style.cursor=state.finderMode ? "crosshair" : "";
+      if(state.hoverStopPopup){state.hoverStopPopup.remove();state.hoverStopPopup=null;}
     });
 
-    if (!state.map.getLayer("stop-labels")) {
-      state.map.addLayer({
-        id: "stop-labels", type: "symbol", source: "all-stops",
-        filter: ["==", ["get", "__showStop"], 1],
-        minzoom: 10.5,
-        layout: {
-          "text-field": ["get", "__stopName"],
-          "visibility": "none",
-          "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
-          "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
-          "text-offset": [0, 1.15],
-          "text-anchor": "top",
-          "text-allow-overlap": false,
-          "text-ignore-placement": false
-        },
-        paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
-      });
-    }
-
+    state.map.addLayer({
+      id: "stop-labels", type: "symbol", source: "all-stops",
+      filter: activeStopFilter,
+      minzoom: 10.5,
+      layout: {
+        "text-field": ["get", "__stopName"],
+        "visibility": "none",
+        "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 17, 12],
+        "text-offset": [0, 1.15],
+        "text-anchor": "top",
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
+      },
+      paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
+    });
     byId("stopsToggle").addEventListener("change", event => {
-      state.stopsVisible = event.target.checked;
-      config.routes.forEach(route => {
-        const id = "stops-" + route.key;
-        if (state.map.getLayer(id)) {
-          state.map.setLayoutProperty(id, "visibility",
-            state.stopsVisible && state.routeVisibility.get(route.key) !== false ? "visible" : "none");
-        }
+      state.stopsVisible=event.target.checked;
+      ["stops-all","stop-labels"].forEach(id=>{
+        if(state.map.getLayer(id)) state.map.setLayoutProperty(id,"visibility",state.stopsVisible ? "visible":"none");
       });
-      if (state.map.getLayer("stop-labels")) {
-        const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
-        state.map.setFilter("stop-labels", visibleKeys.length
-          ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
-          : ["==", ["get", "__showStop"], -1]);
-        state.map.setLayoutProperty("stop-labels", "visibility", state.stopsVisible ? "visible" : "none");
-      }
       refreshSelectedBuffer();
     });
   }
-
 
   function stopBufferPolygon(feature, radiusMeters, steps = 48) {
     const [lon, lat] = feature.geometry.coordinates;
