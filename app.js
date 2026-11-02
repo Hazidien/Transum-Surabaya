@@ -527,75 +527,82 @@
   async function addLoadedData() {
     setStatus("Memuat rute dan halte…");
     const failures = [];
-
-    for (const [index, route] of config.routes.entries()) {
-      addRoutePanel(route, index);
-      state.routeVisibility.set(route.key, true);
-      try {
-        const data = await loadGeoJSON(route.file);
-        const sourceId = "route-source-" + route.key;
-        const bounds = boundsForFeatureCollection(data);
-        state.map.addSource(sourceId, { type: "geojson", data });
-        const haloId = "route-halo-" + route.key;
-        const lineId = "route-line-" + route.key;
-        state.map.addLayer({
-          id: haloId, type: "line", source: sourceId,
-          layout: { "line-cap": "round", "line-join": "round" },
-          paint: { "line-color": "#07101e", "line-width": 7, "line-opacity": 0.95 }
-        });
-        state.map.addLayer({
-          id: lineId, type: "line", source: sourceId,
-          layout: { "line-cap": "round", "line-join": "round" },
-          paint: { "line-color": route.color, "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 15, 5], "line-opacity": 0.98 }
-        });
-        state.map.on("click", lineId, (event) => {
-          selectRouteDetails(route.key);
-          state.map.flyTo({ center: event.lngLat, zoom: Math.max(13, state.map.getZoom()), duration: 450 });
-        });
-        state.map.on("mouseenter", lineId, () => state.map.getCanvas().style.cursor = "pointer");
-        state.map.on("mouseleave", lineId, () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
-        state.routes.set(route.key, { data, bounds, sourceId });
-        state.routeLayerIds.set(route.key, [haloId, lineId]);
-        const countEl = byId("route-count-" + route.key);
-        if (countEl) countEl.textContent = data.features.length;
-      } catch (error) {
-        failures.push(error.message);
-        const countEl = byId("route-count-" + route.key);
-        if (countEl) countEl.textContent = "belum diunggah";
+    try {
+      // Muat koridor satu per satu agar satu berkas bermasalah tidak menghentikan peta.
+      for (const [index, route] of config.routes.entries()) {
+        addRoutePanel(route, index);
+        state.routeVisibility.set(route.key, true);
+        try {
+          const data = await loadGeoJSON(route.file);
+          const sourceId = "route-source-" + route.key;
+          const bounds = boundsForFeatureCollection(data);
+          state.map.addSource(sourceId, { type: "geojson", data });
+          const haloId = "route-halo-" + route.key;
+          const lineId = "route-line-" + route.key;
+          state.map.addLayer({
+            id: haloId, type: "line", source: sourceId,
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: { "line-color": "#07101e", "line-width": 7, "line-opacity": 0.95 }
+          });
+          state.map.addLayer({
+            id: lineId, type: "line", source: sourceId,
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: { "line-color": route.color, "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 15, 5], "line-opacity": 0.98 }
+          });
+          state.map.on("click", lineId, () => selectRouteDetails(route.key));
+          state.map.on("mouseenter", lineId, () => state.map.getCanvas().style.cursor = "pointer");
+          state.map.on("mouseleave", lineId, () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
+          state.routes.set(route.key, { data, bounds, sourceId });
+          state.routeLayerIds.set(route.key, [haloId, lineId]);
+          const countEl = byId("route-count-" + route.key);
+          if (countEl) countEl.textContent = data.features.length;
+        } catch (error) {
+          failures.push(error.message);
+          const countEl = byId("route-count-" + route.key);
+          if (countEl) countEl.textContent = "gagal dimuat";
+          console.warn("Gagal memuat koridor " + route.key + ":", error);
+        }
       }
-    }
 
-    await loadAllStops(failures);
-    addStopLayers();
-    setupCircleBuffers();
-    setupBusSimulation();
-    await setupCoverage(failures);
-    setupBuildings(failures);
-    updateRouteCounter();
-    wireRouteSearch();
+      try { await loadAllStops(failures); }
+      catch (error) { failures.push("Halte: " + error.message); console.error(error); }
 
-    const allBounds = new maplibregl.LngLatBounds();
-    let hasBounds = false;
-    state.routes.forEach(route => {
-      if (route.bounds && !route.bounds.isEmpty()) {
-        allBounds.extend(route.bounds.getSouthWest());
-        allBounds.extend(route.bounds.getNorthEast());
-        hasBounds = true;
+      // Setiap komponen opsional diisolasi. Kegagalan buffer/simulasi/POI
+      // tidak boleh menahan overlay pemuatan atau membuat seluruh peta gelap.
+      const stages = [
+        ["layer halte", () => addStopLayers()],
+        ["buffer halte", () => setupCircleBuffers()],
+        ["simulasi bus", () => setupBusSimulation()],
+        ["jangkauan halte", () => setupCoverage(failures)],
+        ["bangunan 3D", () => setupBuildings(failures)],
+        ["penghitung rute", () => updateRouteCounter()],
+        ["pencarian rute", () => wireRouteSearch()]
+      ];
+      for (const [label, run] of stages) {
+        try { await run(); }
+        catch (error) {
+          failures.push(label + ": " + (error?.message || String(error)));
+          console.error("Tahap " + label + " gagal:", error);
+        }
       }
-    });
-    // Keep the configured opening view. Do not auto-fit all corridors, which can zoom out unexpectedly.
 
-    if (failures.length) {
-      setStatus(state.routes.size + "/" + config.routes.length + " rute · data belum lengkap");
-      showError("Peta dasar sudah tampil, tetapi beberapa GeoJSON belum ditemukan atau tidak terbaca. Unggah berkas menggunakan nama yang tercantum di folder README, lalu muat ulang website. Detail teknis ada di console browser.");
-      console.warn("Berkas data belum tersedia:", failures);
-      hideLoadingOverlay();
+      if (failures.length) {
+        setStatus(state.routes.size + "/" + config.routes.length + " rute · sebagian data bermasalah");
+        showError("Peta tetap dapat digunakan, tetapi ada komponen yang gagal dimuat. Periksa Console browser untuk detail.");
+        console.warn("Peringatan pemuatan data:", failures);
+      } else {
+        hideError();
+        setStatus(state.routes.size + " rute · data siap");
+      }
       openCreditModal(true);
-    } else {
-      hideError();
-      setStatus(state.routes.size + " rute · data siap");
+    } catch (error) {
+      console.error("Kesalahan saat inisialisasi data peta:", error);
+      setStatus("Peta tampil · ada data yang gagal dimuat");
+      showError("Sebagian data gagal dimuat. Peta dasar tetap tersedia; muat ulang atau periksa Console browser.");
+    } finally {
+      // Pengaman utama: overlay wajib ditutup meskipun ada error di tahap mana pun.
       hideLoadingOverlay();
-      openCreditModal(true);
+      try { state.map?.resize(); state.map?.triggerRepaint(); } catch (_) {}
     }
   }
 
