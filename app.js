@@ -323,6 +323,19 @@
         });
       }
 
+      // Satukan titik dari dataset/rute berbeda jika benar-benar berimpit.
+      // Ambang 3 m menghindari penggabungan halte A/B yang berada di sisi jalan berbeda.
+      if (!match) {
+        let nearestDistance = Infinity;
+        groups.forEach(group => {
+          const distance = haversineMeters(group.center, coord);
+          if (distance <= 3 && distance < nearestDistance) {
+            match = group;
+            nearestDistance = distance;
+          }
+        });
+      }
+
       // Keep unnamed records independent so they cannot absorb named stops.
       if (!match) {
         match = { members: [], coords: [], center: coord, canonicalName: keyName };
