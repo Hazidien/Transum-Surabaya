@@ -927,7 +927,7 @@
       "type": "Feature",
       "properties": {
         "Route_Id": "Terminal Menanggal-Terminal Manukan",
-        "Halte_name": "Halte Darmo Park A"
+        "Halte_name": "Halte Darmo Park 1"
       },
       "geometry": {
         "type": "Point",
@@ -942,7 +942,7 @@
       "type": "Feature",
       "properties": {
         "Route_Id": "Terminal Menanggal-Terminal Manukan",
-        "Halte_name": "Halte Darmo Park A"
+        "Halte_name": "Halte Darmo Park 1"
       },
       "geometry": {
         "type": "Point",
@@ -957,7 +957,7 @@
       "type": "Feature",
       "properties": {
         "Route_Id": "Terminal Menanggal-Terminal Manukan",
-        "Halte_name": "Park and Ride Mayjen Sungkono"
+        "Halte_name": "Halte Darmo Park 2"
       },
       "geometry": {
         "type": "Point",
