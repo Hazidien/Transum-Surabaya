@@ -238,7 +238,8 @@
     }
     refreshSelectedBuffer();
     state.busMarkers.forEach((marker, busId) => {
-      if (busId.startsWith(routeKey + "::")) marker.getElement().style.display = visible && state.busesVisible ? "" : "none";
+      if (busId.startsWith(routeKey + "::")) marker.getElement().style.visibility = visible && state.busesVisible ? "visible" : "hidden";
+      marker.getElement().style.pointerEvents = visible && state.busesVisible ? "auto" : "none";
     });
     if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) state.activeBusPopup.remove();
   }
@@ -691,10 +692,8 @@
     });
     byId("stopsToggle").addEventListener("change", event => {
       state.stopsVisible = event.target.checked;
-      if (state.map.getLayer("stops-all")) state.map.setLayoutProperty("stops-all", "visibility", state.stopsVisible ? "visible" : "none");
-      if (state.map.getLayer("stop-labels")) state.map.setLayoutProperty("stop-labels", "visibility", state.stopsVisible ? "visible" : "none");
-      if (state.stopsVisible) refreshSelectedBuffer();
-      else setBufferLayerVisibility(false);
+      setStopLayerVisibility(state.stopsVisible);
+      setBufferLayerVisibility(state.stopsVisible && byId("coverageToggle").checked && !!state.selectedStop);
     });
   }
 
@@ -819,9 +818,20 @@
 
 
   function setBufferLayerVisibility(visible) {
-    ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
-      if (state.map?.getLayer(id)) state.map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
-    });
+    // Toggle melalui paint opacity, bukan perubahan layout MapLibre.
+    if (state.map?.getLayer("stop-circle-buffer-fill")) state.map.setPaintProperty("stop-circle-buffer-fill", "fill-opacity", visible ? 0.34 : 0);
+    if (state.map?.getLayer("stop-circle-buffer-outline")) state.map.setPaintProperty("stop-circle-buffer-outline", "line-opacity", visible ? 0.98 : 0);
+  }
+
+  function setStopLayerVisibility(visible) {
+    if (state.map?.getLayer("stops-all")) {
+      state.map.setPaintProperty("stops-all", "circle-opacity", visible ? 0.98 : 0);
+      state.map.setPaintProperty("stops-all", "circle-stroke-opacity", visible ? 1 : 0);
+    }
+    if (state.map?.getLayer("stop-labels")) {
+      state.map.setPaintProperty("stop-labels", "text-opacity", visible ? 1 : 0);
+      state.map.setPaintProperty("stop-labels", "text-halo-color", visible ? "#101827" : "rgba(16,24,39,0)");
+    }
   }
 
   function refreshSelectedBuffer() {
@@ -936,7 +946,8 @@
       state.busesVisible = !!visible;
       byId("busesToggle").checked = state.busesVisible;
       if (dockToggle) dockToggle.checked = state.busesVisible;
-      state.busMarkers.forEach(marker => { marker.getElement().style.display = state.busesVisible ? "" : "none"; });
+      state.busMarkers.forEach(marker => { marker.getElement().style.visibility = state.busesVisible ? "visible" : "hidden";
+        marker.getElement().style.pointerEvents = state.busesVisible ? "auto" : "none"; });
       if (!state.busesVisible) {
         if (state.busFrame) cancelAnimationFrame(state.busFrame);
         state.busFrame = null;
@@ -1106,7 +1117,8 @@
       const routeVisible = state.routeVisibility.get(route.key) !== false;
       if (!entry || !routeVisible || !state.busesVisible) {
         state.busMarkers.forEach((marker, busId) => {
-          if (busId.startsWith(route.key + "::")) marker.getElement().style.display = "none";
+          if (busId.startsWith(route.key + "::")) marker.getElement().style.visibility = "hidden";
+          marker.getElement().style.pointerEvents = "none";
         });
         return;
       }
@@ -1137,7 +1149,8 @@
           state.busMarkers.set(busId, marker);
           state.busProgress.set(busId, length * i / count);
         }
-        marker.getElement().style.display = "";
+        marker.getElement().style.visibility = "visible";
+        marker.getElement().style.pointerEvents = "auto";
         const previousProgress = state.busProgress.get(busId) || 0;
         const stopsAlongRoute = stopDistances;
         const waitState = state.busStopWait.get(busId);
