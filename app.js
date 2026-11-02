@@ -820,6 +820,12 @@
   }
 
 
+  function setBufferLayerVisibility(visible) {
+    ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
+      if (state.map?.getLayer(id)) state.map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+    });
+  }
+
   function refreshSelectedBuffer() {
     const source = state.map?.getSource("stop-circle-buffers");
     if (!source) return;
@@ -828,8 +834,13 @@
       ? stop.properties.__routeKeys
       : [stop?.properties?.__routeKey].filter(Boolean);
     const hasVisibleService = selectedRouteKeys.some(key => state.routeVisibility.get(key) !== false);
-    const enabled = byId("coverageToggle").checked && stop && state.stopsVisible && hasVisibleService;
-    source.setData({ type: "FeatureCollection", features: enabled ? [stopBufferPolygon(stop, state.bufferRadius)] : [] });
+    const enabled = byId("coverageToggle").checked && !!stop && state.stopsVisible && hasVisibleService;
+    if (!enabled) {
+      setBufferLayerVisibility(false);
+      return;
+    }
+    source.setData({ type: "FeatureCollection", features: [stopBufferPolygon(stop, state.bufferRadius)] });
+    setBufferLayerVisibility(true);
   }
 
   function showStopDetails(feature) {
