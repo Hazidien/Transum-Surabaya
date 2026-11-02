@@ -237,8 +237,10 @@
     setStopLayerVisibility(state.stopsVisible);
     refreshSelectedBuffer();
     state.busMarkers.forEach((marker, busId) => {
-      if (busId.startsWith(routeKey + "::")) marker.getElement().style.visibility = visible && state.busesVisible ? "visible" : "hidden";
-      marker.getElement().style.pointerEvents = visible && state.busesVisible ? "auto" : "none";
+      if (busId.startsWith(routeKey + "::")) {
+        marker.getElement().style.visibility = visible && state.busesVisible ? "visible" : "hidden";
+        marker.getElement().style.pointerEvents = visible && state.busesVisible ? "auto" : "none";
+      }
     });
     if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) state.activeBusPopup.remove();
   }
