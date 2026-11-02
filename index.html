@@ -60,18 +60,6 @@
           <input type="checkbox" id="stopsToggle" checked>
           <span class="switch"></span>
         </label>
-        <label class="layer-toggle">
-          <span class="layer-symbol coverage-symbol">◉</span>
-          <span class="toggle-copy"><strong>Buffer lingkaran halte</strong><small>Radius jangkauan indikatif</small></span>
-          <input type="checkbox" id="coverageToggle">
-          <span class="switch"></span>
-        </label>
-        <div class="buffer-control">
-          <div class="buffer-heading"><label for="bufferSlider">Radius jangkauan</label><strong id="bufferValue">400 m</strong></div>
-          <input id="bufferSlider" type="range" min="100" max="1000" step="100" value="400">
-          <div class="buffer-scale"><span>100 m</span><span>1.000 m</span></div>
-          <p id="bufferTime" class="buffer-caption">≈ 5 menit jalan kaki (garis lurus)</p>
-        </div>
       </section>
 
       <section class="section-block tools-block">
@@ -93,12 +81,6 @@
         </div>
         <p class="helper-copy">Bus virtual bergerak mengikuti geometri rute, bukan posisi kendaraan aktual.</p>
         <button class="primary-button" id="busPlayButton"><span>▶</span> Mulai simulasi bus</button>
-        <label class="layer-toggle bus-visibility-toggle">
-          <span class="layer-symbol bus-symbol">▰</span>
-          <span class="toggle-copy"><strong>Tampilkan bus</strong><small>Ikon bergerak di sepanjang rute</small></span>
-          <input type="checkbox" id="busesToggle" checked>
-          <span class="switch"></span>
-        </label>
         <div class="buffer-control">
           <div class="buffer-heading"><label for="busSpeed">Kecepatan simulasi</label><strong id="busSpeedValue">1×</strong></div>
           <input id="busSpeed" type="range" min="1" max="60" step="1" value="30">
@@ -155,11 +137,6 @@
         </div>
         <div id="mapDetailContent"></div>
       </aside>
-      <div class="map-legend" id="mapLegend">
-        <span class="legend-title">KORIDOR</span>
-        <span><i style="background:#F59E0B"></i>Suroboyo Bus</span>
-        <span><i style="background:#FB7185"></i>Wira Wiri</span>
-      </div>
       <div class="simulation-dock" id="simulationDock">
         <button id="busDockPlay" aria-label="Mulai atau jeda simulasi">▶</button>
         <span class="dock-clock" id="simulationClock">06:00</span>
@@ -195,6 +172,6 @@
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
   <script src="config.js?v=20261101c"></script>
-  <script src="app.js?v=20261102basrafix2"></script>
+  <script src="app.js?v=20261102ui-clean1"></script>
 </body>
 </html>
