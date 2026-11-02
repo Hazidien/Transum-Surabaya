@@ -867,7 +867,7 @@
       "type": "Feature",
       "properties": {
         "Route_Id": "Terminal Menanggal-Terminal Manukan",
-        "Halte_name": "Aditya Warman"
+        "Halte_name": "Indragiri"
       },
       "geometry": {
         "type": "Point",
@@ -957,7 +957,7 @@
       "type": "Feature",
       "properties": {
         "Route_Id": "Terminal Menanggal-Terminal Manukan",
-        "Halte_name": "Halte Darmo Park 2"
+        "Halte_name": "Halte Park and Ride Mayjen Sungkono"
       },
       "geometry": {
         "type": "Point",
