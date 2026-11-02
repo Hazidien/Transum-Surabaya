@@ -221,19 +221,10 @@
       const coverageEnabled = byId("coverageToggle")?.checked === true;
       state.map.setLayoutProperty(id, "visibility", visible && (!isCoverage || coverageEnabled) ? "visible" : "none");
     });
-    // Visibilitas halte diatur per-koridor melalui layer filter, bukan setData GeoJSON
-    // setiap checkbox berubah. Ini mencegah rebuild source besar dan mempertahankan titik
-    // halte bersama selama minimal satu koridor yang melayaninya masih aktif.
-    const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
-    const activeStopFilter = visibleKeys.length
-      ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
-      : ["==", ["get", "__showStop"], -1];
-    if (state.map.getLayer("stops-all")) {
-      state.map.setFilter("stops-all", activeStopFilter);
-    }
-    if (state.map.getLayer("stop-labels")) {
-      state.map.setFilter("stop-labels", activeStopFilter);
-    }
+    // Perbarui GeoJSON halte gabungan, bukan ekspresi filter dinamis MapLibre.
+    // Ini menjaga halte lintas-rute tetap satu titik dan menghindari renderer blank
+    // saat koridor dimatikan berulang kali.
+    refreshStopsSource();
     setStopLayerVisibility(state.stopsVisible);
     refreshSelectedBuffer();
     state.busMarkers.forEach((marker, busId) => {
@@ -378,11 +369,14 @@
   function refreshStopsSource() {
     if (!state.map || !state.map.getSource("all-stops")) return;
     const groups = buildStopGroups();
-    const features = groups.map((group, index) => {
+    const features = groups.flatMap((group, index) => {
       const members = group.members;
       const routeKeys = group.routeKeys;
       const visibleRouteKeys = routeKeys.filter(key => state.routeVisibility.get(key) !== false);
-      return {
+      // Jangan kirim halte ke renderer jika seluruh koridor pelayanannya dimatikan.
+      // Halte gabungan tetap tampil selama minimal satu koridor masih aktif.
+      if (!visibleRouteKeys.length) return [];
+      return [{
         type: "Feature", id: "stop-cluster-" + index,
         geometry: { type: "Point", coordinates: group.center },
         properties: {
@@ -394,9 +388,9 @@
             id: f.properties.stop_id ?? f.properties.Stop_Id ?? f.properties.Id ?? f.properties.id ?? "—",
             coordinates: f.geometry.coordinates
           })),
-          __showStop: state.stopsVisible && visibleRouteKeys.length ? 1 : 0
+          __showStop: state.stopsVisible ? 1 : 0
         }
-      };
+      }];
     });
     state.map.getSource("all-stops").setData({ type: "FeatureCollection", features });
   }
@@ -638,9 +632,7 @@
     state.map.addSource("all-stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     refreshStopsSource();
     const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
-    const activeStopFilter = visibleKeys.length
-      ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
-      : ["==", ["get", "__showStop"], -1];
+    const activeStopFilter = null;
     // Satu layer untuk semua titik halte bersama. Layer per-rute sebelumnya
     // menggambar fitur yang sama berulang kali ketika satu halte dilayani banyak koridor.
     state.map.addLayer({
@@ -820,12 +812,13 @@
 
   function setLayerVisibilitySafely(ids, visible) {
     const map = state.map;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map) return;
     ids.forEach(id => {
       try {
+        // setLayoutProperty adalah operasi lokal pada layer yang sudah ada.
+        // Jangan memanggil setFilter / setData saat toggle buffer.
         if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
       } catch (error) {
-        // Satu layer yang gagal tidak boleh menghentikan interaksi layer lainnya.
         console.warn("Gagal mengubah visibilitas layer " + id + ":", error);
       }
     });
@@ -841,20 +834,11 @@
   function setStopLayerVisibility(visible) {
     const map = state.map;
     if (!map || !map.isStyleLoaded()) return;
-    const visibleKeys = config.routes
-      .filter(route => state.routeVisibility.get(route.key) !== false)
-      .map(route => route.key);
-    const routeFilter = visibleKeys.length
-      ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
-      : ["==", ["get", "__showStop"], -1];
-    // Filter koridor tetap stabil; on/off titik halte memakai layout visibility.
-    // Ini menghindari filter kontradiktif yang dapat menyebabkan renderer MapLibre
-    // gagal ketika beberapa layer dimatikan berurutan.
+    // Toggle titik hanya mengubah layout visibility. Data halte sudah difilter
+    // ketika koridor berubah, sehingga tidak ada filter ekspresi yang dibangun ulang.
     ["stops-all", "stop-labels"].forEach(id => {
       try {
-        if (!map.getLayer(id)) return;
-        map.setFilter(id, routeFilter);
-        map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
       } catch (error) {
         console.warn("Gagal memperbarui layer halte " + id + ":", error);
       }
