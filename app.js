@@ -742,10 +742,8 @@
     };
     slider.addEventListener("input", refresh);
     toggle.addEventListener("change", () => {
-      ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
-        if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", toggle.checked ? "visible" : "none");
-      });
-      refreshSelectedBuffer();
+      if (toggle.checked) refreshSelectedBuffer();
+      else setBufferLayerVisibility(false);
     });
     refresh();
     refreshSelectedBuffer();
