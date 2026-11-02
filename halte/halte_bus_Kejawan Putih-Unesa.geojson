@@ -637,21 +637,6 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Halte Gedung Juang 45"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          112.72891766,
-          -7.29234016
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "Id": 0,
-        "Route_Id": "Kejawan Putih-Unesa",
         "Halte_name": "Mayjend Sungkono"
       },
       "geometry": {
@@ -697,7 +682,7 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Halte Darmo Park 2"
+        "Halte_name": "Halte Park and Ride Mayjen Sungkono"
       },
       "geometry": {
         "type": "Point",
