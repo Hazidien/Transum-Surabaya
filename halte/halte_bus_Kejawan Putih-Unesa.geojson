@@ -667,7 +667,7 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Halte Darmo Park 1"
+        "Halte_name": "Halte Gedung Juang 45"
       },
       "geometry": {
         "type": "Point",
@@ -682,7 +682,7 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Halte Darmo Park 2"
+        "Halte_name": "Halte Darmo Park A"
       },
       "geometry": {
         "type": "Point",
@@ -742,7 +742,7 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Halte Putat Gede 1"
+        "Halte_name": "Halte Taman Makam Pahlawan 2"
       },
       "geometry": {
         "type": "Point",
@@ -757,7 +757,7 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Halte Putat Gede 2"
+        "Halte_name": "Halte Putat Gede A"
       },
       "geometry": {
         "type": "Point",
@@ -772,7 +772,7 @@
       "properties": {
         "Id": 0,
         "Route_Id": "Kejawan Putih-Unesa",
-        "Halte_name": "Halte Darmo Permai"
+        "Halte_name": "Halte Putat Gede B"
       },
       "geometry": {
         "type": "Point",
