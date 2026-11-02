@@ -819,20 +819,27 @@
 
 
   function setBufferLayerVisibility(visible) {
-    // Toggle melalui paint opacity, bukan perubahan layout MapLibre.
-    if (state.map?.getLayer("stop-circle-buffer-fill")) state.map.setPaintProperty("stop-circle-buffer-fill", "fill-opacity", visible ? 0.34 : 0);
-    if (state.map?.getLayer("stop-circle-buffer-outline")) state.map.setPaintProperty("stop-circle-buffer-outline", "line-opacity", visible ? 0.98 : 0);
+    // Gunakan filter layer agar toggle tidak mengubah paint/layout berulang kali.
+    // Ini menghindari rebuild state renderer saat beberapa kontrol diubah berurutan.
+    const filter = visible ? null : ["==", ["get", "__bufferVisible"], true];
+    ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
+      if (state.map?.getLayer(id)) state.map.setFilter(id, filter);
+    });
   }
 
   function setStopLayerVisibility(visible) {
-    if (state.map?.getLayer("stops-all")) {
-      state.map.setPaintProperty("stops-all", "circle-opacity", visible ? 0.98 : 0);
-      state.map.setPaintProperty("stops-all", "circle-stroke-opacity", visible ? 1 : 0);
-    }
-    if (state.map?.getLayer("stop-labels")) {
-      state.map.setPaintProperty("stop-labels", "text-opacity", visible ? 1 : 0);
-      state.map.setPaintProperty("stop-labels", "text-halo-color", visible ? "#101827" : "rgba(16,24,39,0)");
-    }
+    const visibleKeys = config.routes
+      .filter(route => state.routeVisibility.get(route.key) !== false)
+      .map(route => route.key);
+    const routeFilter = visibleKeys.length
+      ? ["any", ...visibleKeys.map(key => ["in", key, ["get", "__routeKeys"]])]
+      : ["==", ["get", "__showStop"], -1];
+    const filter = visible
+      ? routeFilter
+      : ["all", routeFilter, ["==", ["get", "__showStop"], -1]];
+    ["stops-all", "stop-labels"].forEach(id => {
+      if (state.map?.getLayer(id)) state.map.setFilter(id, filter);
+    });
   }
 
   function refreshSelectedBuffer() {
