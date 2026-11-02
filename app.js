@@ -282,73 +282,62 @@
 
   function buildStopGroups() {
     if (state.stopGroups) return state.stopGroups;
-    // Exact canonical names are one logical stop across all datasets/routes,
-    // even when digitized coordinates differ. Use a real member coordinate (medoid),
-    // never an artificial average point between distant platforms.
+    // Merge ONLY equivalent normalized names, and only when their coordinates
+    // are within 80 m. Different names (including A/B and 1/2) remain separate.
     const groups = [];
-    const exactGroups = new Map();
-    const fuzzyBuckets = new Map();
-    const cellMeters = 100;
-    const cellLat = cellMeters / 110574;
-    const cellLonAt = lat => cellMeters / Math.max(1, 111320 * Math.cos(lat * Math.PI / 180));
-    const suffixOf = value => (value.match(/([a-z])$/i) || [,""])[1].toLowerCase();
+    const groupsByName = new Map();
 
     state.stops.forEach(feature => {
       const coord = feature.geometry.coordinates;
       if (!Array.isArray(coord) || !Number.isFinite(coord[0]) || !Number.isFinite(coord[1])) return;
-      const lat=coord[1], lon=coord[0];
-      const rawName=String(feature.properties.__stopName || "").trim();
-      const keyName=/^(halte|shelter)?\s*(tanpa nama|unnamed|unknown)$/i.test(rawName) ? "" : normalizeStopName(rawName);
-      let match = keyName ? exactGroups.get(keyName) || null : null;
+      const rawName = String(feature.properties.__stopName || "").trim();
+      const keyName = /^(halte|shelter)?\s*(tanpa nama|unnamed|unknown)$/i.test(rawName)
+        ? "" : normalizeStopName(rawName);
 
-      // For minor spelling differences, merge only when the stops are spatially close.
-      if (!match) {
-        const gx=Math.floor(lon/cellLonAt(lat)), gy=Math.floor(lat/cellLat);
-        for(let dx=-1;dx<=1 && !match;dx++) for(let dy=-1;dy<=1 && !match;dy++) {
-          for(const group of fuzzyBuckets.get((gx+dx)+"|"+(gy+dy)) || []) {
-            const distance=haversineMeters(group.center,coord);
-            const fuzzyName=keyName && [...group.nameKeys].some(existing => {
-              if (suffixOf(existing)!==suffixOf(keyName)) return false;
-              const longest=Math.max(existing.length,keyName.length);
-              return longest>=8 && editDistance(existing,keyName)<=Math.max(1,Math.floor(longest*0.15));
-            });
-            if ((fuzzyName && distance<=80) || (!keyName && distance<=6)) { match=group; break; }
+      let match = null;
+      if (keyName) {
+        const candidates = groupsByName.get(keyName) || [];
+        let nearestDistance = Infinity;
+        candidates.forEach(group => {
+          const distance = haversineMeters(group.center, coord);
+          if (distance <= 80 && distance < nearestDistance) {
+            match = group;
+            nearestDistance = distance;
           }
+        });
+      }
+
+      // Unnamed records are deliberately not merged with named or differently
+      // named stops; they remain visible instead of disappearing into another stop.
+      if (!match) {
+        match = { members: [], coords: [], center: coord, nameKeys: new Set() };
+        groups.push(match);
+        if (keyName) {
+          if (!groupsByName.has(keyName)) groupsByName.set(keyName, []);
+          groupsByName.get(keyName).push(match);
         }
       }
 
-      if(!match) {
-        match={members:[],coords:[],center:coord,nameKeys:new Set(),bucketKeys:[]};
-        groups.push(match);
-        if(keyName) exactGroups.set(keyName,match);
-        const gx=Math.floor(lon/cellLonAt(lat)), gy=Math.floor(lat/cellLat);
-        const bucketKey=gx+"|"+gy;
-        if(!fuzzyBuckets.has(bucketKey)) fuzzyBuckets.set(bucketKey,[]);
-        fuzzyBuckets.get(bucketKey).push(match);
-      } else if(keyName && !exactGroups.has(keyName)) {
-        exactGroups.set(keyName,match);
-      }
-
       match.members.push(feature);
-      if(keyName) match.nameKeys.add(keyName);
+      if (keyName) match.nameKeys.add(keyName);
       match.coords.push(coord);
     });
 
-    groups.forEach(group=>{
-      // Choose the recorded coordinate nearest to all other member coordinates.
-      // This preserves a real mapped stop position even when source datasets disagree.
-      let best=group.coords[0], bestTotal=Infinity;
-      group.coords.forEach(candidate=>{
-        const total=group.coords.reduce((sum,other)=>sum+haversineMeters(candidate,other),0);
-        if(total<bestTotal){bestTotal=total;best=candidate;}
+    groups.forEach(group => {
+      // Select an actual source coordinate nearest to all group members.
+      let best = group.coords[0], bestTotal = Infinity;
+      group.coords.forEach(candidate => {
+        const total = group.coords.reduce((sum, other) => sum + haversineMeters(candidate, other), 0);
+        if (total < bestTotal) { bestTotal = total; best = candidate; }
       });
-      group.center=best;
-      group.routeKeys=[...new Set(group.members.map(f=>f.properties.__routeKey).filter(Boolean))];
-      group.routeIds=[...new Set(group.members.map(f=>f.properties.__rawRouteId).filter(Boolean))];
-      group.names=[...new Set(group.members.map(f=>f.properties.__stopName).filter(Boolean))];
-      group.displayName=formatStopName(preferredStopName(group.names));
+      group.center = best;
+      group.routeKeys = [...new Set(group.members.map(f => f.properties.__routeKey).filter(Boolean))];
+      group.routeIds = [...new Set(group.members.map(f => f.properties.__rawRouteId).filter(Boolean))];
+      group.names = [...new Set(group.members.map(f => f.properties.__stopName).filter(Boolean))];
+      group.displayName = formatStopName(preferredStopName(group.names));
     });
-    state.stopGroups=groups;
+
+    state.stopGroups = groups;
     return groups;
   }
   function refreshStopsSource() {
