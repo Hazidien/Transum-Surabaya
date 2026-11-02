@@ -631,13 +631,10 @@
   function addStopLayers() {
     state.map.addSource("all-stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     refreshStopsSource();
-    const visibleKeys = config.routes.filter(route => state.routeVisibility.get(route.key) !== false).map(route => route.key);
-    const activeStopFilter = null;
     // Satu layer untuk semua titik halte bersama. Layer per-rute sebelumnya
     // menggambar fitur yang sama berulang kali ketika satu halte dilayani banyak koridor.
     state.map.addLayer({
       id: "stops-all", type: "circle", source: "all-stops",
-      filter: activeStopFilter,
       layout: { visibility: state.stopsVisible ? "visible" : "none" },
       paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 5.5],
