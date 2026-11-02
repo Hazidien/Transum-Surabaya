@@ -760,15 +760,30 @@
 
   function haversineKm(a, b) { return haversineMeters(a, b) / 1000; }
 
-  function routeCoordinates(routeData) {
-    const coords = [];
-    const walk = c => {
-      if (!Array.isArray(c)) return;
-      if (typeof c[0] === "number" && typeof c[1] === "number") coords.push(c);
-      else c.forEach(walk);
+  function routeLineParts(routeData) {
+    // Keep every LineString/MultiLineString part independent. Never join
+    // disconnected road segments just because they belong to one feature.
+    const parts = [];
+    const addLine = line => {
+      if (!Array.isArray(line)) return;
+      const clean = line.filter(coord => Array.isArray(coord) &&
+        Number.isFinite(coord[0]) && Number.isFinite(coord[1]) &&
+        coord[0] >= 112 && coord[0] <= 113.5 && coord[1] >= -8 && coord[1] <= -6.5);
+      if (clean.length >= 2) parts.push(clean);
     };
-    (routeData.features || []).forEach(f => { if (f.geometry) walk(f.geometry.coordinates); });
-    return coords;
+    const visitGeometry = geometry => {
+      if (!geometry) return;
+      if (geometry.type === "LineString") addLine(geometry.coordinates);
+      else if (geometry.type === "MultiLineString") (geometry.coordinates || []).forEach(addLine);
+      else if (geometry.type === "GeometryCollection") (geometry.geometries || []).forEach(visitGeometry);
+    };
+    (routeData.features || []).forEach(feature => visitGeometry(feature.geometry));
+    return parts;
+  }
+
+  // Flattened coordinates are retained only for non-animation summaries.
+  function routeCoordinates(routeData) {
+    return routeLineParts(routeData).flat();
   }
 
   function routeLengthKm(coords) {
@@ -935,30 +950,38 @@
     const dockButton = byId("busDockPlay");
     const dockSpeed = byId("busDockSpeed");
     const dockToggle = byId("busDockVisible");
-    // Selector expresses the displayed acceleration. Each setting unit maps to 3x
-    // the previous movement rate: 10x is the previous 30x baseline; 30x is 3x faster.
+
     const applyBusSpeed = value => {
       state.busSpeedSetting = Math.max(1, Number(value) || 1);
-      state.busSpeedMultiplier = state.busSpeedSetting * 3;
+      // Preserve the established control scale: 30x is the default, 60x is fastest.
+      state.busSpeedMultiplier = state.busSpeedSetting;
       byId("busSpeedValue").textContent = state.busSpeedSetting + "×";
       if (dockSpeed) dockSpeed.value = String(state.busSpeedSetting);
-      if (byId("busDockSpeedValue")) byId("busDockSpeedValue").textContent = state.busSpeedSetting + "×";
     };
     applyBusSpeed(30);
-    // Pra-hitung geometri dan halte per koridor sekali saja. Hindari menghitung ulang
-    // seluruh garis (ribuan vertex) pada setiap frame animasi.
+
     state.routeAnimationCache.clear();
+    state.busStopDistances.clear();
+
     config.routes.forEach(route => {
-      const entry=state.routes.get(route.key);
-      if(!entry) return;
-      const coords=routeCoordinates(entry.data);
-      if(coords.length<2) return;
-      const cumulative=[0];
-      for(let i=1;i<coords.length;i++) cumulative[i]=cumulative[i-1]+haversineKm(coords[i-1],coords[i]);
-      const length=cumulative[cumulative.length-1];
-      const stopDistances=getRouteStopDistances(route.key,coords,length);
-      state.routeAnimationCache.set(route.key,{coords,cumulative,length,stopDistances});
+      const entry = state.routes.get(route.key);
+      if (!entry) return;
+      const parts = routeLineParts(entry.data).map(coords => {
+        const cumulative = [0];
+        for (let i = 1; i < coords.length; i++) {
+          cumulative[i] = cumulative[i - 1] + haversineKm(coords[i - 1], coords[i]);
+        }
+        return { coords, cumulative, length: cumulative[cumulative.length - 1] };
+      }).filter(part => part.length > 0.02);
+      const totalLength = parts.reduce((sum, part) => sum + part.length, 0);
+      if (!parts.length || !totalLength) {
+        console.warn("Simulasi dilewati: geometri rute tidak memiliki ruas valid", route.key);
+        return;
+      }
+      const stopDistances = getRouteStopDistances(route.key, parts, totalLength);
+      state.routeAnimationCache.set(route.key, { parts, length: totalLength, stopDistances });
     });
+
     speed.value = "30";
     if (dockSpeed) dockSpeed.value = "30";
     speed.addEventListener("input", () => applyBusSpeed(speed.value));
@@ -966,12 +989,11 @@
       speed.value = String(dockSpeed.value);
       applyBusSpeed(dockSpeed.value);
     });
+
     const setBusesVisible = visible => {
       state.busesVisible = !!visible;
       byId("busesToggle").checked = state.busesVisible;
       if (dockToggle) dockToggle.checked = state.busesVisible;
-      // Bus adalah marker DOM, bukan layer WebGL. Sembunyikan marker tanpa
-      // menghapusnya dari peta agar toggle berulang tidak merusak canvas.
       state.busMarkers.forEach(marker => {
         const element = marker.getElement();
         if (!element) return;
@@ -990,6 +1012,7 @@
     };
     if (dockToggle) dockToggle.addEventListener("change", () => setBusesVisible(dockToggle.checked));
     byId("busesToggle").addEventListener("change", event => setBusesVisible(event.target.checked));
+
     byId("closeMapDetail").addEventListener("click", () => {
       if (state.clickMarker) state.clickMarker.remove();
       state.clickMarker = null;
@@ -1000,6 +1023,7 @@
       state.selectedStop = null;
       refreshSelectedBuffer();
     });
+
     const toggleSimulation = () => {
       state.busAnimationOn = !state.busAnimationOn;
       button.innerHTML = state.busAnimationOn ? "<span>Ⅱ</span> Jeda simulasi bus" : "<span>▶</span> Mulai simulasi bus";
@@ -1015,8 +1039,33 @@
     button.addEventListener("click", toggleSimulation);
     if (dockButton) dockButton.addEventListener("click", toggleSimulation);
     if (byId("simBusCount")) byId("simBusCount").textContent = getTotalSimulatedFleet() + " bus";
-    // Start a clearly labelled simulation on load, matching the reference's running timeline.
     toggleSimulation();
+  }
+
+  function interpolatePart(parts, progressKm) {
+    let remaining = Math.max(0, progressKm);
+    for (const part of parts) {
+      if (remaining <= part.length) {
+        const coords = part.coords;
+        const cumulative = part.cumulative;
+        let low = 1, high = cumulative.length - 1;
+        while (low < high) {
+          const mid = (low + high) >> 1;
+          if (cumulative[mid] < remaining) low = mid + 1;
+          else high = mid;
+        }
+        const i = low;
+        const segment = cumulative[i] - cumulative[i - 1];
+        const t = segment ? Math.max(0, Math.min(1, (remaining - cumulative[i - 1]) / segment)) : 0;
+        return [
+          coords[i - 1][0] + (coords[i][0] - coords[i - 1][0]) * t,
+          coords[i - 1][1] + (coords[i][1] - coords[i - 1][1]) * t
+        ];
+      }
+      remaining -= part.length;
+    }
+    const lastPart = parts[parts.length - 1];
+    return lastPart.coords[lastPart.coords.length - 1];
   }
 
   function interpolateRoute(coords, progressKm) {
@@ -1090,45 +1139,53 @@
     });
   }
 
-  function getRouteStopDistances(routeKey, coords, routeLength) {
+  function getRouteStopDistances(routeKey, parts, routeLength) {
     if (state.busStopDistances.has(routeKey)) return state.busStopDistances.get(routeKey);
-    const cumulative = [0];
-    for (let i = 1; i < coords.length; i++) cumulative[i] = cumulative[i - 1] + haversineKm(coords[i - 1], coords[i]);
     const points = state.stops.filter(stop => stop.properties.__routeKey === routeKey);
     const distances = [];
     points.forEach(stop => {
       const point = stop.geometry.coordinates;
       let bestDistanceMeters = Infinity;
       let bestAlongKm = null;
-      for (let i = 1; i < coords.length; i++) {
-        const a = coords[i - 1], b = coords[i];
-        const meanLat = (a[1] + b[1] + point[1]) / 3 * Math.PI / 180;
-        const sx = 111.32 * Math.cos(meanLat);
-        const sy = 110.57;
-        const ax = a[0] * sx, ay = a[1] * sy;
-        const bx = b[0] * sx, by = b[1] * sy;
-        const px = point[0] * sx, py = point[1] * sy;
-        const dx = bx - ax, dy = by - ay;
-        const denom = dx * dx + dy * dy;
-        const t = denom ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / denom)) : 0;
-        const q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-        const distanceMeters = haversineKm(point, q) * 1000;
-        if (distanceMeters < bestDistanceMeters) {
-          bestDistanceMeters = distanceMeters;
-          bestAlongKm = cumulative[i - 1] + haversineKm(a, b) * t;
+      let precedingPartLength = 0;
+      parts.forEach(part => {
+        const { coords, cumulative } = part;
+        for (let i = 1; i < coords.length; i++) {
+          const a = coords[i - 1], b = coords[i];
+          const meanLat = (a[1] + b[1] + point[1]) / 3 * Math.PI / 180;
+          const sx = 111.32 * Math.cos(meanLat);
+          const sy = 110.57;
+          const ax = a[0] * sx, ay = a[1] * sy;
+          const bx = b[0] * sx, by = b[1] * sy;
+          const px = point[0] * sx, py = point[1] * sy;
+          const dx = bx - ax, dy = by - ay;
+          const denom = dx * dx + dy * dy;
+          const t = denom ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / denom)) : 0;
+          const q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+          const distanceMeters = haversineKm(point, q) * 1000;
+          if (distanceMeters < bestDistanceMeters) {
+            bestDistanceMeters = distanceMeters;
+            bestAlongKm = precedingPartLength + cumulative[i - 1] +
+              haversineKm(a, b) * t;
+          }
         }
-      }
-      // Stop points can sit slightly away from the digitized route centerline.
+        precedingPartLength += part.length;
+      });
       if (bestAlongKm !== null && bestDistanceMeters <= 250) distances.push(bestAlongKm);
     });
-    distances.sort((x, y) => x - y);
-    const unique = distances.filter((value, index) => index === 0 || value - distances[index - 1] > 0.08);
+    distances.sort((a, b) => a - b);
+    const unique = distances.filter((value, index) =>
+      index === 0 || value - distances[index - 1] > 0.08
+    );
     state.busStopDistances.set(routeKey, unique);
     return unique;
   }
 
   function animateBusMarkers(now) {
-    if (!state.busAnimationOn || !state.busesVisible) { state.busFrame = null; return; }
+    if (!state.busAnimationOn || !state.busesVisible) {
+      state.busFrame = null;
+      return;
+    }
     if (now - state.busLastRender < 33) {
       state.busFrame = requestAnimationFrame(animateBusMarkers);
       return;
@@ -1138,52 +1195,61 @@
     const elapsedMs = Math.min(250, now - state.busLastTime);
     const deltaHours = elapsedMs / 3600000 * state.busSpeedMultiplier;
     state.busLastTime = now;
+
     state.simulationMinutes = (state.simulationMinutes + elapsedMs / 1000 * state.busSpeedMultiplier * 0.5) % (24 * 60);
     const hh = String(Math.floor(state.simulationMinutes / 60)).padStart(2, "0");
     const mm = String(Math.floor(state.simulationMinutes % 60)).padStart(2, "0");
     if (byId("simulationClock")) byId("simulationClock").textContent = hh + ":" + mm;
 
     config.routes.forEach(route => {
-      const entry = state.routes.get(route.key);
+      const routePrefix = route.key + "::";
       const routeVisible = state.routeVisibility.get(route.key) !== false;
-      if (!entry || !routeVisible || !state.busesVisible) {
+      const entry = state.routes.get(route.key);
+      const cache = state.routeAnimationCache.get(route.key);
+      if (!entry || !routeVisible || !state.busesVisible || !cache) {
         state.busMarkers.forEach((marker, busId) => {
-          if (busId.startsWith(route.key + "::")) marker.getElement().style.visibility = "hidden";
-          marker.getElement().style.pointerEvents = "none";
+          if (!busId.startsWith(routePrefix)) return;
+          const element = marker.getElement();
+          if (element) {
+            element.style.visibility = "hidden";
+            element.style.pointerEvents = "none";
+          }
         });
         return;
       }
-      const cache = state.routeAnimationCache.get(route.key);
-      if (!cache || cache.coords.length < 2) return;
-      const {coords,length,stopDistances} = cache;
+
+      const { parts, length, stopDistances } = cache;
       const fleet = getFleetConfig(route.key);
       const count = Math.max(1, Math.min(40, Number(fleet.count) || 1));
-      const simulationMovementSpeed = route.key.startsWith("ww-") ? 15 : 20;
-      const popupNominalSpeed = route.key.startsWith("ww-") ? 25 : 20;
+      const nominalSpeed = route.key.startsWith("ww-") ? 15 : 20;
       for (let i = 0; i < count; i++) {
-        const busId = route.key + "::" + String(i + 1).padStart(2, "0");
+        const busId = routePrefix + String(i + 1).padStart(2, "0");
         let marker = state.busMarkers.get(busId);
         if (!marker) {
-          const el = document.createElement("button");
-          el.type = "button";
-          el.className = "bus-marker";
-          el.textContent = "";
-          el.style.background = route.color;
-          el.setAttribute("aria-label", "Buka informasi bus simulasi " + (i + 1));
-          el.title = "SIMULASI — klik untuk informasi bus";
-          marker = new maplibregl.Marker({ element: el, anchor: "center" })
-            .setLngLat(interpolateRouteCached(cache, length * i / count)).addTo(state.map);
-          el.addEventListener("click", event => {
+          const element = document.createElement("button");
+          element.type = "button";
+          element.className = "bus-marker";
+          element.textContent = "";
+          element.style.background = route.color;
+          element.setAttribute("aria-label", "Buka informasi bus simulasi " + (i + 1));
+          element.title = "SIMULASI — klik untuk informasi bus";
+          marker = new maplibregl.Marker({ element, anchor: "center" })
+            .setLngLat(interpolatePart(parts, length * i / count))
+            .addTo(state.map);
+          element.addEventListener("click", event => {
             event.stopPropagation();
-            createBusPopup(route, busId, fleet, popupNominalSpeed, marker);
+            createBusPopup(route, busId, fleet, nominalSpeed, marker);
           });
           state.busMarkers.set(busId, marker);
           state.busProgress.set(busId, length * i / count);
         }
-        marker.getElement().style.visibility = "visible";
-        marker.getElement().style.pointerEvents = "auto";
+
+        const element = marker.getElement();
+        element.style.display = "";
+        element.style.visibility = "visible";
+        element.style.pointerEvents = "auto";
+
         const previousProgress = state.busProgress.get(busId) || 0;
-        const stopsAlongRoute = stopDistances;
         const waitState = state.busStopWait.get(busId);
         let progress = previousProgress;
         if (waitState && waitState.remainingMs > 0) {
@@ -1191,28 +1257,28 @@
           progress = waitState.stopProgress;
           if (waitState.remainingMs <= 0) state.busStopWait.delete(busId);
         } else {
-          const proposed = previousProgress + simulationMovementSpeed * deltaHours;
-          let nextStop = null;
-          if (length > 0) {
-            for (const stopDistance of stopsAlongRoute) {
-              const ahead = stopDistance > previousProgress + 0.001 && stopDistance <= proposed + 0.001;
-              const wrapped = proposed >= length && stopDistance <= (proposed % length);
-              if (ahead || wrapped) { nextStop = stopDistance; break; }
-            }
-          }
-          if (nextStop !== null) {
+          const proposed = previousProgress + nominalSpeed * deltaHours;
+          const nextStop = stopDistances.find(stopDistance =>
+            stopDistance > previousProgress + 0.001 &&
+            stopDistance <= proposed + 0.001
+          );
+          if (nextStop !== undefined) {
             progress = nextStop;
             state.busStopWait.set(busId, { stopProgress: nextStop, remainingMs: 2200 });
           } else {
-            progress = length > 0 ? proposed % length : proposed;
+            progress = length > 0 ? proposed % length : 0;
           }
         }
+
         state.busProgress.set(busId, progress);
-        marker.setLngLat(interpolateRouteCached(cache, progress));
-        if (state.activeBusPopup && state.activeBusId === busId) state.activeBusPopup.setLngLat(marker.getLngLat());
+        marker.setLngLat(interpolatePart(parts, progress));
+        if (state.activeBusPopup && state.activeBusId === busId) {
+          state.activeBusPopup.setLngLat(marker.getLngLat());
+        }
       }
     });
-    if (byId("simBusCount")) byId("simBusCount").textContent = getTotalSimulatedFleet() + " bus";
+
+    if (byId("simBusCount")) byId("simBusCount").textContent = String(state.busMarkers.size || getTotalSimulatedFleet()) + " bus";
     state.busFrame = requestAnimationFrame(animateBusMarkers);
   }
 
