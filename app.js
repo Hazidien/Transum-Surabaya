@@ -486,7 +486,7 @@
 
     state.map = new maplibregl.Map({
       container: "map",
-      style: "https://tiles.openfreemap.org/styles/positron",
+      style: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
       center: config.map.center,
       zoom: config.map.zoom,
       pitch: config.map.pitch,
@@ -1142,83 +1142,46 @@
 
   function setupBuildings(failures) {
     const toggle = byId("buildingsToggle");
-    if (!config.buildings.enabled) {
-      byId("buildingStatus").textContent = "Belum diaktifkan · butuh PMTiles";
+    const status = byId("buildingStatus");
+
+    // CARTO Voyager menyediakan vector source "carto" dengan source-layer "building".
+    // Height dan min-height berasal dari atribut bangunan OpenStreetMap yang diproses OpenMapTiles.
+    if (!state.map.getSource("carto")) {
+      status.textContent = "Sumber bangunan CARTO tidak tersedia";
       toggle.disabled = true;
+      console.warn("Layer bangunan 3D tidak ditambahkan: source CARTO tidak ditemukan.");
       return;
     }
-    if (config.buildings.mode === "pmtiles") {
-      if (!window.pmtiles) {
-        failures.push("Pustaka PMTiles tidak tersedia");
-        byId("buildingStatus").textContent = "Pustaka PMTiles gagal dimuat";
-        return;
-      }
-      const absoluteUrl = new URL(config.buildings.file, document.baseURI).href;
-      const sourceUrl = "pmtiles://" + absoluteUrl;
-      state.map.addSource("buildings", { type: "vector", url: sourceUrl });
-      addBuildingLayer(config.buildings.sourceLayer || "buildings");
-    } else {
-      loadGeoJSON(config.buildings.file).then(data => {
-        state.map.addSource("buildings", { type: "geojson", data, maxzoom: 14 });
-        addBuildingLayer(null);
-        byId("buildingStatus").textContent = data.features.length.toLocaleString("id-ID") + " footprint";
-        toggle.disabled = false;
-      }).catch(error => {
-        failures.push(error.message);
-        byId("buildingStatus").textContent = "File bangunan tidak ditemukan";
-      });
-    }
 
-    if (config.buildings.mode === "pmtiles") {
-      // Aktifkan checkbox hanya bila pengguna sudah mengubah config dan tile berhasil dimuat.
-      byId("buildingStatus").textContent = "Menunggu berkas bangunan.pmtiles";
-      toggle.disabled = false;
-    }
-
-    function addBuildingLayer(sourceLayer) {
-      const height = ["to-number", ["get", config.buildings.heightProperty || "LIDAR_MEAN"], 0];
-      const layer = {
+    if (!state.map.getLayer("buildings-3d")) {
+      const firstSymbolLayer = state.map.getStyle().layers.find(layer => layer.type === "symbol");
+      state.map.addLayer({
         id: "buildings-3d",
         type: "fill-extrusion",
-        source: "buildings",
-        minzoom: 12,
+        source: "carto",
+        "source-layer": "building",
+        minzoom: 11,
+        filter: ["!=", ["get", "hide_3d"], true],
         paint: {
-          "fill-extrusion-color": [
-            "interpolate", ["linear"], height,
-            0, "#354457", 5, "#50657e", 20, "#68829a", 60, "#9babc1"
-          ],
-          "fill-extrusion-height": ["max", 0.1, height],
-          "fill-extrusion-base": 0,
-          "fill-extrusion-opacity": 0.85,
+          "fill-extrusion-color": "#d8cbb7",
+          "fill-extrusion-height": ["max", 3, ["to-number", ["get", "render_height"], 6]],
+          "fill-extrusion-base": ["max", 0, ["to-number", ["get", "render_min_height"], 0]],
+          "fill-extrusion-opacity": 0.96,
           "fill-extrusion-vertical-gradient": true
         },
-        layout: { visibility: "none" }
-      };
-      if (sourceLayer) layer["source-layer"] = sourceLayer;
-      const firstRouteLayer = state.routeLayerIds.get(config.routes[0]?.key)?.[0];
-      state.map.addLayer(layer, firstRouteLayer);
-      state.buildingLayerAdded = true;
-      state.map.on("click", "buildings-3d", (event) => {
-        if (!event.features?.length) return;
-        const properties = event.features[0].properties || {};
-        const heightValue = properties[config.buildings.heightProperty || "LIDAR_MEAN"];
-        const rows = [["Tinggi (LIDAR_MEAN)", heightValue == null ? "Tidak tersedia" : String(heightValue) + " m"]];
-        ["building_id", "name", "area_m2", "floors"].forEach(key => {
-          if (properties[key] != null) rows.push([key, properties[key]]);
-        });
-        new maplibregl.Popup({ offset: 8 }).setLngLat(event.lngLat)
-          .setHTML(popupHtml("Footprint bangunan", properties.name || properties.building_id || "Bangunan Surabaya", rows))
-          .addTo(state.map);
-      });
-      state.map.on("mouseenter", "buildings-3d", () => state.map.getCanvas().style.cursor = "pointer");
-      state.map.on("mouseleave", "buildings-3d", () => state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : "");
-      toggle.addEventListener("change", (event) => {
-        if (state.map.getLayer("buildings-3d")) {
-          state.map.setLayoutProperty("buildings-3d", "visibility", event.target.checked ? "visible" : "none");
-        }
-      });
-      byId("buildingStatus").textContent = "Siap · aktifkan untuk tampilkan";
+        layout: { visibility: "visible" }
+      }, firstSymbolLayer?.id);
     }
+
+    toggle.disabled = false;
+    toggle.checked = true;
+    status.textContent = "Bangunan OSM 3D · CARTO";
+
+    toggle.addEventListener("change", event => {
+      if (state.map.getLayer("buildings-3d")) {
+        state.map.setLayoutProperty("buildings-3d", "visibility", event.target.checked ? "visible" : "none");
+      }
+    });
   }
 
   function wireRouteSearch() {
