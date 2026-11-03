@@ -493,7 +493,7 @@
       bearing: config.map.bearing,
       maxPitch: 75,
       attributionControl: false,
-      canvasContextAttributes: { antialias: false }
+      canvasContextAttributes: { antialias: true }
     });
 
     state.map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
@@ -1144,29 +1144,41 @@
     const toggle = byId("buildingsToggle");
     const status = byId("buildingStatus");
 
-    // CARTO Voyager menyediakan vector source "carto" dengan source-layer "building".
-    // Height dan min-height berasal dari atribut bangunan OpenStreetMap yang diproses OpenMapTiles.
-    if (!state.map.getSource("carto")) {
-      status.textContent = "Sumber bangunan CARTO tidak tersedia";
-      toggle.disabled = true;
-      console.warn("Layer bangunan 3D tidak ditambahkan: source CARTO tidak ditemukan.");
-      return;
+    // Basemap tetap CARTO Voyager. Geometri dan atribut tinggi bangunan
+    // diambil dari vector tiles OpenFreeMap (OpenMapTiles/OSM), seperti pola
+    // resmi MapLibre 3D buildings: source-layer "building".
+    if (!state.map.getSource("openfreemap-buildings")) {
+      state.map.addSource("openfreemap-buildings", {
+        type: "vector",
+        url: "https://tiles.openfreemap.org/planet"
+      });
     }
 
     if (!state.map.getLayer("buildings-3d")) {
-      const firstSymbolLayer = state.map.getStyle().layers.find(layer => layer.type === "symbol");
+      const styleLayers = state.map.getStyle().layers || [];
+      const firstSymbolLayer = styleLayers.find(layer =>
+        layer.type === "symbol" && layer.layout && layer.layout["text-field"]
+      );
       state.map.addLayer({
         id: "buildings-3d",
         type: "fill-extrusion",
-        source: "carto",
+        source: "openfreemap-buildings",
         "source-layer": "building",
-        minzoom: 11,
+        minzoom: 13,
         filter: ["!=", ["get", "hide_3d"], true],
         paint: {
-          "fill-extrusion-color": "#d8cbb7",
-          "fill-extrusion-height": ["max", 3, ["to-number", ["get", "render_height"], 6]],
-          "fill-extrusion-base": ["max", 0, ["to-number", ["get", "render_min_height"], 0]],
-          "fill-extrusion-opacity": 0.96,
+          "fill-extrusion-color": "#9eabb5",
+          "fill-extrusion-height": [
+            "interpolate", ["linear"], ["zoom"],
+            13, 0,
+            14, ["coalesce", ["to-number", ["get", "render_height"]], 6]
+          ],
+          "fill-extrusion-base": [
+            "interpolate", ["linear"], ["zoom"],
+            13, 0,
+            14, ["coalesce", ["to-number", ["get", "render_min_height"]], 0]
+          ],
+          "fill-extrusion-opacity": 1,
           "fill-extrusion-vertical-gradient": true
         },
         layout: { visibility: "visible" }
@@ -1175,7 +1187,7 @@
 
     toggle.disabled = false;
     toggle.checked = true;
-    status.textContent = "Bangunan OSM 3D · CARTO";
+    status.textContent = "Bangunan 3D · OpenStreetMap";
 
     toggle.addEventListener("change", event => {
       if (state.map.getLayer("buildings-3d")) {
