@@ -486,12 +486,12 @@
 
     state.map = new maplibregl.Map({
       container: "map",
-      style: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
+      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
       center: config.map.center,
       zoom: config.map.zoom,
       pitch: config.map.pitch,
       bearing: config.map.bearing,
-      maxPitch: 75,
+      maxPitch: 60,
       attributionControl: false,
       canvasContextAttributes: { antialias: true }
     });
