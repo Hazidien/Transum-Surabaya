@@ -486,7 +486,7 @@
 
     state.map = new maplibregl.Map({
       container: "map",
-      style: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
+      style: "https://tiles.openfreemap.org/styles/positron",
       center: config.map.center,
       zoom: config.map.zoom,
       pitch: config.map.pitch,
