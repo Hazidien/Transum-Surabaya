@@ -175,8 +175,8 @@ window.TRANSUM_CONFIG = {
   map: {
     center: [112.75, -7.27],
     zoom: 11,
-    pitch: 48,
-    bearing: -18
+    pitch: 60,
+    bearing: -20
   },
 
   walking: {
