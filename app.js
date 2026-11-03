@@ -1193,6 +1193,16 @@
       }, firstSymbolLayer?.id);
     }
 
+    // Tempatkan garis rute di bawah extrusion 3D agar garis berada pada permukaan tanah
+    // dan tertutup bangunan ketika melintas di belakang/di bawahnya.
+    state.routeLayerIds.forEach(layerIds => {
+      layerIds.forEach(layerId => {
+        if (state.map.getLayer(layerId) && state.map.getLayer("buildings-3d")) {
+          state.map.moveLayer(layerId, "buildings-3d");
+        }
+      });
+    });
+
     toggle.disabled = false;
     toggle.checked = true;
     status.textContent = "Bangunan 3D · OpenStreetMap";
