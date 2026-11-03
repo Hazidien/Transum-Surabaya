@@ -27,6 +27,7 @@
     activePopup: null,
     selectedRouteKey: null,
     selectedStop: null,
+    bufferRadius: 400,
     labelsVisible: true,
     busesVisible: true,
     busAnimationOn: false,
@@ -237,6 +238,7 @@
     state.busMarkers.forEach((marker, busId) => {
       if (busId.startsWith(routeKey + "::")) marker.getElement().style.display = visible && state.busesVisible ? "" : "none";
     });
+    refreshSelectedBuffer();
     if (state.activeBusPopup && !visible && state.activeBusId?.startsWith(routeKey + "::")) state.activeBusPopup.remove();
   }
 
@@ -572,6 +574,7 @@
 
     await loadAllStops(failures);
     addStopLayers();
+    setupCircleBuffers();
     setupBusSimulation();
     setupBuildings(failures);
     updateRouteCounter();
@@ -769,9 +772,75 @@
 
 
 
+  function stopBufferPolygon(feature, radiusMeters, steps = 48) {
+    const [lon, lat] = feature.geometry.coordinates;
+    const coords = [];
+    const earth = 6371008.8;
+    const angular = radiusMeters / earth;
+    const lat1 = lat * Math.PI / 180;
+    const lon1 = lon * Math.PI / 180;
+    for (let i = 0; i <= steps; i++) {
+      const bearing = (i / steps) * Math.PI * 2;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(angular) + Math.cos(lat1) * Math.sin(angular) * Math.cos(bearing));
+      const lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(angular) * Math.cos(lat1), Math.cos(angular) - Math.sin(lat1) * Math.sin(lat2));
+      coords.push([lon2 * 180 / Math.PI, lat2 * 180 / Math.PI]);
+    }
+    return { type: "Feature", properties: { __routeKey: feature.properties.__routeKey, __stopName: feature.properties.__stopName }, geometry: { type: "Polygon", coordinates: [coords] } };
+  }
+
+  function setupCircleBuffers() {
+    const toggle = byId("coverageToggle");
+    const slider = byId("bufferSlider");
+    if (!state.map.getSource("stop-circle-buffers")) {
+      state.map.addSource("stop-circle-buffers", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      state.map.addLayer({
+        id: "stop-circle-buffer-fill", type: "fill", source: "stop-circle-buffers",
+        paint: { "fill-color": ["match", ["get", "__routeKey"],
+          "sby-benowo", "#00D9FF", "sby-kejawan", "#00D9FF", "sby-purabaya", "#00D9FF",
+          "ww-gunung-anyar", "#00D9FF", "ww-tow", "#00D9FF", "#00D9FF"], "fill-opacity": 0.34 },
+        layout: { visibility: "none" }
+      });
+      state.map.addLayer({
+        id: "stop-circle-buffer-outline", type: "line", source: "stop-circle-buffers",
+        paint: { "line-color": ["match", ["get", "__routeKey"],
+          "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
+          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 2.4, "line-opacity": 0.98 },
+        layout: { visibility: toggle.checked ? "visible" : "none" }
+      });
+    }
+    const refresh = () => {
+      state.bufferRadius = Number(slider.value) || 400;
+      byId("bufferValue").textContent = state.bufferRadius >= 1000 ? "1.000 m" : state.bufferRadius + " m";
+      byId("bufferTime").textContent = "≈ " + Math.max(1, Math.round((state.bufferRadius / 1000 / 4.5) * 60)) + " menit jalan kaki (garis lurus)";
+      refreshSelectedBuffer();
+    };
+    slider.addEventListener("input", refresh);
+    toggle.addEventListener("change", () => {
+      ["stop-circle-buffer-fill", "stop-circle-buffer-outline"].forEach(id => {
+        if (state.map.getLayer(id)) state.map.setLayoutProperty(id, "visibility", toggle.checked ? "visible" : "none");
+      });
+      refreshSelectedBuffer();
+    });
+    refresh();
+    refreshSelectedBuffer();
+  }
+
+  function refreshSelectedBuffer() {
+    const source = state.map?.getSource("stop-circle-buffers");
+    if (!source) return;
+    const stop = state.selectedStop;
+    const selectedRouteKeys = Array.isArray(stop?.properties?.__routeKeys)
+      ? stop.properties.__routeKeys
+      : [stop?.properties?.__routeKey].filter(Boolean);
+    const hasVisibleService = selectedRouteKeys.some(key => state.routeVisibility.get(key) !== false);
+    const enabled = byId("coverageToggle").checked && stop && state.stopsVisible && hasVisibleService;
+    source.setData({ type: "FeatureCollection", features: enabled ? [stopBufferPolygon(stop, state.bufferRadius)] : [] });
+  }
+
   function showStopDetails(feature) {
     if (!feature || !feature.geometry || feature.geometry.type !== "Point") return;
     state.selectedStop = feature;
+    refreshSelectedBuffer();
     const p = feature.properties || {};
     // MapLibre may expose GeoJSON array-valued properties as JSON strings on queried features.
     // Parse them explicitly; otherwise the popup falls back to a single route and hides the shared corridors.
@@ -863,6 +932,7 @@
       if (byId("mapHelpPanel")) byId("mapHelpPanel").hidden = false;
       nearestResult.innerHTML = '<div class="result-placeholder"><span class="pin-outline">◎</span><span>Klik peta untuk mencari halte terdekat.</span></div>';
       state.selectedStop = null;
+      refreshSelectedBuffer();
 
     });
     const toggleSimulation = () => {
