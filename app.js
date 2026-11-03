@@ -1154,6 +1154,14 @@
       });
     }
 
+    // CARTO Voyager juga menggambar footprint bangunan 2D pada dua layer ini.
+    // Sembunyikan keduanya agar atap 2D tidak menutupi hasil extrusion 3D.
+    ["building", "building-top"].forEach(layerId => {
+      if (state.map.getLayer(layerId)) {
+        state.map.setLayoutProperty(layerId, "visibility", "none");
+      }
+    });
+
     if (!state.map.getLayer("buildings-3d")) {
       const styleLayers = state.map.getStyle().layers || [];
       const firstSymbolLayer = styleLayers.find(layer =>
