@@ -795,16 +795,12 @@
       state.map.addSource("stop-circle-buffers", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       state.map.addLayer({
         id: "stop-circle-buffer-fill", type: "fill", source: "stop-circle-buffers",
-        paint: { "fill-color": ["match", ["get", "__routeKey"],
-          "sby-benowo", "#00D9FF", "sby-kejawan", "#00D9FF", "sby-purabaya", "#00D9FF",
-          "ww-gunung-anyar", "#00D9FF", "ww-tow", "#00D9FF", "#00D9FF"], "fill-opacity": 0.34 },
-        layout: { visibility: "none" }
+        paint: { "fill-color": "#08D5F5", "fill-opacity": 0.34 },
+        layout: { visibility: "visible" }
       });
       state.map.addLayer({
         id: "stop-circle-buffer-outline", type: "line", source: "stop-circle-buffers",
-        paint: { "line-color": ["match", ["get", "__routeKey"],
-          "sby-benowo", "#F59E0B", "sby-kejawan", "#38BDF8", "sby-purabaya", "#A78BFA",
-          "ww-gunung-anyar", "#FB7185", "ww-tow", "#34D399", "#38BDF8"], "line-width": 2.4, "line-opacity": 0.98 },
+        paint: { "line-color": "#08BFE8", "line-width": 2.2, "line-opacity": 0.95 },
         layout: { visibility: "visible" }
       });
     }
