@@ -1162,11 +1162,18 @@
       }
     });
 
+    const styleLayers = state.map.getStyle().layers || [];
+    const buildingTopIndex = styleLayers.findIndex(layer => layer.id === "building-top");
+    const buildingAnchor = buildingTopIndex >= 0
+      ? styleLayers[buildingTopIndex + 1]?.id
+      : styleLayers.find(layer => layer.type === "symbol" && layer.layout && layer.layout["text-field"])?.id;
+    const labelAnchor = buildingTopIndex >= 0
+      ? styleLayers.slice(buildingTopIndex + 1).find(layer =>
+          layer.type === "symbol" && layer.layout && layer.layout["text-field"]
+        )?.id
+      : styleLayers.find(layer => layer.type === "symbol" && layer.layout && layer.layout["text-field"])?.id;
+
     if (!state.map.getLayer("buildings-3d")) {
-      const styleLayers = state.map.getStyle().layers || [];
-      const firstSymbolLayer = styleLayers.find(layer =>
-        layer.type === "symbol" && layer.layout && layer.layout["text-field"]
-      );
       state.map.addLayer({
         id: "buildings-3d",
         type: "fill-extrusion",
@@ -1190,18 +1197,19 @@
           "fill-extrusion-vertical-gradient": true
         },
         layout: { visibility: "visible" }
-      }, firstSymbolLayer?.id);
+      }, buildingAnchor);
     }
 
-    // Tempatkan garis rute di bawah extrusion 3D agar garis berada pada permukaan tanah
-    // dan tertutup bangunan ketika melintas di belakang/di bawahnya.
-    state.routeLayerIds.forEach(layerIds => {
-      layerIds.forEach(layerId => {
-        if (state.map.getLayer(layerId) && state.map.getLayer("buildings-3d")) {
-          state.map.moveLayer(layerId, "buildings-3d");
-        }
+    // Jalan basemap dirender lebih dahulu; extrusion 3D menutup jalan yang berada
+    // di bawah tapak bangunan. Garis koridor Transum ditempatkan di atas extrusion
+    // tetapi tetap di bawah label basemap agar rute tetap terbaca.
+    if (labelAnchor) {
+      state.routeLayerIds.forEach(layerIds => {
+        layerIds.forEach(layerId => {
+          if (state.map.getLayer(layerId)) state.map.moveLayer(layerId, labelAnchor);
+        });
       });
-    });
+    }
 
     toggle.disabled = false;
     toggle.checked = true;
