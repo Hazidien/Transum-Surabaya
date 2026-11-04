@@ -691,13 +691,6 @@
       },
       paint: { "text-color": "#f8fafc", "text-halo-color": "#101827", "text-halo-width": 1.4, "text-halo-blur": 0.2 }
     });
-    byId("stopsToggle").addEventListener("change", event => {
-      state.stopsVisible=event.target.checked;
-      ["stops-all","stop-labels"].forEach(id=>{
-        if(state.map.getLayer(id)) state.map.setLayoutProperty(id,"visibility",state.stopsVisible ? "visible":"none");
-      });
-
-    });
   }
 
 
@@ -1141,7 +1134,6 @@
 
 
   function setupBuildings(failures) {
-    const toggle = byId("buildingsToggle");
     const status = byId("buildingStatus");
 
     // Basemap tetap CARTO Voyager. Geometri dan atribut tinggi bangunan
@@ -1211,15 +1203,7 @@
       });
     }
 
-    toggle.disabled = false;
-    toggle.checked = true;
     status.textContent = "Bangunan 3D · OpenStreetMap";
-
-    toggle.addEventListener("change", event => {
-      if (state.map.getLayer("buildings-3d")) {
-        state.map.setLayoutProperty("buildings-3d", "visibility", event.target.checked ? "visible" : "none");
-      }
-    });
   }
 
   function wireRouteSearch() {
