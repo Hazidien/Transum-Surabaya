@@ -266,3 +266,9 @@ kbd { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color
 .route-group[data-group="suroboyo"] .route-group-heading::before { content:""; display:inline-block; width:8px; height:8px; margin-right:8px; border-radius:2px; background:#F59E0B; }
 .route-group[data-group="wirawiri"] .route-group-heading::before { content:""; display:inline-block; width:8px; height:8px; margin-right:8px; border-radius:2px; background:#34D399; }
 .route-list { gap:2px; }
+
+
+/* Data kota: informasi statis, bukan kontrol layer */
+.layer-toggle { cursor: default; }
+.layer-toggle input,
+.layer-toggle .switch { display: none !important; }
