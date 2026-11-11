@@ -44,7 +44,10 @@
     activeBusPopup: null,
     activeBusId: null,
     hoverStopPopup: null,
-    simulationMinutes: 6 * 60
+    simulationMinutes: 6 * 60,
+    poiFeatures: [],
+    poiPopup: null,
+    poiRequestId: 0
   };
 
   if (!window.maplibregl || !config) {
@@ -577,6 +580,8 @@
     setupCircleBuffers();
     setupBusSimulation();
     setupBuildings(failures);
+    await loadPoiData();
+    if (state.poiFeatures.length) addPoiLayers();
     updateRouteCounter();
     wireRouteSearch();
 
@@ -820,6 +825,152 @@
     source.setData({ type: "FeatureCollection", features: enabled ? [stopBufferPolygon(stop, state.bufferRadius)] : [] });
   }
 
+  async function loadPoiData() {
+    try {
+      const collection = await loadGeoJSON("poi/data/poi_surabaya.geojson");
+      state.poiFeatures = collection.features.filter(feature =>
+        feature.geometry?.type === "Point" &&
+        Number.isFinite(feature.geometry.coordinates?.[0]) &&
+        Number.isFinite(feature.geometry.coordinates?.[1])
+      );
+      console.info("POI Surabaya dimuat:", state.poiFeatures.length);
+    } catch (error) {
+      state.poiFeatures = [];
+      console.warn("Data POI tidak dapat dimuat:", error);
+    }
+  }
+
+  function poiImageUrl(path) {
+    return String(path || "").split("/").map(segment => encodeURIComponent(segment)).join("/");
+  }
+
+  function showPoiPopup(feature) {
+    if (!feature || feature.geometry?.type !== "Point") return;
+    const properties = feature.properties || {};
+    const name = properties.POI || "POI Surabaya";
+    const imageUrl = poiImageUrl(properties.image);
+    if (state.poiPopup) state.poiPopup.remove();
+    const popup = new maplibregl.Popup({
+      closeButton: true,
+      closeOnClick: true,
+      offset: 13,
+      maxWidth: "320px",
+      className: "poi-map-popup"
+    }).setLngLat(feature.geometry.coordinates).setHTML(`
+      <article class="poi-popup-card">
+        ${imageUrl ? '<img class="poi-popup-image" src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(name) + '">' : ""}
+        <div class="poi-popup-copy">
+          <span class="poi-popup-kicker">POINT OF INTEREST · SURABAYA</span>
+          <h3>${escapeHtml(name)}</h3>
+        </div>
+      </article>
+    `).addTo(state.map);
+    state.poiPopup = popup;
+    popup.on("close", () => {
+      if (state.poiPopup === popup) state.poiPopup = null;
+    });
+    const image = popup.getElement()?.querySelector(".poi-popup-image");
+    if (image) image.addEventListener("error", () => { image.hidden = true; });
+    byId("mapDetailPanel").hidden = true;
+    if (byId("mapHelpPanel")) byId("mapHelpPanel").hidden = true;
+  }
+
+  function addPoiLayers() {
+    if (state.map.getSource("poi-source")) return;
+    state.map.addSource("poi-source", {
+      type: "geojson",
+      data: { type: "FeatureCollection", features: state.poiFeatures }
+    });
+    const firstLabel = (state.map.getStyle().layers || []).find(layer =>
+      layer.type === "symbol" && layer.layout && layer.layout["text-field"]
+    )?.id;
+    state.map.addLayer({
+      id: "poi-points",
+      type: "circle",
+      source: "poi-source",
+      paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 3.5, 13, 5.5, 17, 7],
+        "circle-color": "#F59E0B",
+        "circle-stroke-color": "#FFFFFF",
+        "circle-stroke-width": 1.8,
+        "circle-opacity": 0.98
+      }
+    }, firstLabel);
+    state.map.on("click", "poi-points", event => {
+      const feature = event.features?.[0];
+      if (feature) showPoiPopup(feature);
+    });
+    state.map.on("mouseenter", "poi-points", () => { state.map.getCanvas().style.cursor = "pointer"; });
+    state.map.on("mouseleave", "poi-points", () => { state.map.getCanvas().style.cursor = state.finderMode ? "crosshair" : ""; });
+  }
+
+  async function loadNearbyPoisForStop(origin) {
+    const requestId = ++state.poiRequestId;
+    const radius = Number(state.bufferRadius) || 400;
+    const list = byId("nearbyPoiList");
+    if (!list) return;
+    if (!state.poiFeatures.length) {
+      list.innerHTML = '<p class="nearby-poi-note">Data POI belum berhasil dimuat.</p>';
+      return;
+    }
+    const candidates = state.poiFeatures.map((feature, index) => ({
+      feature,
+      index,
+      straightMeters: haversineMeters(origin, feature.geometry.coordinates)
+    })).filter(item => item.straightMeters <= radius)
+      .sort((a, b) => a.straightMeters - b.straightMeters)
+      .slice(0, 8);
+
+    if (!candidates.length) {
+      list.innerHTML = '<p class="nearby-poi-note">Belum ada POI dalam radius ' + Math.round(radius) + ' meter dari halte ini.</p>';
+      return;
+    }
+
+    list.innerHTML = '<div class="loading-row"><span class="mini-spinner"></span> Menghitung jarak dan waktu berjalan kaki…</div>';
+    const results = await Promise.all(candidates.map(async item => {
+      try {
+        const route = await getWalkingRoute(origin, item.feature.geometry.coordinates);
+        return { ...item, route, routed: Number.isFinite(route.distanceKm) };
+      } catch (_) {
+        const km = item.straightMeters / 1000;
+        return {
+          ...item,
+          route: {
+            distanceKm: km,
+            durationMinutes: (km / (Number(config.walking.fallbackWalkingSpeedKmh) || 4.5)) * 60
+          },
+          routed: false
+        };
+      }
+    }));
+
+    if (requestId !== state.poiRequestId || !list.isConnected) return;
+    results.sort((a, b) => a.route.distanceKm - b.route.distanceKm);
+    const allRouted = results.every(item => item.routed);
+    list.innerHTML = results.map(item => {
+      const p = item.feature.properties || {};
+      const meters = item.route.distanceKm * 1000;
+      const distance = meters >= 1000 ? (meters / 1000).toFixed(2) + " km" : Math.round(meters) + " m";
+      const minutes = Math.max(1, Math.round(item.route.durationMinutes));
+      return `
+        <button class="nearby-poi-item" type="button" data-poi-index="${item.index}">
+          <span class="nearby-poi-dot"></span>
+          <span class="nearby-poi-copy"><strong>${escapeHtml(p.POI || "POI Surabaya")}</strong><small>${distance} · ${minutes} menit berjalan kaki</small></span>
+          <span class="nearby-poi-arrow">›</span>
+        </button>`;
+    }).join("") + (allRouted
+      ? '<p class="nearby-poi-note">Jarak dan durasi mengikuti jaringan jalan pedestrian Valhalla/OpenStreetMap.</p>'
+      : '<p class="nearby-poi-note">Sebagian rute pedestrian tidak tersedia. Untuk POI tersebut, jarak menggunakan garis lurus dan waktu merupakan estimasi kasar.</p>');
+    list.querySelectorAll("[data-poi-index]").forEach(button => {
+      button.addEventListener("click", () => {
+        const feature = state.poiFeatures[Number(button.dataset.poiIndex)];
+        if (!feature) return;
+        state.map.flyTo({ center: feature.geometry.coordinates, zoom: Math.max(15, state.map.getZoom()), duration: 500 });
+        showPoiPopup(feature);
+      });
+    });
+  }
+
   function showStopDetails(feature) {
     if (!feature || !feature.geometry || feature.geometry.type !== "Point") return;
     state.selectedStop = feature;
@@ -857,13 +1008,16 @@
       <div class="served-route-list">${routeLabels.map(route => '<div class="served-route-chip" style="--route-color:' + route.color + '">' + escapeHtml(route.label) + '</div>').join("")}</div>
       ${rawRouteIds.length ? '<p class="result-note">Route_Id: ' + rawRouteIds.map(escapeHtml).join(" · ") + '</p>' : ""}
       ${p.__memberCount > 1 ? '<p class="result-note">Titik halte dari beberapa dataset digabung menjadi satu lokasi. Seluruh koridor yang melayani lokasi ini ditampilkan di atas.</p>' : ""}
-      <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>`;
+      <button class="toolbar-button detail-nearest-button" id="detailFindNearby">Cari akses ke halte ini</button>
+      <div class="route-stop-heading">POI terdekat · radius ${Math.round(state.bufferRadius)} m</div>
+      <div class="nearby-poi-list" id="nearbyPoiList"><div class="loading-row">Menyiapkan POI…</div></div>`;
     byId("mapDetailPanel").hidden = false;
     if (byId("mapHelpPanel")) byId("mapHelpPanel").hidden = true;
 
     const coord = feature.geometry.coordinates;
     state.map.flyTo({ center: coord, zoom: Math.max(14, state.map.getZoom()), duration: 550 });
     byId("detailFindNearby").addEventListener("click", () => findNearestStop(coord));
+    loadNearbyPoisForStop(coord);
   }
 
   function setupBusSimulation() {
@@ -1224,7 +1378,7 @@
       const routeLayerIds = new Set([...state.routeLayerIds.values()].flat());
       const clickedTransitFeature = rendered.some(feature => {
         const id = feature.layer?.id || "";
-        return id.startsWith("stops-") || id === "stop-labels" || routeLayerIds.has(id);
+        return id.startsWith("stops-") || id.startsWith("poi-") || id === "stop-labels" || routeLayerIds.has(id);
       });
       if (clickedTransitFeature) return;
       findNearestStop([event.lngLat.lng, event.lngLat.lat]);
