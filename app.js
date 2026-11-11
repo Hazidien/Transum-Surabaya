@@ -807,6 +807,7 @@
       byId("bufferValue").textContent = state.bufferRadius >= 1000 ? "1.000 m" : state.bufferRadius + " m";
       byId("bufferTime").textContent = "≈ " + Math.max(1, Math.round((state.bufferRadius / 1000 / 4.5) * 60)) + " menit jalan kaki (garis lurus)";
       refreshSelectedBuffer();
+      if (state.selectedStop) loadNearbyPoisForStop(state.selectedStop.geometry.coordinates);
     };
     slider.addEventListener("input", refresh);
     refresh();
@@ -973,6 +974,7 @@
 
   function showStopDetails(feature) {
     if (!feature || !feature.geometry || feature.geometry.type !== "Point") return;
+    if (state.poiPopup) { state.poiPopup.remove(); state.poiPopup = null; }
     state.selectedStop = feature;
     refreshSelectedBuffer();
     const p = feature.properties || {};
