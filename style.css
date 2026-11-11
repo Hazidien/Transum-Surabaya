@@ -272,3 +272,48 @@ kbd { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color
 .layer-toggle { cursor: default; }
 .layer-toggle input,
 .layer-toggle .switch { display: none !important; }
+
+/* POI markers, image popup, and nearby POI list in selected-stop panel. */
+.poi-map-popup .maplibregl-popup-content {
+  overflow: hidden;
+  padding: 0 !important;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 12px !important;
+  background: #172333 !important;
+  color: #eef4ff !important;
+}
+.poi-map-popup .maplibregl-popup-close-button {
+  z-index: 2;
+  top: 5px;
+  right: 6px;
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
+  background: rgba(8,13,24,.78);
+  color: #fff;
+  font-size: 19px;
+}
+.poi-map-popup .maplibregl-popup-tip {
+  border-top-color: #172333 !important;
+  border-bottom-color: #172333 !important;
+}
+.poi-popup-card { width: 270px; max-width: 100%; }
+.poi-popup-image { display: block; width: 100%; height: 155px; object-fit: cover; background: #26364a; }
+.poi-popup-image[hidden] { display: none; }
+.poi-popup-copy { padding: 12px 14px 14px; }
+.poi-popup-kicker { display: block; margin-bottom: 5px; color: #72e9ce; font-size: 8px; font-weight: 850; letter-spacing: .12em; }
+.poi-popup-copy h3 { margin: 0; color: #f4f7fb; font-size: 14px; line-height: 1.4; }
+.nearby-poi-list { display: flex; flex-direction: column; gap: 4px; max-height: 310px; overflow-y: auto; padding-right: 3px; }
+.nearby-poi-item { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 8px; border: 1px solid rgba(255,255,255,.06); border-radius: 8px; background: rgba(255,255,255,.045); color: #eef4ff; text-align: left; cursor: pointer; }
+.nearby-poi-item:hover { border-color: rgba(80,227,194,.35); background: rgba(80,227,194,.08); }
+.nearby-poi-dot { flex: 0 0 8px; width: 8px; height: 8px; border: 1px solid #fff; border-radius: 50%; background: #F59E0B; }
+.nearby-poi-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 3px; }
+.nearby-poi-copy strong { color: #f1f5f9; font-size: 10px; line-height: 1.4; }
+.nearby-poi-copy small { color: #9eacc0; font-size: 9px; }
+.nearby-poi-arrow { color: #72e9ce; font-size: 18px; }
+.nearby-poi-note { margin: 7px 2px 4px; color: #8fa0b7; font-size: 9px; line-height: 1.55; }
+@media(max-width:760px) {
+  .poi-popup-card { width: 235px; }
+  .poi-popup-image { height: 130px; }
+  .nearby-poi-list { max-height: 240px; }
+}
